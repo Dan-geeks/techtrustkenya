@@ -50,39 +50,45 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Demo mode: any email/password is accepted. Rather than faking a session, an
-    // unrecognised pair is provisioned as a real Supabase user — the tables are all
-    // RLS-guarded on auth.uid(), so a fake session would clear the login screen and
-    // then render empty dashboards. Supabase enforces a 6-char minimum, so short
-    // passwords are padded deterministically and the same input logs in again later.
-    const creds = demoAuthBypass
-      ? { email: signin.email.trim(), password: signin.password.padEnd(6, "0") }
-      : signin;
+    try {
+      // Demo mode: any email/password is accepted. Rather than faking a session, an
+      // unrecognised pair is provisioned as a real Supabase user — the tables are all
+      // RLS-guarded on auth.uid(), so a fake session would clear the login screen and
+      // then render empty dashboards. Supabase enforces a 6-char minimum, so short
+      // passwords are padded deterministically and the same input logs in again later.
+      const creds = demoAuthBypass
+        ? { email: signin.email.trim(), password: signin.password.padEnd(6, "0") }
+        : signin;
 
-    let { data, error } = await supabase.auth.signInWithPassword(creds);
+      let { data, error } = await supabase.auth.signInWithPassword(creds);
 
-    if (error && demoAuthBypass && error.message.toLowerCase().includes("invalid login credentials")) {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: creds.email,
-        password: creds.password,
-        options: { data: { full_name: creds.email.split("@")[0] } },
-      });
-      if (!signUpError) {
-        ({ data, error } = await supabase.auth.signInWithPassword(creds));
+      if (error && demoAuthBypass && error.message.toLowerCase().includes("invalid login credentials")) {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: creds.email,
+          password: creds.password,
+          options: { data: { full_name: creds.email.split("@")[0] } },
+        });
+        if (!signUpError) {
+          ({ data, error } = await supabase.auth.signInWithPassword(creds));
+        }
       }
-    }
 
-    setLoading(false);
-    if (error) {
-      toast.error(error.message.toLowerCase().includes("invalid login credentials")
-        ? "Incorrect email or password. Please try again."
-        : error.message);
-      return;
-    }
-    toast.success("Welcome back!");
-    if (data.user) {
-      const path = await getPostLoginPath(data.user.id);
-      navigate(path, { replace: true });
+      if (error) {
+        toast.error(error.message.toLowerCase().includes("invalid login credentials")
+          ? "Incorrect email or password. Please try again."
+          : error.message);
+        return;
+      }
+      toast.success("Welcome back!");
+      if (data.user) {
+        const path = await getPostLoginPath(data.user.id);
+        navigate(path, { replace: true });
+      }
+    } catch (error) {
+      console.error("Sign-in request failed", error);
+      toast.error("Could not reach the sign-in service. Check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
