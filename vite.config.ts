@@ -5,7 +5,9 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/techtrustkenya/",
+  // Firebase Hosting serves from the domain root; GitHub Pages serves from a
+  // repo sub-path. VITE_BASE_PATH lets the Pages workflow ask for the latter.
+  base: process.env.VITE_BASE_PATH ?? "/",
   server: {
     host: "::",
     port: 8080,
