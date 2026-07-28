@@ -1,0 +1,26 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" fill="#F5F7FA"></rect>
+
+  <!-- Small centered placeholder icon -->
+  <g transform="translate(540,320)">
+    <rect width="120" height="120" rx="24" fill="#2563EB"></rect>
+    
+    <path d="M60 22
+             C74 32, 90 38, 104 42
+             V70
+             C104 92, 87 110, 60 122
+             C33 110, 16 92, 16 70
+             V42
+             C30 38, 46 32, 60 22Z" stroke="white" stroke-width="6" fill="none"></path>
+
+    <path d="M44 66L56 78L80 54" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+
+  <text x="600" y="500" text-anchor="middle" font-family="Arial" font-size="24" font-weight="600" fill="#0B1F3A">
+    TechTrust Placeholder
+  </text>
+
+  <text x="600" y="535" text-anchor="middle" font-family="Arial" font-size="16" fill="#6B7280">
+    Verified marketplace image
+  </text>
+</svg>

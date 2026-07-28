@@ -1,0 +1,20 @@
+{
+  "name": "techtrust-escrow-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun --watch index.ts",
+    "test": "bun test",
+    "verify:stk": "bun run scripts/verify-stk.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "typescript": "^5.8.3"
+  }
+}
