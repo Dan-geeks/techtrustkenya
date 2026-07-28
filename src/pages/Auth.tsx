@@ -34,6 +34,9 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const googleAuthEnabled = import.meta.env.VITE_GOOGLE_AUTH_ENABLED === "true";
+  /** Client-demo shortcut — see handleSignIn. Set to "false" to restore real auth. */
+  const demoAuthBypass = import.meta.env.VITE_DEMO_AUTH_BYPASS === "true";
   const [signin, setSignin] = useState({ email: "", password: "" });
   const [signup, setSignup] = useState({ email: "", password: "", full_name: "", phone_number: "" });
 
@@ -46,7 +49,29 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword(signin);
+
+    // Demo mode: any email/password is accepted. Rather than faking a session, an
+    // unrecognised pair is provisioned as a real Supabase user — the tables are all
+    // RLS-guarded on auth.uid(), so a fake session would clear the login screen and
+    // then render empty dashboards. Supabase enforces a 6-char minimum, so short
+    // passwords are padded deterministically and the same input logs in again later.
+    const creds = demoAuthBypass
+      ? { email: signin.email.trim(), password: signin.password.padEnd(6, "0") }
+      : signin;
+
+    let { data, error } = await supabase.auth.signInWithPassword(creds);
+
+    if (error && demoAuthBypass && error.message.toLowerCase().includes("invalid login credentials")) {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: creds.email,
+        password: creds.password,
+        options: { data: { full_name: creds.email.split("@")[0] } },
+      });
+      if (!signUpError) {
+        ({ data, error } = await supabase.auth.signInWithPassword(creds));
+      }
+    }
+
     setLoading(false);
     if (error) {
       toast.error(error.message.toLowerCase().includes("invalid login credentials")
@@ -180,31 +205,40 @@ const Auth = () => {
 
         <div className="w-full max-w-md">
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card">
-            {/* Google covers both sign-in and sign-up, so it sits above the tabs. */}
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={handleGoogleSignIn}
-              disabled={googleLoading || loading}
-            >
-              {googleLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Redirecting…
-                </>
-              ) : (
-                <>
-                  <GoogleMark /> Continue with Google
-                </>
-              )}
-            </Button>
+            {/* Google covers both sign-in and sign-up, so it sits above the tabs.
+                Hidden unless the provider is actually enabled in Supabase: supabase-js
+                redirects the browser to /auth/v1/authorize without checking first, so a
+                disabled provider dumps the user on a raw 400 JSON page instead of
+                returning an error we could toast. Flip VITE_GOOGLE_AUTH_ENABLED once
+                Google is configured on the Supabase project. */}
+            {googleAuthEnabled && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                  onClick={handleGoogleSignIn}
+                  disabled={googleLoading || loading}
+                >
+                  {googleLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Redirecting…
+                    </>
+                  ) : (
+                    <>
+                      <GoogleMark /> Continue with Google
+                    </>
+                  )}
+                </Button>
 
-            <div className="my-6 flex items-center gap-3">
-              <span className="h-px flex-1 bg-border" />
-              <span className="text-xs uppercase tracking-wide text-muted-foreground">or</span>
-              <span className="h-px flex-1 bg-border" />
-            </div>
+                <div className="my-6 flex items-center gap-3">
+                  <span className="h-px flex-1 bg-border" />
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">or</span>
+                  <span className="h-px flex-1 bg-border" />
+                </div>
+              </>
+            )}
 
             <Tabs defaultValue="signin">
               <TabsList className="grid grid-cols-2 w-full">
