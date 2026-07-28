@@ -19,6 +19,15 @@ deployed on Railway. The frontend points at it via `VITE_RAILWAY_FUNCTION_URL`;
 when that is blank it falls back to the Supabase edge functions in
 `supabase/functions/`.
 
+Collection runs through **DarajaPay** (`darajapay.app`) rather than talking to
+Safaricom directly: set `PAYMENT_PROVIDER=darajapay` and
+`DARAJAPAY_TILL_NUMBER=3399774`. DarajaPay holds the consumer key, passkey and
+shortcode, so this repo needs no Daraja credentials and no public callback URL.
+The trade-off is that DarajaPay owns the callback, so Response 2 only ever
+arrives by polling — `/payment-status` queries its `/widget/status` for you.
+Direct Daraja and KCB Buni remain available behind the same `PAYMENT_PROVIDER`
+switch.
+
 **An STK Push returns two responses.** The immediate reply to
 `POST /mpesa-stkpush` (`ResponseCode: "0"`) means only that the M-Pesa PIN prompt
 reached the customer's phone — *no money has moved*. The second response arrives

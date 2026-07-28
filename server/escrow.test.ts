@@ -60,6 +60,7 @@ describe("resolveProvider", () => {
       "MPESA_CONSUMER_SECRET",
       "KCB_BUNI_CONSUMER_KEY",
       "KCB_BUNI_CONSUMER_SECRET",
+      "DARAJAPAY_TILL_NUMBER",
       "PAYMENT_SIMULATION_ENABLED",
     ]) {
       delete process.env[key];
@@ -85,6 +86,22 @@ describe("resolveProvider", () => {
     process.env.KCB_BUNI_CONSUMER_KEY = "k";
     process.env.KCB_BUNI_CONSUMER_SECRET = "s";
     expect(resolveProvider()).toBe("kcb_buni");
+    clear();
+  });
+
+  test("a DarajaPay till selects DarajaPay, and outranks stale Daraja credentials", () => {
+    clear();
+    process.env.DARAJAPAY_TILL_NUMBER = "3399774";
+    expect(resolveProvider()).toBe("darajapay");
+
+    // Leftover direct-Daraja keys must not silently take the payment back.
+    process.env.MPESA_CONSUMER_KEY = "k";
+    process.env.MPESA_CONSUMER_SECRET = "s";
+    expect(resolveProvider()).toBe("darajapay");
+
+    // ...but an explicit setting still wins over the till.
+    process.env.PAYMENT_PROVIDER = "safaricom_daraja";
+    expect(resolveProvider()).toBe("safaricom_daraja");
     clear();
   });
 

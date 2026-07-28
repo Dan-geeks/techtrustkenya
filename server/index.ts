@@ -5,6 +5,8 @@
 //   2. Customer enters M-Pesa PIN.
 //   3. POST /mpesa-callback     → gateway confirms, funds are marked held in Float. (Response 2)
 //   4. GET  /payment-status     → the client polls this until it stops being `pending`.
+//      (With PAYMENT_PROVIDER=darajapay there is no step 3 — DarajaPay owns the
+//      callback, so step 4 polling its /widget/status IS Response 2.)
 //   5. POST /release-float-payment → customer confirms delivery, vendor is paid out (B2C).
 //   6. POST /payout-result      → gateway confirms the payout, order marked released.
 //
@@ -42,7 +44,7 @@ type Vendor = {
   phone?: string | null;
 };
 
-type Provider = "simulation" | "safaricom_daraja" | "kcb_buni";
+type Provider = "simulation" | "safaricom_daraja" | "kcb_buni" | "darajapay";
 type PayoutProvider = "simulation" | "safaricom_b2c" | "kcb_buni";
 
 type StkResult = {
@@ -309,8 +311,10 @@ function simulationEnabled() {
 export function resolveProvider(): Provider {
   const configured = env("PAYMENT_PROVIDER").toLowerCase();
   if (["simulation", "simulator", "demo"].includes(configured)) return "simulation";
+  if (["darajapay", "daraja_pay", "darajapay.app"].includes(configured)) return "darajapay";
   if (["kcb", "kcb_buni", "buni"].includes(configured)) return "kcb_buni";
   if (["safaricom", "daraja", "mpesa", "safaricom_daraja"].includes(configured)) return "safaricom_daraja";
+  if (env("DARAJAPAY_TILL_NUMBER")) return "darajapay";
   if (env("KCB_BUNI_CONSUMER_KEY") && env("KCB_BUNI_CONSUMER_SECRET")) return "kcb_buni";
   if (env("MPESA_CONSUMER_KEY") && env("MPESA_CONSUMER_SECRET")) return "safaricom_daraja";
   if (simulationEnabled()) return "simulation";
@@ -499,6 +503,58 @@ async function requestDarajaStk(args: { orderId: string; phone: string; amountKs
     transactionId: checkoutRequestId,
     merchantRequestId: firstString(data.MerchantRequestID),
     customerMessage: firstString(data.CustomerMessage, data.ResponseDescription) ?? "STK Push sent",
+    details: data,
+  };
+}
+
+const DARAJAPAY_DEFAULT_BASE = "https://darajapay-api-production-65ba.up.railway.app";
+
+function darajapayBaseUrl() {
+  return cleanBaseUrl(env("DARAJAPAY_BASE_URL"), DARAJAPAY_DEFAULT_BASE);
+}
+
+/**
+ * DarajaPay (darajapay.app) fronts Safaricom for us: it holds the consumer
+ * key/secret, shortcode and passkey, so this service needs neither credentials
+ * nor a public callback URL. The trade-off is that Response 2 only ever arrives
+ * by polling `/widget/status` — see reconcileDarajaPayStk.
+ */
+async function requestDarajaPayStk(args: { orderId: string; phone: string; amountKsh: number }): Promise<StkResult> {
+  const till = env("DARAJAPAY_TILL_NUMBER");
+  if (!till) {
+    return { provider: "darajapay", success: false, error: "Missing DARAJAPAY_TILL_NUMBER" };
+  }
+
+  const res = await fetch(`${darajapayBaseUrl()}/darajapay/stkpush`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      Amount: String(args.amountKsh),
+      Phonenumber: args.phone,
+      TillNumber: till,
+    }),
+  });
+  const data = await getJson(res);
+
+  const checkoutRequestId = firstString(data.CheckoutRequestID, data.checkoutRequestId, data.id);
+  if (!res.ok || !checkoutRequestId) {
+    return {
+      provider: "darajapay",
+      success: false,
+      error:
+        firstString(data.error, data.message, data.ResponseDescription, data.errorMessage) ??
+        `DarajaPay STK push failed (HTTP ${res.status})`,
+      details: data,
+    };
+  }
+
+  return {
+    provider: "darajapay",
+    success: true,
+    transactionId: checkoutRequestId,
+    merchantRequestId: firstString(data.MerchantRequestID),
+    customerMessage:
+      firstString(data.CustomerMessage, data.ResponseDescription) ?? "STK Push sent — enter your M-Pesa PIN",
     details: data,
   };
 }
@@ -905,6 +961,56 @@ async function reconcileDarajaStk(order: Order): Promise<"paid" | "failed" | "pe
   }
 }
 
+/**
+ * Response 2 for DarajaPay. Unlike Daraja this is not a fallback — no callback
+ * ever lands, so /payment-status polling this endpoint is the only way an order
+ * leaves `pending`.
+ *
+ * Caveat: `/widget/status` answers `{"status":"pending"}` for an unknown or
+ * expired CheckoutRequestID exactly as it does for a live prompt still awaiting
+ * a PIN, so a lost push is indistinguishable from a slow one and the order stays
+ * pending rather than being auto-failed. Only "failed" (or an explicit failure
+ * ResultCode) is treated as terminal.
+ */
+async function reconcileDarajaPayStk(order: Order): Promise<"paid" | "failed" | "pending"> {
+  const checkoutId = order.mpesa_transaction_id;
+  if (!checkoutId) return "pending";
+
+  try {
+    const res = await fetch(`${darajapayBaseUrl()}/widget/status?id=${encodeURIComponent(checkoutId)}`);
+    const data = await getJson(res);
+    if (!res.ok) return "pending";
+
+    const status = firstString(data.status, data.state, data.paymentStatus)?.toLowerCase();
+
+    if (status === "paid" || status === "success" || status === "completed") {
+      await settleIntoFloat({
+        order,
+        receipt: firstString(data.receipt, data.MpesaReceiptNumber, data.mpesaReceiptNumber) ?? checkoutId,
+        transactionId: checkoutId,
+        provider: "darajapay",
+        payload: { reconciled: true, ...data },
+      });
+      return "paid";
+    }
+
+    if (status === "failed" || status === "cancelled" || status === "canceled") {
+      await failPayment(
+        order,
+        firstString(data.message, data.ResultDesc, data.error) ?? "Payment was not completed",
+        "darajapay",
+        { reconciled: true, ...data },
+      );
+      return "failed";
+    }
+
+    return "pending";
+  } catch (error) {
+    console.warn("[reconcile] DarajaPay status query failed", error);
+    return "pending";
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Payouts
 // ---------------------------------------------------------------------------
@@ -1111,6 +1217,10 @@ app.get("/config-check", (c) => {
       consumerSecret: has("KCB_BUNI_CONSUMER_SECRET"),
       payoutUrl: has("KCB_BUNI_PAYOUT_URL"),
     },
+    darajapay: {
+      baseUrl: darajapayBaseUrl(),
+      tillNumber: has("DARAJAPAY_TILL_NUMBER"),
+    },
   });
 });
 
@@ -1159,9 +1269,11 @@ app.post("/mpesa-stkpush", async (c) => {
     }
 
     const result =
-      provider === "kcb_buni"
-        ? await requestKcbBuniStk({ orderId: order.id, phone: phoneFmt, amountKsh })
-        : await requestDarajaStk({ orderId: order.id, phone: phoneFmt, amountKsh });
+      provider === "darajapay"
+        ? await requestDarajaPayStk({ orderId: order.id, phone: phoneFmt, amountKsh })
+        : provider === "kcb_buni"
+          ? await requestKcbBuniStk({ orderId: order.id, phone: phoneFmt, amountKsh })
+          : await requestDarajaStk({ orderId: order.id, phone: phoneFmt, amountKsh });
 
     if (!result.success) {
       await recordPaymentEvent({
@@ -1235,8 +1347,13 @@ app.get("/payment-status", async (c) => {
         : "pending";
 
     let current = order;
-    if (status === "pending" && order.payment_provider === "safaricom_daraja") {
-      const reconciled = await reconcileDarajaStk(order);
+    if (status === "pending") {
+      const reconciled =
+        order.payment_provider === "darajapay"
+          ? await reconcileDarajaPayStk(order)
+          : order.payment_provider === "safaricom_daraja"
+            ? await reconcileDarajaStk(order)
+            : "pending";
       if (reconciled !== "pending") {
         status = reconciled;
         current = (await getOrder(order.id)) ?? order;
