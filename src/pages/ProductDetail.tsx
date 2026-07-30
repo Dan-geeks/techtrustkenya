@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "@/components/marketplace/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -123,8 +124,32 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="container py-20 text-center text-muted-foreground">
-        Loading product…
+      <div className="container py-8">
+        <div className="grid lg:grid-cols-[3fr_2fr] gap-10">
+          <div className="space-y-3">
+            <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
+            <div className="flex gap-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="flex-1 aspect-square rounded-lg" />
+              ))}
+            </div>
+          </div>
+          <div className="space-y-5">
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-14 rounded-full" />
+            </div>
+            <Skeleton className="h-9 w-3/4" />
+            <Skeleton className="h-10 w-40" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <div className="flex gap-3 pt-2">
+              <Skeleton className="h-11 flex-1 rounded-lg" />
+              <Skeleton className="h-11 flex-1 rounded-lg" />
+            </div>
+            <Skeleton className="h-24 w-full rounded-xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -132,6 +157,9 @@ const ProductDetail = () => {
     return (
       <div className="container py-20 text-center">
         <p className="text-lg font-semibold">Product not found</p>
+        <Button asChild variant="outline" className="mt-4">
+          <Link to="/browse">Back to Browse</Link>
+        </Button>
       </div>
     );
   }
@@ -216,7 +244,7 @@ const ProductDetail = () => {
 
   return (
     <>
-      <div className="container py-8 pb-32 md:pb-8">
+      <div className="container py-8 pb-32 md:pb-8 animate-in fade-in-0 duration-300">
         <div className="grid lg:grid-cols-[3fr_2fr] gap-10">
           {/* Gallery */}
           <div className="space-y-3">
