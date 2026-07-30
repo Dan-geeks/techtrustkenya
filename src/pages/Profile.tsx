@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Mail, Phone, Save, User } from "lucide-react";
+import { Camera, Copy, Gift, Loader2, Mail, Phone, Save, User, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,8 @@ const Profile = () => {
   const [phone, setPhone] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -38,7 +40,7 @@ const Profile = () => {
 
     (async () => {
       const [profileRes, rolesRes] = await Promise.all([
-        supabase.from("profiles").select("full_name,phone_number,avatar_url").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("full_name,phone_number,avatar_url,referral_code,wallet_balance_ksh").eq("id", user.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
       ]);
 
@@ -46,6 +48,8 @@ const Profile = () => {
         setFullName(profileRes.data.full_name ?? "");
         setPhone(profileRes.data.phone_number ?? "");
         setAvatarUrl(profileRes.data.avatar_url ?? null);
+        setReferralCode((profileRes.data as any).referral_code ?? null);
+        setWalletBalance((profileRes.data as any).wallet_balance_ksh ?? 0);
       }
       setRoles((rolesRes.data?.map((r) => r.role as Role)) ?? []);
       setLoading(false);
@@ -107,6 +111,12 @@ const Profile = () => {
       toast.success("Profile updated");
     }
     setSaving(false);
+  };
+
+  const copyReferralCode = () => {
+    if (!referralCode) return;
+    navigator.clipboard.writeText(referralCode);
+    toast.success("Referral code copied");
   };
 
   const initials = fullName
@@ -230,6 +240,29 @@ const Profile = () => {
           )}
           Save Changes
         </Button>
+      </Card>
+
+      <Card className="p-6 mt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Gift className="h-4 w-4 text-accent" />
+          <h2 className="font-semibold">Refer friends, earn KES 500</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Share your code. You both get KES 500 credited to your wallet once they complete their first order.
+        </p>
+        <div className="flex items-center gap-2">
+          <Input value={referralCode ?? "…"} readOnly className="font-mono tracking-wider bg-muted" />
+          <Button variant="outline" size="icon" onClick={copyReferralCode} disabled={!referralCode} aria-label="Copy referral code">
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-success/5 border border-success/20">
+          <Wallet className="h-4 w-4 text-success shrink-0" />
+          <p className="text-sm">
+            Wallet balance:{" "}
+            <span className="font-semibold text-foreground">KES {walletBalance.toLocaleString()}</span>
+          </p>
+        </div>
       </Card>
     </div>
   );

@@ -1535,6 +1535,9 @@ app.post("/release-float-payment", async (c) => {
           order.id,
         );
       }
+      await rpc("grant_referral_reward", { p_order_id: order.id }).catch((e) =>
+        console.warn("[grant_referral_reward]", e),
+      );
       return json({
         success: true,
         payoutPending: false,
@@ -1552,6 +1555,9 @@ app.post("/release-float-payment", async (c) => {
       payout_gateway_response: result.details,
       status: "confirmed",
     });
+    await rpc("grant_referral_reward", { p_order_id: order.id }).catch((e) =>
+      console.warn("[grant_referral_reward]", e),
+    );
     await recordPaymentEvent({
       order_id: order.id,
       event_type: "payout_initiated",

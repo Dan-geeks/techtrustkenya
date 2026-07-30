@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, ShoppingBag, Store, ChevronLeft, Mail, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PasswordInput } from "@/components/ui/password-input";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,9 +25,12 @@ const GoogleMark = () => (
 
 const trustBullets = [
   "Every vendor physically inspected by our team",
-  "Payments held in Float escrow until you confirm",
+  "Payments held in Float until you confirm",
   "Dispute resolution included at no extra cost",
 ];
+
+/** Progressive signup: pick what you're here for, then how to continue, then fill in the form. */
+type SignupStage = "role" | "method" | "form";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -38,7 +42,9 @@ const Auth = () => {
   /** Client-demo shortcut — see handleSignIn. Set to "false" to restore real auth. */
   const demoAuthBypass = import.meta.env.VITE_DEMO_AUTH_BYPASS === "true";
   const [signin, setSignin] = useState({ email: "", password: "" });
-  const [signup, setSignup] = useState({ email: "", password: "", full_name: "", phone_number: "" });
+  const [signup, setSignup] = useState({ email: "", password: "", full_name: "", phone_number: "", referral_code: "" });
+  const [signupStage, setSignupStage] = useState<SignupStage>("role");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -142,6 +148,10 @@ const Auth = () => {
       toast.error("Phone must be 07XXXXXXXX or 2547XXXXXXXX");
       return;
     }
+    if (!agreedToTerms) {
+      toast.error("Please agree to the Terms & Conditions to continue.");
+      return;
+    }
     setLoading(true);
     const email = signup.email;
     const password = signup.password;
@@ -150,7 +160,11 @@ const Auth = () => {
       password: password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
-        data: { full_name: signup.full_name, phone_number: signup.phone_number },
+        data: {
+          full_name: signup.full_name,
+          phone_number: signup.phone_number,
+          referral_code: signup.referral_code.trim() || undefined,
+        },
       },
     });
     setLoading(false);
@@ -211,47 +225,34 @@ const Auth = () => {
 
         <div className="w-full max-w-md">
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card">
-            {/* Google covers both sign-in and sign-up, so it sits above the tabs.
-                Hidden unless the provider is actually enabled in Supabase: supabase-js
-                redirects the browser to /auth/v1/authorize without checking first, so a
-                disabled provider dumps the user on a raw 400 JSON page instead of
-                returning an error we could toast. Flip VITE_GOOGLE_AUTH_ENABLED once
-                Google is configured on the Supabase project. */}
-            {googleAuthEnabled && (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  className="w-full"
-                  onClick={handleGoogleSignIn}
-                  disabled={googleLoading || loading}
-                >
-                  {googleLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Redirecting…
-                    </>
-                  ) : (
-                    <>
-                      <GoogleMark /> Continue with Google
-                    </>
-                  )}
-                </Button>
-
-                <div className="my-6 flex items-center gap-3">
-                  <span className="h-px flex-1 bg-border" />
-                  <span className="text-xs uppercase tracking-wide text-muted-foreground">or</span>
-                  <span className="h-px flex-1 bg-border" />
-                </div>
-              </>
-            )}
-
-            <Tabs defaultValue="signin">
+            <Tabs defaultValue="signin" onValueChange={() => setSignupStage("role")}>
               <TabsList className="grid grid-cols-2 w-full">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
+
+              {/* SIGN IN — unchanged shape, just no divider line above the form */}
               <TabsContent value="signin" className="mt-6">
+                {googleAuthEnabled && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    className="w-full mb-5"
+                    onClick={handleGoogleSignIn}
+                    disabled={googleLoading || loading}
+                  >
+                    {googleLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" /> Redirecting…
+                      </>
+                    ) : (
+                      <>
+                        <GoogleMark /> Continue with Google
+                      </>
+                    )}
+                  </Button>
+                )}
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div>
                     <Label htmlFor="si-email">Email</Label>
@@ -271,28 +272,149 @@ const Auth = () => {
                   </Button>
                 </form>
               </TabsContent>
+
+              {/* SIGN UP — three progressive stages: role, then method, then the form */}
               <TabsContent value="signup" className="mt-6">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div>
-                    <Label htmlFor="su-name">Full Name</Label>
-                    <Input id="su-name" autoComplete="name" required value={signup.full_name} onChange={(e) => setSignup({ ...signup, full_name: e.target.value })} className="mt-1.5" />
+                {signupStage === "role" && (
+                  <div className="animate-in fade-in-0 zoom-in-95 duration-300 space-y-3">
+                    <p className="text-sm text-muted-foreground mb-4 text-center">
+                      What brings you to TechTrust?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setSignupStage("method")}
+                      className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
+                    >
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
+                        <ShoppingBag className="h-5 w-5" />
+                      </span>
+                      <span>
+                        <span className="block font-semibold text-sm">I want to buy</span>
+                        <span className="block text-xs text-muted-foreground mt-0.5">
+                          Shop verified laptops and phones, protected by Float
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/vendor/register")}
+                      className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
+                    >
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
+                        <Store className="h-5 w-5" />
+                      </span>
+                      <span>
+                        <span className="block font-semibold text-sm">I want to sell</span>
+                        <span className="block text-xs text-muted-foreground mt-0.5">
+                          List your shop and reach verified buyers
+                        </span>
+                      </span>
+                    </button>
                   </div>
-                  <div>
-                    <Label htmlFor="su-phone">Phone (07XX or 2547XX)</Label>
-                    <Input id="su-phone" type="tel" autoComplete="tel" required value={signup.phone_number} onChange={(e) => setSignup({ ...signup, phone_number: e.target.value })} className="mt-1.5" placeholder="0712345678" />
+                )}
+
+                {signupStage === "method" && (
+                  <div className="animate-in fade-in-0 zoom-in-95 duration-300 space-y-3">
+                    <button
+                      type="button"
+                      onClick={() => setSignupStage("role")}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" /> Back
+                    </button>
+                    {googleAuthEnabled && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="lg"
+                        className="w-full"
+                        onClick={handleGoogleSignIn}
+                        disabled={googleLoading}
+                      >
+                        {googleLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" /> Redirecting…
+                          </>
+                        ) : (
+                          <>
+                            <GoogleMark /> Continue with Google
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      className="w-full"
+                      onClick={() => setSignupStage("form")}
+                    >
+                      <Mail className="h-4 w-4" /> Continue with Email
+                    </Button>
                   </div>
-                  <div>
-                    <Label htmlFor="su-email">Email</Label>
-                    <Input id="su-email" type="email" autoComplete="email" required value={signup.email} onChange={(e) => setSignup({ ...signup, email: e.target.value })} className="mt-1.5" />
+                )}
+
+                {signupStage === "form" && (
+                  <div className="animate-in fade-in-0 slide-in-from-right-4 duration-300">
+                    <button
+                      type="button"
+                      onClick={() => setSignupStage("method")}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" /> Back
+                    </button>
+                    <form onSubmit={handleSignUp} className="space-y-4">
+                      <div>
+                        <Label htmlFor="su-name">Full Name</Label>
+                        <Input id="su-name" autoComplete="name" required value={signup.full_name} onChange={(e) => setSignup({ ...signup, full_name: e.target.value })} className="mt-1.5" />
+                      </div>
+                      <div>
+                        <Label htmlFor="su-phone">Phone (07XX or 2547XX)</Label>
+                        <Input id="su-phone" type="tel" autoComplete="tel" required value={signup.phone_number} onChange={(e) => setSignup({ ...signup, phone_number: e.target.value })} className="mt-1.5" placeholder="0712345678" />
+                      </div>
+                      <div>
+                        <Label htmlFor="su-email">Email</Label>
+                        <Input id="su-email" type="email" autoComplete="email" required value={signup.email} onChange={(e) => setSignup({ ...signup, email: e.target.value })} className="mt-1.5" />
+                      </div>
+                      <div>
+                        <Label htmlFor="su-pw">Password (min 6 chars)</Label>
+                        <PasswordInput id="su-pw" autoComplete="new-password" required minLength={6} value={signup.password} onChange={(e) => setSignup({ ...signup, password: e.target.value })} className="mt-1.5" />
+                      </div>
+                      <div>
+                        <Label htmlFor="su-ref" className="flex items-center gap-1.5">
+                          <Gift className="h-3.5 w-3.5 text-accent" /> Referral code (optional)
+                        </Label>
+                        <Input
+                          id="su-ref"
+                          autoComplete="off"
+                          value={signup.referral_code}
+                          onChange={(e) => setSignup({ ...signup, referral_code: e.target.value.toUpperCase() })}
+                          className="mt-1.5 uppercase"
+                          placeholder="e.g. JOHN91D14"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          You and your friend each get KES 500 after your first order.
+                        </p>
+                      </div>
+                      <label className="flex items-start gap-2.5 text-sm cursor-pointer select-none pt-1">
+                        <Checkbox
+                          checked={agreedToTerms}
+                          onCheckedChange={(v) => setAgreedToTerms(v === true)}
+                          className="mt-0.5"
+                        />
+                        <span className="text-muted-foreground">
+                          I agree to TechTrust's{" "}
+                          <Link to="/terms" target="_blank" className="text-accent underline hover:text-accent/80">
+                            Terms &amp; Conditions
+                          </Link>
+                        </span>
+                      </label>
+                      <Button type="submit" variant="hero" className="w-full" size="lg" disabled={loading || !agreedToTerms}>
+                        {loading ? "Creating account…" : "Create Account"}
+                      </Button>
+                    </form>
                   </div>
-                  <div>
-                    <Label htmlFor="su-pw">Password (min 6 chars)</Label>
-                    <PasswordInput id="su-pw" autoComplete="new-password" required minLength={6} value={signup.password} onChange={(e) => setSignup({ ...signup, password: e.target.value })} className="mt-1.5" />
-                  </div>
-                  <Button type="submit" variant="hero" className="w-full" size="lg" disabled={loading}>
-                    {loading ? "Creating account…" : "Create Account"}
-                  </Button>
-                </form>
+                )}
               </TabsContent>
             </Tabs>
           </div>

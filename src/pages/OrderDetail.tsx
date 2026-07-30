@@ -232,7 +232,7 @@ const OrderDetail = () => {
         <h2 className="font-semibold text-sm mb-3">Payment</h2>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs bg-muted px-2 py-1 rounded font-medium">KCB Buni</span>
+            <span className="text-xs bg-muted px-2 py-1 rounded font-medium">M-Pesa</span>
             <span className="text-sm text-muted-foreground">{floatStatusText(order)}</span>
           </div>
           <Badge className={`${psBadge.cls} text-xs`} variant="outline">

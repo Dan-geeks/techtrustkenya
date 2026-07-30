@@ -1,11 +1,13 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ShieldCheck, ArrowRight, Wrench } from "lucide-react";
+import { ShieldCheck, ArrowRight, Wrench, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/marketplace/ProductCard";
 import { VendorCard } from "@/components/marketplace/VendorCard";
 import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { getPostLoginPath } from "@/lib/redirectByRole";
 
 interface Stats {
   vendors: number;
@@ -14,14 +16,24 @@ interface Stats {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<any[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
   const [stats, setStats] = useState<Stats>({ vendors: 0, products: 0, transactions: 0 });
 
+  // Signed-in visitors get sent straight to their home (browse/vendor/admin) —
+  // the marketing pitch on this page is for prospective users, not existing ones.
+  useEffect(() => {
+    if (!authLoading && user) {
+      void getPostLoginPath(user.id).then((path) => navigate(path, { replace: true }));
+    }
+  }, [authLoading, user, navigate]);
+
   useEffect(() => {
     document.title = "TechTrust — Verified Tech Marketplace in Kenya";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Buy and sell verified laptops and smartphones in Kenya. Pay securely with Float escrow. Trusted vendors, real protection.");
+    if (meta) meta.setAttribute("content", "Buy and sell verified laptops and smartphones in Kenya. Pay securely with Float. Trusted vendors, real protection.");
 
     (async () => {
       const [{ data: prods }, { data: vens }, vendorCount, productCount, txCount] = await Promise.all([
@@ -45,62 +57,93 @@ const Index = () => {
   return (
     <div className="flex flex-col">
 
-      {/* HERO — copy left, large animated illustration right */}
-      <section className="relative bg-primary text-primary-foreground overflow-hidden">
+      {/* HERO — copy left, animated illustration right with a verified badge overlay */}
+      <section className="relative bg-gradient-subtle overflow-hidden">
         <div className="container relative py-16 lg:py-20">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-8">
             <div>
-              <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/40">
+              <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 Kenya's Verified Tech Marketplace
               </p>
-              <h1 className="text-balance text-5xl font-extrabold leading-[1.0] tracking-tight md:text-6xl">
-                Buy Tech You Can{" "}
+              <h1 className="text-balance text-5xl font-extrabold leading-[1.0] tracking-tight text-foreground md:text-6xl">
+                Buy and Sell Tech You Can{" "}
                 <em className="not-italic text-accent">Actually</em>{" "}
                 Trust.
               </h1>
-              <p className="mt-6 max-w-lg text-lg leading-relaxed text-primary-foreground/60">
-                Every vendor is physically inspected. Every payment held in escrow until you confirm delivery.
+              <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
+                Every vendor is physically inspected. Every payment held in Float until you confirm delivery.
                 No risk. No surprises.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button variant="hero" size="xl" asChild>
-                  <Link to="/browse">Shop Now <ArrowRight className="h-4 w-4" /></Link>
+                <Button size="xl" asChild>
+                  <Link to="/browse">Browse Verified Tech <ArrowRight className="h-4 w-4" /></Link>
                 </Button>
-                <Button variant="outlineLight" size="xl" asChild>
-                  <Link to="/vendor/register">List Your Shop</Link>
+                <Button variant="outline" size="xl" asChild>
+                  <Link to="/how-it-works">Learn How It Works</Link>
                 </Button>
               </div>
               <div className="mt-8 flex flex-col gap-2">
-                {["Float Escrow Protected", "Vendor Verified Physically", "Dispute Resolution Included"].map((t) => (
-                  <div key={t} className="flex items-center gap-2.5 text-sm text-primary-foreground/50">
-                    <ShieldCheck className="h-4 w-4 shrink-0 text-accent/70" />
+                {["Float Protected Payments", "Vendor Verified Physically", "Dispute Resolution Included"].map((t) => (
+                  <div key={t} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                    <ShieldCheck className="h-4 w-4 shrink-0 text-success" />
                     {t}
                   </div>
                 ))}
               </div>
             </div>
 
-            <AnimatedArt
-              src={art.marketplace}
-              alt="Vendors and buyers reviewing verified listings and escrow activity on TechTrust"
-              eager
-            />
+            <div className="relative">
+              <div className="rounded-2xl border border-border bg-card p-3 shadow-lg">
+                {products[0]?.image_urls?.[0] ? (
+                  <img
+                    src={products[0].image_urls[0]}
+                    alt={`${products[0].brand ?? ""} ${products[0].model_name ?? ""}`.trim() || "Featured verified listing on TechTrust"}
+                    loading="eager"
+                    className="aspect-[4/3] w-full rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="aspect-[4/3] w-full rounded-lg bg-muted grid place-items-center overflow-hidden">
+                    <AnimatedArt
+                      src={art.marketplace}
+                      alt=""
+                      eager
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-lg bg-success px-4 py-2.5 text-success-foreground shadow-lg sm:left-6">
+                <BadgeCheck className="h-5 w-5 shrink-0" />
+                <div className="leading-tight">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">Verified Listing</p>
+                  <p className="text-sm font-bold">100% Genuine</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Only shown once real numbers exist — "0+ vendors" reads as broken. */}
           {(stats.vendors > 0 || stats.products > 0 || stats.transactions > 0) && (
-            <div className="mt-12 flex flex-wrap gap-8 border-t border-primary-foreground/10 pt-8 text-sm text-primary-foreground/50">
+            <div className="mt-12 flex flex-wrap justify-center gap-8 border-t border-border pt-8 text-sm text-muted-foreground sm:gap-16">
               {stats.vendors > 0 && (
-                <span><strong className="font-semibold text-primary-foreground">{stats.vendors}+</strong> verified vendors</span>
+                <span className="text-center"><strong className="block text-2xl font-bold text-foreground">{stats.vendors}+</strong> Verified vendors</span>
               )}
               {stats.products > 0 && (
-                <span><strong className="font-semibold text-primary-foreground">{stats.products}+</strong> products listed</span>
+                <span className="text-center"><strong className="block text-2xl font-bold text-foreground">{stats.products}+</strong> Products listed</span>
               )}
               {stats.transactions > 0 && (
-                <span><strong className="font-semibold text-primary-foreground">{stats.transactions.toLocaleString()}+</strong> safe transactions</span>
+                <span className="text-center"><strong className="block text-2xl font-bold text-foreground">{stats.transactions.toLocaleString()}+</strong> Safe transactions</span>
               )}
             </div>
           )}
+        </div>
+
+        {/* Reassurance strip — reinforces Float escrow right under the fold */}
+        <div className="bg-primary py-3 text-center text-sm font-medium text-primary-foreground/90">
+          <span className="inline-flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-accent" />
+            Your money is held safely by Float until you confirm your order
+          </span>
         </div>
       </section>
 
@@ -128,7 +171,7 @@ const Index = () => {
                 },
                 {
                   num: "02",
-                  title: "Pay into Float escrow",
+                  title: "Pay into Float",
                   desc: "Your M-Pesa payment is held by TechTrust Float. The vendor receives nothing until you confirm the product. You're never at risk.",
                 },
                 {
@@ -187,6 +230,25 @@ const Index = () => {
           </div>
         </section>
       )}
+
+      {/* UPGRADE CTA — general marketplace push, separate from the repair CTA below */}
+      <section className="bg-primary text-primary-foreground">
+        <div className="container py-16 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Ready to upgrade safely?</h2>
+          <p className="mt-3 max-w-xl mx-auto text-primary-foreground/60 text-sm leading-relaxed">
+            Join thousands of Kenyans transacting with peace of mind. No more "kulipia hewa" —
+            your money is only released when you're happy.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button variant="success" size="lg" asChild>
+              <Link to="/browse">Start Shopping</Link>
+            </Button>
+            <Button variant="outlineLight" size="lg" asChild>
+              <Link to="/vendor/register">Register a Business</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* REPAIR CTA — dark, distinct from hero */}
       <section className="bg-foreground text-background">

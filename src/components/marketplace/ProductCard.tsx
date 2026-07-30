@@ -107,30 +107,28 @@ export const ProductCard = ({
           {brand} {model_name}
         </h3>
 
-        <div className="mt-auto pt-2 flex items-center justify-between">
+        <div className="mt-1">
           <span className="text-sm font-bold text-foreground">{formatKsh(price_ksh)}</span>
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={outOfStock}
-            className={cn(
-              "h-7 w-7 rounded-md flex items-center justify-center transition-colors",
-              outOfStock
-                ? "text-muted-foreground/30 cursor-not-allowed"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )}
-            aria-label="Add to cart"
-          >
-            <ShoppingCart className="h-3.5 w-3.5" />
-          </button>
         </div>
 
         {lowStock && (
           <p className="text-[10px] text-warning font-medium">Only {quantity_in_stock} left</p>
         )}
-        {outOfStock && (
-          <p className="text-[10px] text-muted-foreground">Out of stock</p>
-        )}
+
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={outOfStock}
+          className={cn(
+            "mt-auto pt-2 flex items-center justify-center gap-1.5 h-8 rounded-md text-xs font-semibold transition-colors",
+            outOfStock
+              ? "bg-muted text-muted-foreground/40 cursor-not-allowed"
+              : "bg-success text-success-foreground hover:bg-success/90"
+          )}
+        >
+          <ShoppingCart className="h-3.5 w-3.5" />
+          {outOfStock ? "Out of stock" : "Buy with Float"}
+        </button>
       </div>
     </Link>
   );

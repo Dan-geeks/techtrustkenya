@@ -8,8 +8,8 @@ const steps = [
   },
   {
     num: "02",
-    title: "Float Escrow Payment",
-    body: "When you pay via M-Pesa, your money goes into Float — an escrow account TechTrust controls. The vendor sees your order but cannot access the funds until you confirm receipt.",
+    title: "Float Protected Payment",
+    body: "When you pay via M-Pesa, your money goes into Float — a protected account TechTrust controls. The vendor sees your order but cannot access the funds until you confirm receipt.",
   },
   {
     num: "03",
@@ -35,7 +35,7 @@ const HowItWorks = () => {
         </div>
         <AnimatedArt
           src={art.steps}
-          alt="Working through the TechTrust escrow checklist step by step"
+          alt="Working through the TechTrust Float protection checklist step by step"
           eager
         />
       </header>

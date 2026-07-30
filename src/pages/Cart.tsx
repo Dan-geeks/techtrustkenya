@@ -281,7 +281,7 @@ const Cart = () => {
 
       <p className="mt-8 text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
         <Shield className="h-3.5 w-3.5 text-success shrink-0" />
-        Payments held in Float escrow — released only when you confirm delivery.
+        Payments held in Float — released only when you confirm delivery.
       </p>
     </div>
   );

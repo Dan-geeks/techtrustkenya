@@ -13,6 +13,7 @@ import ProductDetail from "./pages/ProductDetail.tsx";
 import ShopPage from "./pages/ShopPage.tsx";
 import Auth from "./pages/Auth.tsx";
 import HowItWorks from "./pages/HowItWorks.tsx";
+import Terms from "./pages/Terms.tsx";
 import Repairs from "./pages/Repairs.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import VendorRegister from "./pages/vendor/VendorRegister.tsx";
@@ -53,6 +54,7 @@ const App = () => (
                 <Route path="/shop/:vendorId" element={<ShopPage />} />
                 <Route path="/repairs" element={<Repairs />} />
                 <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/terms" element={<Terms />} />
                 <Route
                   path="/cart"
                   element={

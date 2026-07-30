@@ -80,7 +80,7 @@ const Browse = () => {
         .select("*, vendor:vendor_profiles!inner(id,business_name,city,county,sub_county,average_rating,verification_status)")
         .eq("is_active", true)
         .gt("quantity_in_stock", 0)
-        .eq("vendor.verification_status", "approved");
+        .in("vendor.verification_status", ["verified", "approved"]);
 
       if (categories.length) q = q.in("category", categories as any);
       if (conditions.length) q = q.in("condition", conditions as any);

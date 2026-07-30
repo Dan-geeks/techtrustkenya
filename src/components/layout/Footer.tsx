@@ -41,7 +41,7 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><span className="text-muted-foreground">About</span></li>
               <li><a href="mailto:support@techtrust.co.ke" className="hover:text-accent transition-smooth">Contact</a></li>
-              <li><span className="text-muted-foreground">Terms</span></li>
+              <li><Link to="/terms" className="hover:text-accent transition-smooth">Terms</Link></li>
               <li><span className="text-muted-foreground">Privacy</span></li>
             </ul>
           </div>

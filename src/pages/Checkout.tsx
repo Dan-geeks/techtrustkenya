@@ -290,7 +290,7 @@ const Checkout = () => {
 
             <div className="mt-5 flex items-center gap-2 text-xs text-success bg-success/5 border border-success/30 rounded-md px-3 py-2">
               <Shield className="h-3.5 w-3.5 shrink-0 text-success" />
-              <span>Protected by Float escrow</span>
+              <span>Protected by Float</span>
             </div>
           </div>
         </Card>
@@ -351,24 +351,14 @@ const Checkout = () => {
             )}
 
             {phase === "waiting" && (
-              <div className="p-4 bg-success/5 border border-success/30 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-success" />
-                  </span>
-                  <span className="text-sm font-medium text-success">
-                    Waiting for PIN confirmation
-                  </span>
-                </div>
-                <p className="text-xs text-success/80">
-                  Enter your M-Pesa PIN on your phone to confirm payment.
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Time remaining:{" "}
-                  <span className="font-medium">{secondsLeft}s</span> /{" "}
-                  {TIMEOUT_SECONDS}s
-                </p>
+              <div className="p-4 bg-success/5 border border-success/30 rounded-lg flex items-center gap-2.5">
+                <span className="relative flex h-3 w-3 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-success" />
+                </span>
+                <span className="text-sm font-medium text-success">
+                  Check your phone to complete payment
+                </span>
               </div>
             )}
 
