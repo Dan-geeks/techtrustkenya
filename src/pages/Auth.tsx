@@ -29,8 +29,8 @@ const trustBullets = [
   "Dispute resolution included at no extra cost",
 ];
 
-/** Progressive signup: pick what you're here for, then how to continue, then fill in the form. */
-type SignupStage = "role" | "method" | "form";
+/** Progressive signup: pick what you're here for, accept terms, pick how to continue, then fill in the form. */
+type SignupStage = "role" | "terms" | "method" | "form";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -44,7 +44,8 @@ const Auth = () => {
   const [signin, setSignin] = useState({ email: "", password: "" });
   const [signup, setSignup] = useState({ email: "", password: "", full_name: "", phone_number: "", referral_code: "" });
   const [signupStage, setSignupStage] = useState<SignupStage>("role");
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [agreedAge, setAgreedAge] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -146,10 +147,6 @@ const Auth = () => {
     e.preventDefault();
     if (!/^(07\d{8}|2547\d{8})$/.test(signup.phone_number)) {
       toast.error("Phone must be 07XXXXXXXX or 2547XXXXXXXX");
-      return;
-    }
-    if (!agreedToTerms) {
-      toast.error("Please agree to the Terms & Conditions to continue.");
       return;
     }
     setLoading(true);
@@ -282,7 +279,7 @@ const Auth = () => {
                     </p>
                     <button
                       type="button"
-                      onClick={() => setSignupStage("method")}
+                      onClick={() => setSignupStage("terms")}
                       className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
                     >
                       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
@@ -313,11 +310,61 @@ const Auth = () => {
                   </div>
                 )}
 
+                {signupStage === "terms" && (
+                  <div className="animate-in fade-in-0 zoom-in-95 duration-300 space-y-4">
+                    <button
+                      type="button"
+                      onClick={() => setSignupStage("role")}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" /> Back
+                    </button>
+                    <p className="text-sm text-muted-foreground text-center">
+                      Just one quick agreement before you continue
+                    </p>
+                    <div className="space-y-3">
+                      <label className="flex items-start gap-2.5 text-sm cursor-pointer select-none rounded-xl border border-border p-3">
+                        <Checkbox
+                          checked={agreedTerms}
+                          onCheckedChange={(v) => setAgreedTerms(v === true)}
+                          className="mt-0.5"
+                        />
+                        <span className="text-muted-foreground">
+                          I agree to TechTrust's{" "}
+                          <Link to="/terms" target="_blank" className="text-accent underline hover:text-accent/80">
+                            Terms &amp; Conditions
+                          </Link>
+                        </span>
+                      </label>
+                      <label className="flex items-start gap-2.5 text-sm cursor-pointer select-none rounded-xl border border-border p-3">
+                        <Checkbox
+                          checked={agreedAge}
+                          onCheckedChange={(v) => setAgreedAge(v === true)}
+                          className="mt-0.5"
+                        />
+                        <span className="text-muted-foreground">
+                          I confirm I am 18 or older, or an authorized business representative
+                        </span>
+                      </label>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="hero"
+                      size="lg"
+                      className="w-full"
+                      disabled={!agreedTerms || !agreedAge}
+                      onClick={() => setSignupStage("method")}
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                )}
+
                 {signupStage === "method" && (
                   <div className="animate-in fade-in-0 zoom-in-95 duration-300 space-y-3">
                     <button
                       type="button"
-                      onClick={() => setSignupStage("role")}
+                      onClick={() => setSignupStage("terms")}
                       className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2"
                     >
                       <ChevronLeft className="h-3.5 w-3.5" /> Back
@@ -396,20 +443,7 @@ const Auth = () => {
                           You and your friend each get KES 500 after your first order.
                         </p>
                       </div>
-                      <label className="flex items-start gap-2.5 text-sm cursor-pointer select-none pt-1">
-                        <Checkbox
-                          checked={agreedToTerms}
-                          onCheckedChange={(v) => setAgreedToTerms(v === true)}
-                          className="mt-0.5"
-                        />
-                        <span className="text-muted-foreground">
-                          I agree to TechTrust's{" "}
-                          <Link to="/terms" target="_blank" className="text-accent underline hover:text-accent/80">
-                            Terms &amp; Conditions
-                          </Link>
-                        </span>
-                      </label>
-                      <Button type="submit" variant="hero" className="w-full" size="lg" disabled={loading || !agreedToTerms}>
+                      <Button type="submit" variant="hero" className="w-full" size="lg" disabled={loading}>
                         {loading ? "Creating account…" : "Create Account"}
                       </Button>
                     </form>

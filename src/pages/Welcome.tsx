@@ -1,0 +1,106 @@
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { ShieldCheck, ShoppingBag, Store, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+
+/**
+ * One-time gate shown right after a brand-new Google sign-in — email/password
+ * sign-ups already pick a role before the account exists, but Google never
+ * asks. profiles.onboarding_complete flips to true once a choice is made, so
+ * this page never appears again for that account.
+ */
+const Welcome = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [settling, setSettling] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate("/auth", { replace: true });
+  }, [authLoading, user, navigate]);
+
+  const chooseCustomer = async () => {
+    if (!user) return;
+    setSettling(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ onboarding_complete: true })
+      .eq("id", user.id);
+    setSettling(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    navigate("/browse", { replace: true });
+  };
+
+  const chooseVendor = () => {
+    navigate("/vendor/onboarding", { replace: true });
+  };
+
+  if (authLoading || !user) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background px-4">
+        <Loader2 className="h-6 w-6 animate-spin text-accent" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen grid place-items-center px-4 py-10 bg-gradient-subtle">
+      <div className="w-full max-w-lg">
+        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
+          <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
+          <span className="text-base font-bold tracking-tight">
+            Tech<span className="text-accent">Trust</span>
+          </span>
+        </Link>
+
+        <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card text-center">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Welcome to TechTrust</h1>
+          <p className="text-sm text-muted-foreground mb-6">
+            One quick thing — what brings you here?
+          </p>
+
+          <div className="space-y-3 text-left">
+            <button
+              type="button"
+              onClick={chooseCustomer}
+              disabled={settling}
+              className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60"
+            >
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
+                {settling ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShoppingBag className="h-5 w-5" />}
+              </span>
+              <span>
+                <span className="block font-semibold text-sm">I'm a Customer</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">
+                  Browse verified laptops, phones and repairs
+                </span>
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={chooseVendor}
+              disabled={settling}
+              className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60"
+            >
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
+                <Store className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="block font-semibold text-sm">I'm a Vendor</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">
+                  List your shop and reach verified buyers
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Welcome;

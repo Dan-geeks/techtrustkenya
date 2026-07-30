@@ -25,7 +25,8 @@ serve(async (req) => {
       gpsLongitude,
       googleMapsLink,
       shopPhotoUrls,
-      businessCertificateUrl
+      businessCertificateUrl,
+      tillNumber
     } = payload;
 
     const supabase = createClient(
@@ -50,6 +51,7 @@ serve(async (req) => {
         google_maps_link: googleMapsLink || null,
         shop_photo_urls: shopPhotoUrls || [],
         business_certificate_url: businessCertificateUrl || null,
+        till_number: tillNumber || null,
         verification_status: "pending",
         average_rating: 0,
         completed_transactions_count: 0,

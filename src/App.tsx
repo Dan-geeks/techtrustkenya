@@ -12,11 +12,13 @@ import Browse from "./pages/Browse.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
 import ShopPage from "./pages/ShopPage.tsx";
 import Auth from "./pages/Auth.tsx";
+import Welcome from "./pages/Welcome.tsx";
 import HowItWorks from "./pages/HowItWorks.tsx";
 import Terms from "./pages/Terms.tsx";
 import Repairs from "./pages/Repairs.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import VendorRegister from "./pages/vendor/VendorRegister.tsx";
+import VendorOnboarding from "./pages/vendor/VendorOnboarding.tsx";
 import VendorPending from "./pages/vendor/VendorPending.tsx";
 import VendorSuspended from "./pages/vendor/VendorSuspended.tsx";
 import VendorRejected from "./pages/vendor/VendorRejected.tsx";
@@ -42,8 +44,10 @@ const App = () => (
           <CartProvider>
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/welcome" element={<Welcome />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/vendor/register" element={<VendorRegister />} />
+              <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
               <Route path="/vendor/pending" element={<VendorPending />} />
               <Route path="/vendor/suspended" element={<VendorSuspended />} />
               <Route path="/vendor/rejected" element={<VendorRejected />} />
