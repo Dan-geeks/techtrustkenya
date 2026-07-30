@@ -49,6 +49,21 @@ function maskPhone(phone: string): string {
   return phone.slice(0, 4) + "XXXXXX";
 }
 
+/** M-Pesa till/paybill shortcodes are 5-7 digits. */
+function formatTill(raw: string | null | undefined): string | null {
+  const digits = String(raw ?? "").replace(/\D/g, "");
+  return /^\d{5,7}$/.test(digits) ? digits : null;
+}
+
+/** Same initiator/credential normally cover every Daraja product on a shortcode, but B2B is its own activation — check separately in case Safaricom issues distinct ones. */
+function b2bConfigured(): boolean {
+  return Boolean(
+    (env("MPESA_B2B_INITIATOR_NAME") || env("MPESA_INITIATOR_NAME")) &&
+      (env("MPESA_B2B_SECURITY_CREDENTIAL") || env("MPESA_SECURITY_CREDENTIAL")) &&
+      (env("MPESA_B2B_SHORTCODE") || env("MPESA_B2C_SHORTCODE") || env("MPESA_SHORTCODE")),
+  );
+}
+
 function ok(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -258,10 +273,71 @@ async function sendDarajaB2c(args: {
   };
 }
 
+/**
+ * Pays a vendor's M-Pesa till directly (Daraja B2B "Buy Goods"), used instead
+ * of sendDarajaB2c whenever the vendor has a till_number on file and B2B is
+ * configured. Separate product from B2C — Safaricom activates it on its own,
+ * so MPESA_B2B_* credentials are not assumed to exist just because B2C ones
+ * do. Falls back to sendDarajaB2c in sendPayout() when not configured.
+ */
+async function sendDarajaB2bTillPayout(args: {
+  orderId: string;
+  amountKsh: number;
+  tillNumber: string;
+}): Promise<PayoutResult> {
+  const initiator = env("MPESA_B2B_INITIATOR_NAME") || env("MPESA_INITIATOR_NAME");
+  const credential = env("MPESA_B2B_SECURITY_CREDENTIAL") || env("MPESA_SECURITY_CREDENTIAL");
+  const shortcode = env("MPESA_B2B_SHORTCODE") || env("MPESA_B2C_SHORTCODE") || env("MPESA_SHORTCODE");
+  const resultUrl = env("MPESA_B2B_RESULT_URL") || env("MPESA_B2C_RESULT_URL") || env("MPESA_CALLBACK_URL");
+  const timeoutUrl = env("MPESA_B2B_TIMEOUT_URL") || env("MPESA_B2C_TIMEOUT_URL") || env("MPESA_CALLBACK_URL");
+  if (!initiator || !credential || !shortcode || !resultUrl || !timeoutUrl) {
+    throw new Error("M-Pesa B2B till payout is not fully configured");
+  }
+
+  const token = await getDarajaToken();
+  const baseUrl = cleanBaseUrl(env("MPESA_BASE_URL"), "https://sandbox.safaricom.co.ke");
+  const reference = `TT-REL-${args.orderId.slice(0, 8).toUpperCase()}`;
+  const res = await fetch(`${baseUrl}/mpesa/b2b/v1/paymentrequest`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      Initiator: initiator,
+      SecurityCredential: credential,
+      CommandID: env("MPESA_B2B_COMMAND_ID", "BusinessBuyGoods"),
+      SenderIdentifierType: "4",
+      RecieverIdentifierType: "4",
+      Amount: Math.round(args.amountKsh),
+      PartyA: shortcode,
+      PartyB: args.tillNumber,
+      AccountReference: reference,
+      Remarks: `TechTrust order ${reference}`,
+      QueueTimeOutURL: timeoutUrl,
+      ResultURL: resultUrl,
+    }),
+  });
+  const data = await getJson(res);
+  if (!res.ok || firstString(data.ResponseCode) !== "0") {
+    throw new Error(firstString(data.errorMessage, data.ResponseDescription, data.message) ?? `M-Pesa B2B till payout failed with HTTP ${res.status}`);
+  }
+
+  return {
+    provider: "safaricom_b2c",
+    accepted: true,
+    final: false,
+    reference: firstString(data.OriginatorConversationID, data.ConversationID),
+    message: firstString(data.ResponseDescription) ?? "M-Pesa till payout accepted",
+    details: { ...data, payoutDestination: "till", tillNumber: args.tillNumber },
+  };
+}
+
 async function sendPayout(args: {
   orderId: string;
   amountKsh: number;
   vendorPhone: string;
+  vendorTillNumber?: string | null;
   vendorName?: string;
   provider: PayoutProvider;
 }): Promise<PayoutResult> {
@@ -277,13 +353,18 @@ async function sendPayout(args: {
       final: true,
       reference: receipt,
       receipt,
-      message: "Sandbox simulation payout completed",
+      message: args.vendorTillNumber
+        ? "Sandbox simulation payout completed (would have gone to vendor till)"
+        : "Sandbox simulation payout completed",
       details: { simulated: true },
     };
   }
 
-  const { orderId, amountKsh, vendorPhone, vendorName } = args;
+  const { orderId, amountKsh, vendorPhone, vendorTillNumber, vendorName } = args;
   if (provider === "kcb_buni") return await sendKcbBuniPayout({ orderId, amountKsh, vendorPhone, vendorName });
+  if (vendorTillNumber && b2bConfigured()) {
+    return await sendDarajaB2bTillPayout({ orderId, amountKsh, tillNumber: vendorTillNumber });
+  }
   return await sendDarajaB2c({ orderId, amountKsh, vendorPhone });
 }
 
@@ -337,17 +418,22 @@ serve(async (req) => {
 
     const { data: vendor } = await admin
       .from("vendor_profiles")
-      .select("id, user_id, business_name, phone")
+      .select("id, user_id, business_name, phone, till_number")
       .eq("id", order.vendor_id)
       .maybeSingle();
     const vendorPhone = formatPhone(vendor?.phone ?? "");
-    if (!/^254\d{9}$/.test(vendorPhone)) {
+    const vendorTillNumber = formatTill(vendor?.till_number);
+    const canPayToTill = Boolean(vendorTillNumber) && b2bConfigured();
+    const validPhone = /^254\d{9}$/.test(vendorPhone);
+    if (!validPhone && !canPayToTill) {
       return ok({ success: false, error: "Vendor payout phone is missing or invalid" }, 409);
     }
 
     const provider = resolvePayoutProvider();
     console.log(
-      `[release-float-payment] orderId=${orderId} provider=${provider ?? "none"} vendorPhone=${maskPhone(vendorPhone)}`,
+      `[release-float-payment] orderId=${orderId} provider=${provider ?? "none"} destination=${
+        canPayToTill ? `till ${vendorTillNumber}` : maskPhone(vendorPhone)
+      }`,
     );
 
     if (provider === null) {
@@ -372,6 +458,7 @@ serve(async (req) => {
       orderId,
       amountKsh: payoutAmount,
       vendorPhone,
+      vendorTillNumber,
       vendorName: vendor?.business_name,
       provider,
     });
@@ -412,12 +499,15 @@ serve(async (req) => {
     });
 
     if (vendor?.user_id) {
+      const destination = canPayToTill && vendorTillNumber
+        ? `your till ending ${vendorTillNumber.slice(-4)}`
+        : `your number ending ${vendorPhone.slice(-4)}`;
       await admin.from("notifications").insert({
         user_id: vendor.user_id,
         title: payout.final ? "Float released to your mobile money" : "Float payout is processing",
         message: payout.final
-          ? `Payment of KES ${payoutAmount.toLocaleString()} has been sent to your number ending ${vendorPhone.slice(-4)}. Reference: ${payout.receipt ?? payout.reference}.`
-          : `The customer confirmed delivery. Your payout of KES ${payoutAmount.toLocaleString()} is processing to the number ending ${vendorPhone.slice(-4)}.`,
+          ? `Payment of KES ${payoutAmount.toLocaleString()} has been sent to ${destination}. Reference: ${payout.receipt ?? payout.reference}.`
+          : `The customer confirmed delivery. Your payout of KES ${payoutAmount.toLocaleString()} is processing to ${destination}.`,
         type: "payment",
         reference_id: orderId,
       });
