@@ -47,10 +47,19 @@ export const TopNav = () => {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6 ml-6">
-          <NavLink to="/" end className={navLinkClass}>Home</NavLink>
-          <NavLink to="/browse" className={navLinkClass}>Browse</NavLink>
-          <NavLink to="/repairs" className={navLinkClass}>Repairs</NavLink>
-          <NavLink to="/how-it-works" className={navLinkClass}>How It Works</NavLink>
+          {user ? (
+            <>
+              <NavLink to="/browse" className={navLinkClass}>Browse</NavLink>
+              <NavLink to="/repairs" className={navLinkClass}>Repairs</NavLink>
+            </>
+          ) : (
+            <>
+              <NavLink to="/" end className={navLinkClass}>Home</NavLink>
+              <NavLink to="/browse" className={navLinkClass}>Browse</NavLink>
+              <NavLink to="/repairs" className={navLinkClass}>Repairs</NavLink>
+              <NavLink to="/how-it-works" className={navLinkClass}>How It Works</NavLink>
+            </>
+          )}
         </nav>
 
         <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-4">

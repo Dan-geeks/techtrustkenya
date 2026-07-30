@@ -294,7 +294,7 @@ const Auth = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => navigate("/vendor/register")}
+                      onClick={() => navigate("/vendor/register", { state: { role: "vendor" } })}
                       className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
                     >
                       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
