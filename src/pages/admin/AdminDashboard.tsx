@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import {
   Loader2, Users, Store, AlertTriangle, Wallet, MapPin, Phone, Mail, Map,
   FileText, CheckCircle2, XCircle, ShieldCheck, Search,
-  TrendingUp, ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -27,25 +27,32 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="container py-6">
-      <header className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Platform oversight and moderation</p>
-      </header>
-      <Tabs defaultValue="overview">
-        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 justify-start">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="vendors">Vendors</TabsTrigger>
-          <TabsTrigger value="disputes">Disputes</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="mt-6"><AdminOverview /></TabsContent>
-        <TabsContent value="vendors" className="mt-6"><AdminVendors /></TabsContent>
-        <TabsContent value="disputes" className="mt-6"><AdminDisputes /></TabsContent>
-        <TabsContent value="users" className="mt-6"><AdminUsers /></TabsContent>
-        <TabsContent value="payments" className="mt-6"><AdminPayments /></TabsContent>
-      </Tabs>
+    <div className="flex flex-col">
+      <div className="bg-primary text-primary-foreground">
+        <div className="container py-8">
+          <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-accent">
+            <ShieldCheck className="h-3 w-3" /> Internal
+          </span>
+          <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-sm text-primary-foreground/60 mt-1">Platform oversight and moderation</p>
+        </div>
+      </div>
+      <div className="container py-6">
+        <Tabs defaultValue="overview">
+          <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 justify-start">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="vendors">Vendors</TabsTrigger>
+            <TabsTrigger value="disputes">Disputes</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview" className="mt-6"><AdminOverview /></TabsContent>
+          <TabsContent value="vendors" className="mt-6"><AdminVendors /></TabsContent>
+          <TabsContent value="disputes" className="mt-6"><AdminDisputes /></TabsContent>
+          <TabsContent value="users" className="mt-6"><AdminUsers /></TabsContent>
+          <TabsContent value="payments" className="mt-6"><AdminPayments /></TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };
@@ -152,8 +159,8 @@ interface StatCardProps {
 }
 
 const StatCard = ({ icon: Icon, label, value, borderColor, iconBg, pulse }: StatCardProps) => (
-  <Card className={`p-5 border-l-4 ${borderColor}`}>
-    <div className="flex items-center justify-between mb-3">
+  <Card className={`p-5 border-l-4 ${borderColor} transition-shadow hover:shadow-md`}>
+    <div className="flex items-center justify-between mb-4">
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
       <div className="flex items-center gap-1.5">
         {pulse && (
@@ -167,13 +174,7 @@ const StatCard = ({ icon: Icon, label, value, borderColor, iconBg, pulse }: Stat
         </div>
       </div>
     </div>
-    <div className="flex items-end justify-between">
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-        <TrendingUp className="h-3 w-3" />
-        <span>trend</span>
-      </div>
-    </div>
+    <div className="text-3xl font-bold tracking-tight">{value}</div>
   </Card>
 );
 

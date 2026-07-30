@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { CookieConsent } from "@/components/layout/CookieConsent";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import Browse from "./pages/Browse.tsx";
@@ -42,6 +43,7 @@ const App = () => (
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
           <CartProvider>
+            <CookieConsent />
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/welcome" element={<Welcome />} />

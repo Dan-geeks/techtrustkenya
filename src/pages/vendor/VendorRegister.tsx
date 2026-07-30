@@ -137,6 +137,7 @@ const VendorRegister = () => {
   const [certificate, setCertificate] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [locating, setLocating] = useState(false);
+  const [showManualGps, setShowManualGps] = useState(false);
 
   // Redirect logged-in approved vendors away
   useEffect(() => {
@@ -158,7 +159,8 @@ const VendorRegister = () => {
 
   const useMyLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("Your browser doesn't support location access. Enter the coordinates manually.");
+      toast.error("Your browser doesn't support location access.");
+      setShowManualGps(true);
       return;
     }
     setLocating(true);
@@ -171,10 +173,11 @@ const VendorRegister = () => {
         }));
         setErrors((prev) => ({ ...prev, latitude: "", longitude: "" }));
         setLocating(false);
-        toast.success("Location filled in — double check it matches your shop before continuing.");
+        toast.success("Location captured — make sure you're at the shop before continuing.");
       },
       (err) => {
         setLocating(false);
+        setShowManualGps(true);
         toast.error(
           err.code === err.PERMISSION_DENIED
             ? "Location access denied. Enter the coordinates manually or from Google Maps."
@@ -424,11 +427,14 @@ const VendorRegister = () => {
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
           <span className="text-base font-bold tracking-tight">Tech<span className="text-accent">Trust</span></span>
         </Link>
-        <h2 className="text-3xl font-bold leading-tight mb-8 text-balance">
+        <h2 className="text-3xl font-bold leading-tight mb-4 text-balance">
           Verified marketplace for laptops, phones and repairs.
         </h2>
+        <span className="mb-6 inline-flex w-fit items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1.5 text-xs font-semibold text-accent">
+          <Sparkles className="h-3.5 w-3.5" /> Free for your first month — no listing fees
+        </span>
         <div className="space-y-4">
-          {["Every vendor physically inspected", "Payments held in Float until confirmed", "Free to list, zero setup fees"].map((s) => (
+          {["Every vendor physically inspected", "Payments held in Float until confirmed", "Cancel anytime, no lock-in"].map((s) => (
             <div key={s} className="flex items-center gap-3 text-sm text-primary-foreground/70">
               <ShieldCheck className="h-4 w-4 text-accent shrink-0" />
               {s}
@@ -675,38 +681,57 @@ const VendorRegister = () => {
                     <BackLink onClick={goBack} />
                     <div className="space-y-4">
                       <div>
-                        <div className="flex items-center justify-between">
-                          <Label>Shop GPS location</Label>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={useMyLocation}
-                            disabled={locating}
-                          >
+                        <Label>Shop GPS location</Label>
+                        <div className="mt-1.5 flex items-center gap-3 rounded-xl border border-border p-3">
+                          {vsu.latitude && vsu.longitude ? (
+                            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-success/10 text-success">
+                              <Check className="h-4.5 w-4.5" />
+                            </span>
+                          ) : (
+                            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-muted-foreground">
+                              <MapPin className="h-4.5 w-4.5" />
+                            </span>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium">
+                              {vsu.latitude && vsu.longitude ? "Location captured" : "Location not captured yet"}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              Stand at the shop, then tap the button
+                            </p>
+                          </div>
+                          <Button type="button" variant="outline" size="sm" onClick={useMyLocation} disabled={locating}>
                             {locating ? (
                               <><Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> Locating…</>
                             ) : (
-                              <><MapPin className="h-3.5 w-3.5 mr-1" /> Use my current location</>
+                              <><MapPin className="h-3.5 w-3.5 mr-1" /> Use current location</>
                             )}
                           </Button>
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Fills the coordinates below from your device. Stand at the shop before tapping this — you can still edit them manually.
-                        </p>
+                        <ErrorText errors={errors} name="latitude" />
+                        {!showManualGps && (
+                          <button
+                            type="button"
+                            onClick={() => setShowManualGps(true)}
+                            className="mt-1.5 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                          >
+                            Enter coordinates manually instead
+                          </button>
+                        )}
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label>GPS Latitude</Label>
-                          <Input type="number" step="any" placeholder="-1.1023" value={vsu.latitude} onChange={(e) => setVsu({ ...vsu, latitude: e.target.value })} className="mt-1.5" />
-                          <ErrorText errors={errors} name="latitude" />
+                      {showManualGps && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label>GPS Latitude</Label>
+                            <Input type="number" step="any" placeholder="-1.1023" value={vsu.latitude} onChange={(e) => setVsu({ ...vsu, latitude: e.target.value })} className="mt-1.5" />
+                          </div>
+                          <div>
+                            <Label>GPS Longitude</Label>
+                            <Input type="number" step="any" placeholder="37.0144" value={vsu.longitude} onChange={(e) => setVsu({ ...vsu, longitude: e.target.value })} className="mt-1.5" />
+                            <ErrorText errors={errors} name="longitude" />
+                          </div>
                         </div>
-                        <div>
-                          <Label>GPS Longitude</Label>
-                          <Input type="number" step="any" placeholder="37.0144" value={vsu.longitude} onChange={(e) => setVsu({ ...vsu, longitude: e.target.value })} className="mt-1.5" />
-                          <ErrorText errors={errors} name="longitude" />
-                        </div>
-                      </div>
+                      )}
                       <div>
                         <Label>Google Maps link <span className="text-muted-foreground">(optional)</span></Label>
                         <Input placeholder="https://maps.google.com" value={vsu.google_maps_link} onChange={(e) => setVsu({ ...vsu, google_maps_link: e.target.value })} className="mt-1.5" />

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ShieldCheck, ShoppingBag, Store, Loader2 } from "lucide-react";
+import { ShieldCheck, ShoppingBag, Store, Loader2, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 /**
  * One-time gate shown right after a brand-new Google sign-in — email/password
@@ -15,14 +17,27 @@ const Welcome = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [settling, setSettling] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth", { replace: true });
   }, [authLoading, user, navigate]);
 
+  const applyReferralIfEntered = async () => {
+    const code = referralCode.trim();
+    if (!code) return;
+    const { data, error } = await supabase.rpc("apply_referral_code", { p_code: code });
+    if (!error && data === true) {
+      toast.success("Referral code applied!");
+    } else if (!error) {
+      toast.error("That referral code isn't valid.");
+    }
+  };
+
   const chooseCustomer = async () => {
     if (!user) return;
     setSettling(true);
+    await applyReferralIfEntered();
     const { error } = await supabase
       .from("profiles")
       .update({ onboarding_complete: true })
@@ -35,7 +50,10 @@ const Welcome = () => {
     navigate("/browse", { replace: true });
   };
 
-  const chooseVendor = () => {
+  const chooseVendor = async () => {
+    setSettling(true);
+    await applyReferralIfEntered();
+    setSettling(false);
     navigate("/vendor/onboarding", { replace: true });
   };
 
@@ -62,6 +80,24 @@ const Welcome = () => {
           <p className="text-sm text-muted-foreground mb-6">
             One quick thing — what brings you here?
           </p>
+
+          <div className="mb-6 text-left">
+            <Label htmlFor="welcome-referral" className="flex items-center gap-1.5 text-sm">
+              <Gift className="h-3.5 w-3.5 text-accent" /> Referral code (optional)
+            </Label>
+            <Input
+              id="welcome-referral"
+              autoComplete="off"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+              className="mt-1.5 uppercase"
+              placeholder="e.g. JOHN91D14"
+              disabled={settling}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              You and your friend each get KES 500 after your first order.
+            </p>
+          </div>
 
           <div className="space-y-3 text-left">
             <button

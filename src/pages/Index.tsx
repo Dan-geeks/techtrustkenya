@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ShieldCheck, ArrowRight, Wrench, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,6 @@ import { VendorCard } from "@/components/marketplace/VendorCard";
 import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
 import { Reveal } from "@/components/marketing/Reveal";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { getPostLoginPath } from "@/lib/redirectByRole";
 import { useParallax } from "@/hooks/useParallax";
 
 interface Stats {
@@ -18,8 +16,6 @@ interface Stats {
 }
 
 const Index = () => {
-  const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<any[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
   const [stats, setStats] = useState<Stats>({ vendors: 0, products: 0, transactions: 0 });
@@ -28,14 +24,6 @@ const Index = () => {
   const blobTwo = useParallax<HTMLDivElement>(-0.18);
   const heroArt = useParallax<HTMLDivElement>(0.06);
   const repairArt = useParallax<HTMLDivElement>(-0.08);
-
-  // Signed-in visitors get sent straight to their home (browse/vendor/admin) —
-  // the marketing pitch on this page is for prospective users, not existing ones.
-  useEffect(() => {
-    if (!authLoading && user) {
-      void getPostLoginPath(user.id).then((path) => navigate(path, { replace: true }));
-    }
-  }, [authLoading, user, navigate]);
 
   useEffect(() => {
     document.title = "TechTrust — Verified Tech Marketplace in Kenya";
@@ -270,6 +258,9 @@ const Index = () => {
                 <Link to="/vendor/register">Register a Business</Link>
               </Button>
             </div>
+            <p className="mt-4 text-xs font-medium text-accent">
+              Free for your first month as a vendor — no listing fees.
+            </p>
           </Reveal>
         </div>
       </section>
