@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, Camera, FileText, Loader2, Upload, X } from "lucide-react";
+import { ShieldCheck, Camera, FileText, Loader2, Upload, X, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +41,36 @@ const VendorOnboarding = () => {
   const [shopPhotos, setShopPhotos] = useState<File[]>([]);
   const [certificate, setCertificate] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [locating, setLocating] = useState(false);
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Your browser doesn't support location access. Enter the coordinates manually.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setVsu((prev) => ({
+          ...prev,
+          latitude: pos.coords.latitude.toFixed(6),
+          longitude: pos.coords.longitude.toFixed(6),
+        }));
+        setErrors((prev) => ({ ...prev, latitude: "", longitude: "" }));
+        setLocating(false);
+        toast.success("Location filled in — double check it matches your shop before continuing.");
+      },
+      (err) => {
+        setLocating(false);
+        toast.error(
+          err.code === err.PERMISSION_DENIED
+            ? "Location access denied. Enter the coordinates manually or from Google Maps."
+            : "Couldn't get your location. Enter the coordinates manually.",
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -242,6 +272,21 @@ const VendorOnboarding = () => {
               <Err name="physical_address" />
             </div>
 
+            <div>
+              <div className="flex items-center justify-between">
+                <Label>Shop GPS location</Label>
+                <Button type="button" variant="outline" size="sm" onClick={useMyLocation} disabled={locating}>
+                  {locating ? (
+                    <><Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> Locating…</>
+                  ) : (
+                    <><MapPin className="h-3.5 w-3.5 mr-1" /> Use my current location</>
+                  )}
+                </Button>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Fills the coordinates below from your device. Stand at the shop before tapping this — you can still edit them manually.
+              </p>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>GPS Latitude</Label>

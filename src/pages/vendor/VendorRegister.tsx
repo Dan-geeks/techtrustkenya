@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ShieldCheck, Camera, FileText, Loader2, Store, User as UserIcon, Upload, X,
-  Sparkles, Copy, Check, ChevronLeft, ChevronRight, ShoppingBag,
+  Sparkles, Copy, Check, ChevronLeft, ChevronRight, ShoppingBag, MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import { getPostLoginPath } from "@/lib/redirectByRole";
 import { cn } from "@/lib/utils";
 import { KENYA_COUNTIES } from "@/lib/kenyaCounties";
 import { invokeFunction } from "@/lib/functions";
+import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
 
 type Role = "customer" | "vendor";
 
@@ -25,6 +26,78 @@ const phoneOk = (v: string) => /^(07\d{8}|2547\d{8})$/.test(v);
 
 const CUSTOMER_STEPS = ["Role", "Your details"];
 const VENDOR_STEPS = ["Role", "Account", "Business", "Location & Photos", "Review"];
+
+/**
+ * All of these live OUTSIDE VendorRegister on purpose. Defining them inside a
+ * component body gives them a fresh identity every render, so React treats
+ * each keystroke as "a different component" and remounts the step — every
+ * text input loses focus after one character. Keeping them at module scope
+ * with props instead of closures fixes that.
+ */
+const ErrorText = ({ errors, name }: { errors: Record<string, string>; name: string }) =>
+  errors[name] ? <p className="text-xs text-destructive mt-1">{errors[name]}</p> : null;
+
+const BackLink = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="mb-4 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+  >
+    <ChevronLeft className="h-3.5 w-3.5" /> Back
+  </button>
+);
+
+const NextButton = ({ onClick }: { onClick: () => void }) => (
+  <Button type="button" variant="hero" size="lg" className="w-full" onClick={onClick}>
+    Continue <ChevronRight className="h-4 w-4" />
+  </Button>
+);
+
+const Stepper = ({ steps, step }: { steps: string[]; step: number }) => (
+  <div className="mb-10">
+    <div className="flex items-center">
+      {steps.map((label, i) => (
+        <div key={label} className="flex items-center flex-1 last:flex-none">
+          <div className="flex flex-col items-center gap-2">
+            <div
+              className={cn(
+                "grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-semibold transition-all duration-300",
+                i < step
+                  ? "bg-accent text-accent-foreground shadow-md shadow-accent/30"
+                  : i === step
+                  ? "scale-110 bg-accent text-accent-foreground shadow-lg shadow-accent/40 ring-4 ring-accent/20"
+                  : "bg-secondary text-muted-foreground",
+              )}
+            >
+              {i < step ? <Check className="h-4.5 w-4.5" /> : i + 1}
+            </div>
+            <span
+              className={cn(
+                "hidden whitespace-nowrap text-xs font-medium sm:block",
+                i <= step ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              {label}
+            </span>
+          </div>
+          {i < steps.length - 1 && (
+            <div className="mx-3 h-1 flex-1 overflow-hidden rounded-full bg-secondary">
+              <div
+                className={cn(
+                  "h-full rounded-full bg-gradient-to-r from-accent to-accent/70 transition-all duration-500 ease-out",
+                  i < step ? "w-full" : "w-0",
+                )}
+              />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+    <p className="mt-3 text-center text-xs font-medium text-muted-foreground sm:hidden">
+      Step {step + 1} of {steps.length} — {steps[step]}
+    </p>
+  </div>
+);
 
 const VendorRegister = () => {
   const navigate = useNavigate();
@@ -63,6 +136,7 @@ const VendorRegister = () => {
   const [shopPhotos, setShopPhotos] = useState<File[]>([]);
   const [certificate, setCertificate] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [locating, setLocating] = useState(false);
 
   // Redirect logged-in approved vendors away
   useEffect(() => {
@@ -81,6 +155,35 @@ const VendorRegister = () => {
   };
 
   const goBack = () => setStep((s) => Math.max(0, s - 1));
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Your browser doesn't support location access. Enter the coordinates manually.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setVsu((prev) => ({
+          ...prev,
+          latitude: pos.coords.latitude.toFixed(6),
+          longitude: pos.coords.longitude.toFixed(6),
+        }));
+        setErrors((prev) => ({ ...prev, latitude: "", longitude: "" }));
+        setLocating(false);
+        toast.success("Location filled in — double check it matches your shop before continuing.");
+      },
+      (err) => {
+        setLocating(false);
+        toast.error(
+          err.code === err.PERMISSION_DENIED
+            ? "Location access denied. Enter the coordinates manually or from Google Maps."
+            : "Couldn't get your location. Enter the coordinates manually.",
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
 
   /* --------------------------------- Step validation --------------------------------- */
   const validateAccountStep = (): boolean => {
@@ -313,89 +416,38 @@ const VendorRegister = () => {
     }
   };
 
-  /* --------------------------------- Render UI --------------------------------- */
-  const Err = ({ name }: { name: string }) =>
-    errors[name] ? <p className="text-xs text-destructive mt-1">{errors[name]}</p> : null;
-
-  const Stepper = () => (
-    <div className="mb-8 flex items-center">
-      {steps.map((label, i) => (
-        <div key={label} className="flex items-center flex-1 last:flex-none">
-          <div className="flex flex-col items-center gap-1.5">
-            <div
-              className={cn(
-                "grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-semibold transition-all duration-300",
-                i < step
-                  ? "bg-success text-success-foreground"
-                  : i === step
-                  ? "scale-110 bg-accent text-accent-foreground shadow-md"
-                  : "bg-secondary text-muted-foreground",
-              )}
-            >
-              {i < step ? <Check className="h-4 w-4" /> : i + 1}
-            </div>
-            <span
-              className={cn(
-                "hidden whitespace-nowrap text-[10px] font-medium sm:block",
-                i <= step ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {label}
-            </span>
-          </div>
-          {i < steps.length - 1 && (
-            <div className="mx-2 h-0.5 flex-1 overflow-hidden rounded bg-secondary">
-              <div
-                className={cn(
-                  "h-full bg-success transition-all duration-500 ease-out",
-                  i < step ? "w-full" : "w-0",
-                )}
-              />
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  const StepShell = ({ children }: { children: React.ReactNode }) => (
-    <div key={`${role ?? "none"}-${step}`} className="animate-in fade-in-0 slide-in-from-right-4 duration-300">
-      {children}
-    </div>
-  );
-
-  const NextButton = () => (
-    <Button type="button" variant="hero" size="lg" className="w-full" onClick={goNext}>
-      Continue <ChevronRight className="h-4 w-4" />
-    </Button>
-  );
-
-  const BackLink = () => (
-    <button
-      type="button"
-      onClick={goBack}
-      className="mb-4 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
-    >
-      <ChevronLeft className="h-3.5 w-3.5" /> Back
-    </button>
-  );
-
   return (
-    <div className="min-h-screen grid place-items-center px-4 py-10 bg-primary">
-      <div className="w-full max-w-3xl">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-6">
+    <div className="min-h-screen flex">
+      {/* Left branded panel — desktop only, mirrors the Auth page's split layout */}
+      <div className="hidden lg:flex lg:w-2/5 bg-primary text-primary-foreground flex-col justify-center px-12 py-16 shrink-0">
+        <Link to="/" className="flex items-center gap-2 mb-12">
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight text-white">
-            Tech<span className="text-accent">Trust</span>
-          </span>
+          <span className="text-base font-bold tracking-tight">Tech<span className="text-accent">Trust</span></span>
+        </Link>
+        <h2 className="text-3xl font-bold leading-tight mb-8 text-balance">
+          Verified marketplace for laptops, phones and repairs.
+        </h2>
+        <div className="space-y-4">
+          {["Every vendor physically inspected", "Payments held in Float until confirmed", "Free to list, zero setup fees"].map((s) => (
+            <div key={s} className="flex items-center gap-3 text-sm text-primary-foreground/70">
+              <ShieldCheck className="h-4 w-4 text-accent shrink-0" />
+              {s}
+            </div>
+          ))}
+        </div>
+        <AnimatedArt src={art.steps} alt="" className="mt-10" />
+      </div>
+
+      {/* Right panel — the wizard, full height */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-10 lg:py-16">
+        <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
+          <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
+          <span className="text-base font-bold tracking-tight">Tech<span className="text-accent">Trust</span></span>
         </Link>
 
-        <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-elegant">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold">Welcome to TechTrust</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Verified marketplace for laptops, phones and repairs.
-            </p>
+        <div className="w-full max-w-2xl">
+          <div className="text-center mb-6 lg:hidden">
+            <h1 className="text-2xl font-bold">Welcome to TechTrust</h1>
           </div>
 
           <Tabs
@@ -407,14 +459,14 @@ const VendorRegister = () => {
               setErrors({});
             }}
           >
-            <TabsList className="grid grid-cols-2 w-full">
+            <TabsList className="grid grid-cols-2 w-full max-w-sm mx-auto">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
               <TabsTrigger value="signup">Create account</TabsTrigger>
             </TabsList>
 
             {/* SIGN IN */}
-            <TabsContent value="signin" className="mt-6">
-              <form onSubmit={handleSignIn} className="space-y-4 max-w-md mx-auto">
+            <TabsContent value="signin" className="mt-8">
+              <form onSubmit={handleSignIn} className="space-y-4 max-w-sm mx-auto">
                 <div>
                   <Label htmlFor="si-email">Email</Label>
                   <Input id="si-email" type="email" autoComplete="email" required value={signin.email}
@@ -432,303 +484,326 @@ const VendorRegister = () => {
             </TabsContent>
 
             {/* SIGN UP WIZARD */}
-            <TabsContent value="signup" className="mt-6">
-              <Stepper />
+            <TabsContent value="signup" className="mt-8">
+              <Stepper steps={steps} step={step} />
 
-              {/* Step 0 — role */}
-              {step === 0 && (
-                <StepShell>
-                  <p className="text-sm text-muted-foreground mb-4 text-center">What brings you to TechTrust?</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => chooseRole("customer")}
-                      className="flex flex-col items-start gap-3 rounded-xl border-2 border-border p-5 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
-                    >
-                      <span className="grid h-11 w-11 place-items-center rounded-lg bg-accent-soft text-accent">
-                        <ShoppingBag className="h-5 w-5" />
-                      </span>
-                      <span>
-                        <span className="block font-semibold">I'm a Customer</span>
-                        <span className="block text-xs text-muted-foreground mt-0.5">Buy and request repairs.</span>
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => chooseRole("vendor")}
-                      className="flex flex-col items-start gap-3 rounded-xl border-2 border-border p-5 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
-                    >
-                      <span className="grid h-11 w-11 place-items-center rounded-lg bg-accent-soft text-accent">
-                        <Store className="h-5 w-5" />
-                      </span>
-                      <span>
-                        <span className="block font-semibold">I'm a Vendor</span>
-                        <span className="block text-xs text-muted-foreground mt-0.5">Sell and offer repairs.</span>
-                      </span>
-                    </button>
+              <div key={`${role ?? "none"}-${step}`} className="animate-in fade-in-0 slide-in-from-right-4 duration-300">
+                {/* Step 0 — role */}
+                {step === 0 && (
+                  <>
+                    <p className="text-sm text-muted-foreground mb-4 text-center">What brings you to TechTrust?</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto">
+                      <button
+                        type="button"
+                        onClick={() => chooseRole("customer")}
+                        className="flex flex-col items-start gap-3 rounded-xl border-2 border-border p-5 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
+                      >
+                        <span className="grid h-11 w-11 place-items-center rounded-lg bg-accent-soft text-accent">
+                          <ShoppingBag className="h-5 w-5" />
+                        </span>
+                        <span>
+                          <span className="block font-semibold">I'm a Customer</span>
+                          <span className="block text-xs text-muted-foreground mt-0.5">Buy and request repairs.</span>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => chooseRole("vendor")}
+                        className="flex flex-col items-start gap-3 rounded-xl border-2 border-border p-5 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
+                      >
+                        <span className="grid h-11 w-11 place-items-center rounded-lg bg-accent-soft text-accent">
+                          <Store className="h-5 w-5" />
+                        </span>
+                        <span>
+                          <span className="block font-semibold">I'm a Vendor</span>
+                          <span className="block text-xs text-muted-foreground mt-0.5">Sell and offer repairs.</span>
+                        </span>
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {/* Step 1 — account (both roles) */}
+                {step === 1 && role === "customer" && (
+                  <div className="max-w-sm mx-auto">
+                    <BackLink onClick={goBack} />
+                    <form onSubmit={handleCustomerSignUp} className="space-y-4">
+                      <div>
+                        <Label>Full name</Label>
+                        <Input value={csu.full_name} onChange={(e) => setCsu({ ...csu, full_name: e.target.value })} className="mt-1.5" />
+                        <ErrorText errors={errors} name="full_name" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Email</Label>
+                          <Input type="email" autoComplete="email" value={csu.email} onChange={(e) => setCsu({ ...csu, email: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="email" />
+                        </div>
+                        <div>
+                          <Label>Phone</Label>
+                          <Input type="tel" autoComplete="tel" value={csu.phone} placeholder="07XXXXXXXX" onChange={(e) => setCsu({ ...csu, phone: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="phone" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Password</Label>
+                          <PasswordInput autoComplete="new-password" value={csu.password} onChange={(e) => setCsu({ ...csu, password: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="password" />
+                        </div>
+                        <div>
+                          <Label>Confirm</Label>
+                          <PasswordInput autoComplete="new-password" value={csu.confirm} onChange={(e) => setCsu({ ...csu, confirm: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="confirm" />
+                        </div>
+                      </div>
+                      <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+                        {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating…</> : "Create customer account"}
+                      </Button>
+                    </form>
                   </div>
-                </StepShell>
-              )}
+                )}
 
-              {/* Step 1 — account (both roles) */}
-              {step === 1 && role === "customer" && (
-                <StepShell>
-                  <BackLink />
-                  <form onSubmit={handleCustomerSignUp} className="space-y-4 max-w-md mx-auto">
-                    <div>
-                      <Label>Full name</Label>
-                      <Input value={csu.full_name} onChange={(e) => setCsu({ ...csu, full_name: e.target.value })} className="mt-1.5" />
-                      <Err name="full_name" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
+                {step === 1 && role === "vendor" && (
+                  <div className="max-w-lg mx-auto">
+                    <BackLink onClick={goBack} />
+                    <div className="space-y-4">
                       <div>
-                        <Label>Email</Label>
-                        <Input type="email" autoComplete="email" value={csu.email} onChange={(e) => setCsu({ ...csu, email: e.target.value })} className="mt-1.5" />
-                        <Err name="email" />
+                        <Label>Owner / Manager full name</Label>
+                        <Input value={vsu.owner_name} onChange={(e) => setVsu({ ...vsu, owner_name: e.target.value })} className="mt-1.5" />
+                        <ErrorText errors={errors} name="owner_name" />
                       </div>
-                      <div>
-                        <Label>Phone</Label>
-                        <Input type="tel" autoComplete="tel" value={csu.phone} placeholder="07XXXXXXXX" onChange={(e) => setCsu({ ...csu, phone: e.target.value })} className="mt-1.5" />
-                        <Err name="phone" />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Email</Label>
+                          <Input type="email" autoComplete="email" value={vsu.email} onChange={(e) => setVsu({ ...vsu, email: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="email" />
+                        </div>
+                        <div>
+                          <Label>Phone</Label>
+                          <Input type="tel" autoComplete="tel" value={vsu.phone} placeholder="07XXXXXXXX" onChange={(e) => setVsu({ ...vsu, phone: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="phone" />
+                        </div>
                       </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Password</Label>
-                        <PasswordInput autoComplete="new-password" value={csu.password} onChange={(e) => setCsu({ ...csu, password: e.target.value })} className="mt-1.5" />
-                        <Err name="password" />
-                      </div>
-                      <div>
-                        <Label>Confirm</Label>
-                        <PasswordInput autoComplete="new-password" value={csu.confirm} onChange={(e) => setCsu({ ...csu, confirm: e.target.value })} className="mt-1.5" />
-                        <Err name="confirm" />
-                      </div>
-                    </div>
-                    <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
-                      {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating…</> : "Create customer account"}
-                    </Button>
-                  </form>
-                </StepShell>
-              )}
-
-              {step === 1 && role === "vendor" && (
-                <StepShell>
-                  <BackLink />
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Owner / Manager full name</Label>
-                      <Input value={vsu.owner_name} onChange={(e) => setVsu({ ...vsu, owner_name: e.target.value })} className="mt-1.5" />
-                      <Err name="owner_name" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Email</Label>
-                        <Input type="email" autoComplete="email" value={vsu.email} onChange={(e) => setVsu({ ...vsu, email: e.target.value })} className="mt-1.5" />
-                        <Err name="email" />
-                      </div>
-                      <div>
-                        <Label>Phone</Label>
-                        <Input type="tel" autoComplete="tel" value={vsu.phone} placeholder="07XXXXXXXX" onChange={(e) => setVsu({ ...vsu, phone: e.target.value })} className="mt-1.5" />
-                        <Err name="phone" />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <Label className="text-sm">Password</Label>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const pwd = generateStrongPassword(14);
-                            setVsu((prev) => ({ ...prev, password: pwd, confirm: pwd }));
-                            toast.success("Strong password generated — copy it before submitting");
-                          }}
-                        >
-                          <Sparkles className="h-3.5 w-3.5 mr-1" /> Generate strong password
-                        </Button>
-                        {vsu.password && (
+                      <div className="flex items-center justify-between gap-2">
+                        <Label className="text-sm">Password</Label>
+                        <div className="flex items-center gap-2">
                           <Button
                             type="button"
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            onClick={async () => {
-                              await navigator.clipboard.writeText(vsu.password);
-                              toast.success("Password copied to clipboard");
+                            onClick={() => {
+                              const pwd = generateStrongPassword(14);
+                              setVsu((prev) => ({ ...prev, password: pwd, confirm: pwd }));
+                              toast.success("Strong password generated — copy it before submitting");
                             }}
                           >
-                            <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+                            <Sparkles className="h-3.5 w-3.5 mr-1" /> Generate strong password
                           </Button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Password (min 8)</Label>
-                        <PasswordInput autoComplete="new-password" value={vsu.password} onChange={(e) => setVsu({ ...vsu, password: e.target.value })} className="mt-1.5" />
-                        <Err name="password" />
-                      </div>
-                      <div>
-                        <Label>Confirm password</Label>
-                        <PasswordInput autoComplete="new-password" value={vsu.confirm} onChange={(e) => setVsu({ ...vsu, confirm: e.target.value })} className="mt-1.5" />
-                        <Err name="confirm" />
-                      </div>
-                    </div>
-                    <NextButton />
-                  </div>
-                </StepShell>
-              )}
-
-              {/* Step 2 — business (vendor only) */}
-              {step === 2 && role === "vendor" && (
-                <StepShell>
-                  <BackLink />
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Business name</Label>
-                      <Input value={vsu.business_name} onChange={(e) => setVsu({ ...vsu, business_name: e.target.value })} className="mt-1.5" />
-                      <Err name="business_name" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>County</Label>
-                        <Select value={vsu.county} onValueChange={(v) => setVsu({ ...vsu, county: v })}>
-                          <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select county" /></SelectTrigger>
-                          <SelectContent className="max-h-72">
-                            {KENYA_COUNTIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <Err name="county" />
-                      </div>
-                      <div>
-                        <Label>Sub-County or Town</Label>
-                        <Input value={vsu.sub_county} placeholder="e.g. Juja, Westlands, Kisumu CBD, Eldoret Town" onChange={(e) => setVsu({ ...vsu, sub_county: e.target.value })} className="mt-1.5" />
-                        <Err name="sub_county" />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Physical shop address</Label>
-                      <Input value={vsu.physical_address} onChange={(e) => setVsu({ ...vsu, physical_address: e.target.value })} className="mt-1.5" placeholder="Building name, street, floor / shop number" />
-                      <Err name="physical_address" />
-                    </div>
-                    <NextButton />
-                  </div>
-                </StepShell>
-              )}
-
-              {/* Step 3 — location & photos (vendor only) */}
-              {step === 3 && role === "vendor" && (
-                <StepShell>
-                  <BackLink />
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>GPS Latitude</Label>
-                        <Input type="number" step="any" placeholder="-1.1023" value={vsu.latitude} onChange={(e) => setVsu({ ...vsu, latitude: e.target.value })} className="mt-1.5" />
-                        <Err name="latitude" />
-                      </div>
-                      <div>
-                        <Label>GPS Longitude</Label>
-                        <Input type="number" step="any" placeholder="37.0144" value={vsu.longitude} onChange={(e) => setVsu({ ...vsu, longitude: e.target.value })} className="mt-1.5" />
-                        <Err name="longitude" />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Google Maps link <span className="text-muted-foreground">(optional)</span></Label>
-                      <Input placeholder="https://maps.google.com" value={vsu.google_maps_link} onChange={(e) => setVsu({ ...vsu, google_maps_link: e.target.value })} className="mt-1.5" />
-                    </div>
-
-                    <div>
-                      <Label>Shop photos (minimum 2)</Label>
-                      <label className="mt-1.5 flex flex-col items-center justify-center gap-2 px-4 py-6 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-accent transition-smooth">
-                        <Camera className="h-7 w-7 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Upload shop photos, minimum 2</span>
-                        <span className="text-[10px] text-muted-foreground">JPG, PNG, WEBP — max 5MB each</span>
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp"
-                          multiple
-                          className="hidden"
-                          onChange={(e) => {
-                            const files = Array.from(e.target.files ?? []);
-                            setShopPhotos((prev) => [...prev, ...files]);
-                          }}
-                        />
-                      </label>
-                      {shopPhotos.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {shopPhotos.map((f, i) => (
-                            <div key={i} className="relative group animate-in fade-in-0 zoom-in-95 duration-200">
-                              <img src={URL.createObjectURL(f)} alt={f.name} className="h-16 w-16 object-cover rounded border" />
-                              <button
-                                type="button"
-                                onClick={() => setShopPhotos((p) => p.filter((_, j) => j !== i))}
-                                className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-white grid place-items-center"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </div>
-                          ))}
+                          {vsu.password && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                await navigator.clipboard.writeText(vsu.password);
+                                toast.success("Password copied to clipboard");
+                              }}
+                            >
+                              <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+                            </Button>
+                          )}
                         </div>
-                      )}
-                      <Err name="photos" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Password (min 8)</Label>
+                          <PasswordInput autoComplete="new-password" value={vsu.password} onChange={(e) => setVsu({ ...vsu, password: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="password" />
+                        </div>
+                        <div>
+                          <Label>Confirm password</Label>
+                          <PasswordInput autoComplete="new-password" value={vsu.confirm} onChange={(e) => setVsu({ ...vsu, confirm: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="confirm" />
+                        </div>
+                      </div>
+                      <NextButton onClick={goNext} />
                     </div>
-
-                    <div>
-                      <Label>Business certificate <span className="text-muted-foreground">(optional)</span></Label>
-                      <label className="mt-1.5 flex items-center gap-2 px-4 py-3 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-accent transition-smooth">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground flex-1">
-                          {certificate ? certificate.name : "Upload certificate (PDF, JPG, PNG)"}
-                        </span>
-                        <Upload className="h-4 w-4 text-muted-foreground" />
-                        <input
-                          type="file"
-                          accept="application/pdf,image/jpeg,image/png"
-                          className="hidden"
-                          onChange={(e) => setCertificate(e.target.files?.[0] ?? null)}
-                        />
-                      </label>
-                    </div>
-                    <NextButton />
                   </div>
-                </StepShell>
-              )}
+                )}
 
-              {/* Step 4 — review & submit (vendor only) */}
-              {step === 4 && role === "vendor" && (
-                <StepShell>
-                  <BackLink />
-                  <form onSubmit={handleVendorSignUp} className="space-y-4">
-                    <div className="rounded-xl border border-border bg-secondary/40 p-4 space-y-2 text-sm">
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Owner</span><span className="font-medium text-right">{vsu.owner_name || "—"}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Email</span><span className="font-medium text-right">{vsu.email || "—"}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Phone</span><span className="font-medium text-right">{vsu.phone || "—"}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Business</span><span className="font-medium text-right">{vsu.business_name || "—"}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Location</span><span className="font-medium text-right">{[vsu.sub_county, vsu.county].filter(Boolean).join(", ") || "—"}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Shop photos</span><span className="font-medium text-right">{shopPhotos.length} uploaded</span></div>
+                {/* Step 2 — business (vendor only) */}
+                {step === 2 && role === "vendor" && (
+                  <div className="max-w-lg mx-auto">
+                    <BackLink onClick={goBack} />
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Business name</Label>
+                        <Input value={vsu.business_name} onChange={(e) => setVsu({ ...vsu, business_name: e.target.value })} className="mt-1.5" />
+                        <ErrorText errors={errors} name="business_name" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>County</Label>
+                          <Select value={vsu.county} onValueChange={(v) => setVsu({ ...vsu, county: v })}>
+                            <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select county" /></SelectTrigger>
+                            <SelectContent className="max-h-72">
+                              {KENYA_COUNTIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <ErrorText errors={errors} name="county" />
+                        </div>
+                        <div>
+                          <Label>Sub-County or Town</Label>
+                          <Input value={vsu.sub_county} placeholder="e.g. Juja, Westlands, Kisumu CBD, Eldoret Town" onChange={(e) => setVsu({ ...vsu, sub_county: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="sub_county" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Physical shop address</Label>
+                        <Input value={vsu.physical_address} onChange={(e) => setVsu({ ...vsu, physical_address: e.target.value })} className="mt-1.5" placeholder="Building name, street, floor / shop number" />
+                        <ErrorText errors={errors} name="physical_address" />
+                      </div>
+                      <NextButton onClick={goNext} />
                     </div>
+                  </div>
+                )}
 
-                    <div className="flex items-start gap-2 pt-2">
-                      <Checkbox
-                        id="agree"
-                        checked={vsu.agree}
-                        onCheckedChange={(c) => setVsu({ ...vsu, agree: !!c })}
-                        className="mt-1"
-                      />
-                      <Label htmlFor="agree" className="text-sm font-normal leading-relaxed">
-                        I agree to the TechTrust Vendor Terms. I confirm my shop physically exists at
-                        the address above and accept that approval requires admin verification.
-                      </Label>
+                {/* Step 3 — location & photos (vendor only) */}
+                {step === 3 && role === "vendor" && (
+                  <div className="max-w-lg mx-auto">
+                    <BackLink onClick={goBack} />
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <Label>Shop GPS location</Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={useMyLocation}
+                            disabled={locating}
+                          >
+                            {locating ? (
+                              <><Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> Locating…</>
+                            ) : (
+                              <><MapPin className="h-3.5 w-3.5 mr-1" /> Use my current location</>
+                            )}
+                          </Button>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Fills the coordinates below from your device. Stand at the shop before tapping this — you can still edit them manually.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>GPS Latitude</Label>
+                          <Input type="number" step="any" placeholder="-1.1023" value={vsu.latitude} onChange={(e) => setVsu({ ...vsu, latitude: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="latitude" />
+                        </div>
+                        <div>
+                          <Label>GPS Longitude</Label>
+                          <Input type="number" step="any" placeholder="37.0144" value={vsu.longitude} onChange={(e) => setVsu({ ...vsu, longitude: e.target.value })} className="mt-1.5" />
+                          <ErrorText errors={errors} name="longitude" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Google Maps link <span className="text-muted-foreground">(optional)</span></Label>
+                        <Input placeholder="https://maps.google.com" value={vsu.google_maps_link} onChange={(e) => setVsu({ ...vsu, google_maps_link: e.target.value })} className="mt-1.5" />
+                      </div>
+
+                      <div>
+                        <Label>Shop photos (minimum 2)</Label>
+                        <label className="mt-1.5 flex flex-col items-center justify-center gap-2 px-4 py-6 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-accent transition-smooth">
+                          <Camera className="h-7 w-7 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">Upload shop photos, minimum 2</span>
+                          <span className="text-[10px] text-muted-foreground">JPG, PNG, WEBP — max 5MB each</span>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            multiple
+                            className="hidden"
+                            onChange={(e) => {
+                              const files = Array.from(e.target.files ?? []);
+                              setShopPhotos((prev) => [...prev, ...files]);
+                            }}
+                          />
+                        </label>
+                        {shopPhotos.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {shopPhotos.map((f, i) => (
+                              <div key={i} className="relative group animate-in fade-in-0 zoom-in-95 duration-200">
+                                <img src={URL.createObjectURL(f)} alt={f.name} className="h-16 w-16 object-cover rounded border" />
+                                <button
+                                  type="button"
+                                  onClick={() => setShopPhotos((p) => p.filter((_, j) => j !== i))}
+                                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-white grid place-items-center"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <ErrorText errors={errors} name="photos" />
+                      </div>
+
+                      <div>
+                        <Label>Business certificate <span className="text-muted-foreground">(optional)</span></Label>
+                        <label className="mt-1.5 flex items-center gap-2 px-4 py-3 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-accent transition-smooth">
+                          <FileText className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground flex-1">
+                            {certificate ? certificate.name : "Upload certificate (PDF, JPG, PNG)"}
+                          </span>
+                          <Upload className="h-4 w-4 text-muted-foreground" />
+                          <input
+                            type="file"
+                            accept="application/pdf,image/jpeg,image/png"
+                            className="hidden"
+                            onChange={(e) => setCertificate(e.target.files?.[0] ?? null)}
+                          />
+                        </label>
+                      </div>
+                      <NextButton onClick={goNext} />
                     </div>
-                    <Err name="agree" />
+                  </div>
+                )}
 
-                    <Button type="submit" variant="success" size="lg" className="w-full" disabled={loading}>
-                      {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</> : "Submit application"}
-                    </Button>
-                  </form>
-                </StepShell>
-              )}
+                {/* Step 4 — review & submit (vendor only) */}
+                {step === 4 && role === "vendor" && (
+                  <div className="max-w-lg mx-auto">
+                    <BackLink onClick={goBack} />
+                    <form onSubmit={handleVendorSignUp} className="space-y-4">
+                      <div className="rounded-xl border border-border bg-secondary/40 p-4 space-y-2 text-sm">
+                        <div className="flex justify-between gap-4"><span className="text-muted-foreground">Owner</span><span className="font-medium text-right">{vsu.owner_name || "—"}</span></div>
+                        <div className="flex justify-between gap-4"><span className="text-muted-foreground">Email</span><span className="font-medium text-right">{vsu.email || "—"}</span></div>
+                        <div className="flex justify-between gap-4"><span className="text-muted-foreground">Phone</span><span className="font-medium text-right">{vsu.phone || "—"}</span></div>
+                        <div className="flex justify-between gap-4"><span className="text-muted-foreground">Business</span><span className="font-medium text-right">{vsu.business_name || "—"}</span></div>
+                        <div className="flex justify-between gap-4"><span className="text-muted-foreground">Location</span><span className="font-medium text-right">{[vsu.sub_county, vsu.county].filter(Boolean).join(", ") || "—"}</span></div>
+                        <div className="flex justify-between gap-4"><span className="text-muted-foreground">Shop photos</span><span className="font-medium text-right">{shopPhotos.length} uploaded</span></div>
+                      </div>
+
+                      <div className="flex items-start gap-2 pt-2">
+                        <Checkbox
+                          id="agree"
+                          checked={vsu.agree}
+                          onCheckedChange={(c) => setVsu({ ...vsu, agree: !!c })}
+                          className="mt-1"
+                        />
+                        <Label htmlFor="agree" className="text-sm font-normal leading-relaxed">
+                          I agree to the TechTrust Vendor Terms. I confirm my shop physically exists at
+                          the address above and accept that approval requires admin verification.
+                        </Label>
+                      </div>
+                      <ErrorText errors={errors} name="agree" />
+
+                      <Button type="submit" variant="success" size="lg" className="w-full" disabled={loading}>
+                        {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</> : "Submit application"}
+                      </Button>
+                    </form>
+                  </div>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </div>
