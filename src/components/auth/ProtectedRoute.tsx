@@ -10,9 +10,11 @@ interface Props {
   roles?: ("customer" | "vendor" | "admin")[];
   /** For vendor routes: require verification_status === 'approved'. */
   requireApprovedVendor?: boolean;
+  /** Where to send an unauthenticated visitor. Defaults to the customer/vendor auth page. */
+  loginPath?: string;
 }
 
-export const ProtectedRoute = ({ children, roles, requireApprovedVendor }: Props) => {
+export const ProtectedRoute = ({ children, roles, requireApprovedVendor, loginPath = "/auth" }: Props) => {
   const { user, roles: userRoles, loading } = useAuth();
   const location = useLocation();
   const [vendorStatus, setVendorStatus] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export const ProtectedRoute = ({ children, roles, requireApprovedVendor }: Props
     );
   }
 
-  if (!user) return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
+  if (!user) return <Navigate to={loginPath} state={{ from: location.pathname }} replace />;
 
   if (roles && !roles.some((r) => userRoles.includes(r))) {
     return <Navigate to="/" replace />;

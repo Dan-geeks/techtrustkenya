@@ -6,9 +6,28 @@ import { ProductCard } from "@/components/marketplace/ProductCard";
 import { VendorCard } from "@/components/marketplace/VendorCard";
 import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
 import { Reveal } from "@/components/marketing/Reveal";
-import { ClosingShowcase } from "@/components/marketing/ClosingShowcase";
 import { supabase } from "@/integrations/supabase/client";
 import { useParallax } from "@/hooks/useParallax";
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+const band = (v: number, inMin: number, inMax: number) => clamp01((v - inMin) / (inMax - inMin));
+
+/** Raw scrollY-based progress — for the hero, which starts at the very top of
+ * the page, so the generic viewport-relative useScrollProgress (built for
+ * sections further down) would report non-zero progress before any scroll. */
+function useHeroLidClose(closeOverPx = 650) {
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(() => { setScrollY(window.scrollY); raf = 0; });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
+  }, []);
+  return band(scrollY, 0, closeOverPx);
+}
 
 interface Stats {
   vendors: number;
@@ -23,8 +42,8 @@ const Index = () => {
 
   const blobOne = useParallax<HTMLDivElement>(0.12);
   const blobTwo = useParallax<HTMLDivElement>(-0.18);
-  const heroArt = useParallax<HTMLDivElement>(0.06);
   const repairArt = useParallax<HTMLDivElement>(-0.08);
+  const lidClose = useHeroLidClose(); // 0 = open, 1 = shut, as the page scrolls
 
   useEffect(() => {
     document.title = "TechTrust | Verified Tech Marketplace in Kenya";
@@ -53,7 +72,7 @@ const Index = () => {
   return (
     <div className="flex flex-col">
 
-      {/* HERO — copy left, animated illustration right with a verified badge overlay */}
+      {/* HERO — copy left, laptop right; the laptop closes its lid as you scroll past */}
       <section className="relative bg-gradient-subtle overflow-hidden">
         {/* Decorative parallax blobs — purely visual, drift at different speeds for depth */}
         <div
@@ -99,27 +118,25 @@ const Index = () => {
               </div>
             </div>
 
-            <div ref={heroArt} className="relative will-change-transform">
-              <div className="rounded-2xl border border-border bg-card p-3 shadow-lg">
-                {products[0]?.image_urls?.[0] ? (
-                  <img
-                    src={products[0].image_urls[0]}
-                    alt={`${products[0].brand ?? ""} ${products[0].model_name ?? ""}`.trim() || "Featured verified listing on TechTrust"}
-                    loading="eager"
-                    className="aspect-[4/3] w-full rounded-lg object-cover"
-                  />
-                ) : (
-                  <div className="aspect-[4/3] w-full rounded-lg bg-muted grid place-items-center overflow-hidden">
-                    <AnimatedArt
-                      src={art.marketplace}
-                      alt=""
-                      eager
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                )}
+            <div className="relative" style={{ perspective: "1800px" }}>
+              <div
+                className="rounded-2xl border border-border bg-card p-3 shadow-lg will-change-transform"
+                style={{
+                  transform: `rotateX(${-lidClose * 78}deg) scale(${1 - lidClose * 0.08})`,
+                  transformOrigin: "bottom center",
+                }}
+              >
+                <img
+                  src="/sony-laptop.jpg"
+                  alt="Verified laptop listing, ready for handover"
+                  loading="eager"
+                  className="aspect-[4/3] w-full rounded-lg object-cover"
+                />
               </div>
-              <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-lg bg-success px-4 py-2.5 text-success-foreground shadow-lg sm:left-6">
+              <div
+                className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-lg bg-success px-4 py-2.5 text-success-foreground shadow-lg sm:left-6 transition-opacity duration-300"
+                style={{ opacity: 1 - lidClose }}
+              >
                 <BadgeCheck className="h-5 w-5 shrink-0" />
                 <div className="leading-tight">
                   <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">Verified Listing</p>
@@ -202,8 +219,6 @@ const Index = () => {
         </div>
       </section>
 
-      <ClosingShowcase />
-
       {/* FEATURED PRODUCTS */}
       <section className="container py-16">
         <Reveal>
@@ -266,6 +281,15 @@ const Index = () => {
             </p>
           </Reveal>
         </div>
+      </section>
+
+      {/* DIVIDER — breaks up the two back-to-back dark sections */}
+      <section className="bg-background">
+        <Reveal className="container py-14 text-center">
+          <p className="text-xl md:text-2xl font-display font-semibold text-foreground text-balance">
+            From your next laptop to your next repair — always protected.
+          </p>
+        </Reveal>
       </section>
 
       {/* REPAIR CTA — dark, distinct from hero */}

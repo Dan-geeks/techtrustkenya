@@ -32,6 +32,7 @@ import Profile from "./pages/Profile.tsx";
 import Notifications from "./pages/Notifications.tsx";
 import VendorDashboard from "./pages/vendor/VendorDashboard.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
+import AdminLogin from "./pages/admin/AdminLogin.tsx";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <CookieConsent />
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/vendor/register" element={<VendorRegister />} />
@@ -120,7 +122,7 @@ const App = () => (
                 <Route
                   path="/admin"
                   element={
-                    <ProtectedRoute roles={["admin"]}>
+                    <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
                       <AdminDashboard />
                     </ProtectedRoute>
                   }
@@ -128,7 +130,7 @@ const App = () => (
                 <Route
                   path="/admin/dashboard"
                   element={
-                    <ProtectedRoute roles={["admin"]}>
+                    <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
                       <AdminDashboard />
                     </ProtectedRoute>
                   }
