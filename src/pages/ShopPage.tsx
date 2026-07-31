@@ -47,9 +47,11 @@ const ShopPage = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-3xl md:text-4xl font-bold text-foreground">{vendor.business_name}</h1>
-                <Badge className="bg-success/10 text-success border border-success/30">
-                  <ShieldCheck className="h-3 w-3 mr-1" /> Verified
-                </Badge>
+                {(vendor.verification_status === "verified" || vendor.verification_status === "approved") && (
+                  <Badge className="bg-success/10 text-success border border-success/30">
+                    <ShieldCheck className="h-3 w-3 mr-1" /> Verified
+                  </Badge>
+                )}
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                 {vendor.physical_address && (

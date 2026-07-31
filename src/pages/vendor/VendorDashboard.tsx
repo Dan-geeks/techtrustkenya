@@ -12,6 +12,7 @@ import {
   Zap,
   BarChart2,
   Settings,
+  Store,
 } from "lucide-react";
 import { OverviewTab } from "@/components/vendor/OverviewTab";
 import { ProductsTab } from "@/components/vendor/ProductsTab";
@@ -77,14 +78,20 @@ const VendorDashboard = () => {
     );
 
   return (
-    <div className="container py-6">
-      <header className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold">{vendor.business_name}</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your shop, products, orders, repairs and more.
-        </p>
-      </header>
+    <div className="flex flex-col">
+      <div className="bg-primary text-primary-foreground">
+        <div className="container py-8">
+          <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-accent">
+            <Store className="h-3 w-3" /> Vendor
+          </span>
+          <h1 className="text-2xl md:text-3xl font-bold">{vendor.business_name}</h1>
+          <p className="text-sm text-primary-foreground/60 mt-1">
+            Manage your shop, products, orders, repairs and more.
+          </p>
+        </div>
+      </div>
 
+      <div className="container py-6">
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="flex flex-wrap h-auto justify-start gap-1 bg-muted/50 p-1">
           {tabs.map(({ value, label, Icon }) => (
@@ -130,6 +137,7 @@ const VendorDashboard = () => {
           <SettingsTab vendor={vendor} onUpdated={(v) => setVendor(v)} />
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 };
