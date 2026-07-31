@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/marketplace/ProductCard";
 import { VendorCard } from "@/components/marketplace/VendorCard";
 import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
 import { Reveal } from "@/components/marketing/Reveal";
+import { CountUp } from "@/components/marketing/CountUp";
 import { supabase } from "@/integrations/supabase/client";
 import { useParallax } from "@/hooks/useParallax";
 
@@ -118,20 +119,36 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="relative" style={{ perspective: "1800px" }}>
-              <div
-                className="rounded-2xl border border-border bg-card p-3 shadow-lg will-change-transform"
-                style={{
-                  transform: `rotateX(${-lidClose * 78}deg) scale(${1 - lidClose * 0.08})`,
-                  transformOrigin: "bottom center",
-                }}
-              >
-                <img
-                  src="/sony-laptop.jpg"
-                  alt="Verified laptop listing, ready for handover"
-                  loading="eager"
-                  className="aspect-[4/3] w-full rounded-lg object-cover"
-                />
+            <div className="relative">
+              <div className="rounded-2xl border border-border bg-card p-3 shadow-lg">
+                <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-[#1a1712]" style={{ perspective: "1400px" }}>
+                  {/* Base layer (keyboard deck + desk) — static, never moves */}
+                  <img
+                    src="/sony-laptop.jpg"
+                    alt="Verified laptop listing, ready for handover"
+                    loading="eager"
+                    className="absolute inset-0 h-full w-full object-cover"
+                    style={{ clipPath: "polygon(0% 58%, 100% 41%, 100% 100%, 0% 100%)" }}
+                  />
+                  {/* Screen layer — only this rotates, hinged at the line where it meets the base.
+                      Clipped a couple points past the seam so it overlaps the base slightly and
+                      never reveals a gap while foreshortening in 3D. */}
+                  <div
+                    className="absolute inset-0 will-change-transform"
+                    style={{
+                      transform: `rotateX(${-lidClose * 72}deg)`,
+                      transformOrigin: "50% 51%",
+                    }}
+                  >
+                    <img
+                      src="/sony-laptop.jpg"
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 h-full w-full object-cover"
+                      style={{ clipPath: "polygon(0% 0%, 100% 0%, 100% 44%, 0% 62%)" }}
+                    />
+                  </div>
+                </div>
               </div>
               <div
                 className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-lg bg-success px-4 py-2.5 text-success-foreground shadow-lg sm:left-6 transition-opacity duration-300"
@@ -150,13 +167,13 @@ const Index = () => {
           {(stats.vendors > 0 || stats.products > 0 || stats.transactions > 0) && (
             <div className="mt-16 flex flex-wrap justify-center gap-10 border-t border-border pt-10 text-base text-muted-foreground sm:gap-24">
               {stats.vendors > 0 && (
-                <span className="text-center"><strong className="block text-4xl font-bold text-foreground">{stats.vendors}+</strong> Verified vendors</span>
+                <span className="text-center"><strong className="block text-4xl font-bold text-foreground"><CountUp value={stats.vendors} />+</strong> Verified vendors</span>
               )}
               {stats.products > 0 && (
-                <span className="text-center"><strong className="block text-4xl font-bold text-foreground">{stats.products}+</strong> Products listed</span>
+                <span className="text-center"><strong className="block text-4xl font-bold text-foreground"><CountUp value={stats.products} />+</strong> Products listed</span>
               )}
               {stats.transactions > 0 && (
-                <span className="text-center"><strong className="block text-4xl font-bold text-foreground">{stats.transactions.toLocaleString()}+</strong> Safe transactions</span>
+                <span className="text-center"><strong className="block text-4xl font-bold text-foreground"><CountUp value={stats.transactions} />+</strong> Safe transactions</span>
               )}
             </div>
           )}

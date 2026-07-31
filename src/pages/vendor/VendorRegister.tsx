@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  ShieldCheck, Camera, FileText, Loader2, Store, User as UserIcon, Upload, X,
-  Sparkles, Copy, Check, ChevronLeft, ChevronRight, ShoppingBag, MapPin,
+  ShieldCheck, Camera, FileText, Loader2, Upload, X,
+  Sparkles, Copy, Check, ChevronLeft, ChevronRight, MapPin,
 } from "lucide-react";
+import { ShoppingBagIcon } from "@/components/icons/ShoppingBagIcon";
+import { StoreIcon } from "@/components/icons/StoreIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -490,7 +492,7 @@ const VendorRegister = () => {
                         className="flex flex-col items-start gap-3 rounded-xl border-2 border-border p-5 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
                       >
                         <span className="grid h-11 w-11 place-items-center rounded-lg bg-accent-soft text-accent">
-                          <ShoppingBag className="h-5 w-5" />
+                          <ShoppingBagIcon className="h-5 w-5" />
                         </span>
                         <span>
                           <span className="block font-semibold">I'm a Customer</span>
@@ -503,7 +505,7 @@ const VendorRegister = () => {
                         className="flex flex-col items-start gap-3 rounded-xl border-2 border-border p-5 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
                       >
                         <span className="grid h-11 w-11 place-items-center rounded-lg bg-accent-soft text-accent">
-                          <Store className="h-5 w-5" />
+                          <StoreIcon className="h-5 w-5" />
                         </span>
                         <span>
                           <span className="block font-semibold">I'm a Vendor</span>

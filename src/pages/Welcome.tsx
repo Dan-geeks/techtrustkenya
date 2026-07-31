@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ShieldCheck, ShoppingBag, Store, Loader2, Gift } from "lucide-react";
+import { ShieldCheck, Loader2, Gift } from "lucide-react";
+import { ShoppingBagIcon } from "@/components/icons/ShoppingBagIcon";
+import { StoreIcon } from "@/components/icons/StoreIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -107,7 +109,7 @@ const Welcome = () => {
               className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60"
             >
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
-                {settling ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShoppingBag className="h-5 w-5" />}
+                {settling ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShoppingBagIcon className="h-5 w-5" />}
               </span>
               <span>
                 <span className="block font-semibold text-sm">I'm a Customer</span>
@@ -123,7 +125,7 @@ const Welcome = () => {
               className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60"
             >
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
-                <Store className="h-5 w-5" />
+                <StoreIcon className="h-5 w-5" />
               </span>
               <span>
                 <span className="block font-semibold text-sm">I'm a Vendor</span>

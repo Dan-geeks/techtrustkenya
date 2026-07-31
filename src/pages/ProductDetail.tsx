@@ -8,13 +8,13 @@ import {
   ArrowRight,
   MapPin,
   Clock,
-  ShoppingCart,
   Package,
-  Store,
   ChevronDown,
   ChevronUp,
   Zap,
 } from "lucide-react";
+import { CartLargeIcon } from "@/components/icons/CartLargeIcon";
+import { StoreIcon } from "@/components/icons/StoreIcon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -230,7 +230,7 @@ const ProductDetail = () => {
 
   const ctaAddToCart = (
     <Button variant="outline" size="lg" className="flex-1" onClick={handleAddToCart} disabled={outOfStock || adding}>
-      <ShoppingCart className="h-4 w-4" />
+      <CartLargeIcon className="h-4 w-4" />
       {outOfStock ? "Out of Stock" : adding ? "Adding…" : "Add to Cart"}
     </Button>
   );
@@ -408,7 +408,7 @@ const ProductDetail = () => {
                         {Number(product.vendor.average_rating ?? 0).toFixed(1)}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Store className="h-3 w-3" />
+                        <StoreIcon className="h-3 w-3" />
                         {product.vendor.total_completed_transactions ?? 0} sales
                       </span>
                     </div>

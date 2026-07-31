@@ -8,32 +8,52 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { getPostLoginPath } from "@/lib/redirectByRole";
 
 /** Dedicated sign-in for /admin — deliberately separate from /auth (no Google, no signup, no role picker). */
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const { user, roles, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Landing here already signed in (not right after this form's own submit,
+  // which routes itself below) — e.g. a direct visit while a session exists.
   useEffect(() => {
     if (!authLoading && user) {
-      navigate(roles.includes("admin") ? "/admin/dashboard" : "/", { replace: true });
+      void getPostLoginPath(user.id).then((path) =>
+        navigate(path.startsWith("/admin") ? path : "/", { replace: true }),
+      );
     }
-  }, [authLoading, user, roles, navigate]);
+  }, [authLoading, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      setLoading(false);
       toast.error(error.message.toLowerCase().includes("invalid login credentials")
         ? "Incorrect email or password."
         : error.message);
+      return;
     }
-    // Success: the useEffect above picks up the new session and routes by role.
+    // Query roles directly rather than trusting AuthProvider's `roles` state,
+    // which updates asynchronously after `user` and can still read stale
+    // (empty) for a render or two right after sign-in.
+    if (data.user) {
+      const path = await getPostLoginPath(data.user.id);
+      setLoading(false);
+      if (path.startsWith("/admin")) {
+        navigate(path, { replace: true });
+      } else {
+        toast.error("This account doesn't have admin access.");
+        await supabase.auth.signOut();
+      }
+    } else {
+      setLoading(false);
+    }
   };
 
   return (

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, ShieldCheck, ShoppingBag, Store, ChevronLeft, Mail, Gift } from "lucide-react";
+import { Loader2, ShieldCheck, ChevronLeft, Mail, Gift } from "lucide-react";
+import { ShoppingBagIcon } from "@/components/icons/ShoppingBagIcon";
+import { StoreIcon } from "@/components/icons/StoreIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -283,7 +285,7 @@ const Auth = () => {
                       className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
                     >
                       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
-                        <ShoppingBag className="h-5 w-5" />
+                        <ShoppingBagIcon className="h-5 w-5" />
                       </span>
                       <span>
                         <span className="block font-semibold text-sm">I want to buy</span>
@@ -298,7 +300,7 @@ const Auth = () => {
                       className="w-full flex items-center gap-4 rounded-xl border border-border p-4 text-left transition-all hover:border-accent hover:bg-accent-soft hover:shadow-md hover:-translate-y-0.5"
                     >
                       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
-                        <Store className="h-5 w-5" />
+                        <StoreIcon className="h-5 w-5" />
                       </span>
                       <span>
                         <span className="block font-semibold text-sm">I want to sell</span>
