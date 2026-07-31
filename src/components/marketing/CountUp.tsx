@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 const easeOutQuad = (t: number) => t * (2 - t);
 
 /** Counts up from 0 to `value` once scrolled into view, then holds. */
-export const CountUp = ({ value, durationMs = 1200 }: { value: number; durationMs?: number }) => {
+export const CountUp = ({ value, durationMs = 2400 }: { value: number; durationMs?: number }) => {
   const ref = useRef<HTMLSpanElement>(null);
   const [display, setDisplay] = useState(0);
   const started = useRef(false);

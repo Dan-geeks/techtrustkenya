@@ -99,7 +99,7 @@ const Index = () => {
             </div>
 
             <div className="relative">
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
+              <div className="rounded-2xl border border-border bg-primary p-6 shadow-lg">
                 <img
                   src="/coding-with-coffee.svg"
                   alt="Illustration of a laptop displaying code"
