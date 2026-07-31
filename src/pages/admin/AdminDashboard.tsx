@@ -101,48 +101,22 @@ const AdminOverview = () => {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-      <StatCard
-        icon={Users}
-        label="Total Users"
-        value={stats.users.toString()}
-        borderColor="border-l-blue-500"
-        iconBg="bg-blue-100 text-blue-600"
-      />
-      <StatCard
-        icon={Store}
-        label="Active Vendors"
-        value={stats.vendors.toString()}
-        borderColor="border-l-green-500"
-        iconBg="bg-green-100 text-green-600"
-      />
+      <StatCard icon={Users} label="Total Users" value={stats.users.toString()} accent="text-blue-500" />
+      <StatCard icon={Store} label="Active Vendors" value={stats.vendors.toString()} accent="text-success" />
       <StatCard
         icon={Store}
         label="Pending Approvals"
         value={stats.pendingVendors.toString()}
-        borderColor="border-l-amber-500"
-        iconBg="bg-amber-100 text-amber-600"
+        accent="text-amber-500"
         pulse={stats.pendingVendors > 0}
       />
-      <StatCard
-        icon={Wallet}
-        label="Lifetime GMV"
-        value={formatKsh(stats.gmv)}
-        borderColor="border-l-indigo-500"
-        iconBg="bg-indigo-100 text-indigo-600"
-      />
-      <StatCard
-        icon={Wallet}
-        label="Platform Revenue (10%)"
-        value={formatKsh(stats.revenue)}
-        borderColor="border-l-green-500"
-        iconBg="bg-green-100 text-green-600"
-      />
+      <StatCard icon={Wallet} label="Lifetime GMV" value={formatKsh(stats.gmv)} accent="text-indigo-500" />
+      <StatCard icon={Wallet} label="Platform Revenue (10%)" value={formatKsh(stats.revenue)} accent="text-success" />
       <StatCard
         icon={AlertTriangle}
         label="Open Disputes"
         value={stats.disputes.toString()}
-        borderColor="border-l-red-500"
-        iconBg="bg-red-100 text-red-600"
+        accent="text-destructive"
         pulse={stats.disputes > 0}
       />
     </div>
@@ -153,28 +127,23 @@ interface StatCardProps {
   icon: React.ElementType;
   label: string;
   value: string;
-  borderColor: string;
-  iconBg: string;
+  accent: string;
   pulse?: boolean;
 }
 
-const StatCard = ({ icon: Icon, label, value, borderColor, iconBg, pulse }: StatCardProps) => (
-  <Card className={`p-5 border-l-4 ${borderColor} transition-shadow hover:shadow-md`}>
-    <div className="flex items-center justify-between mb-4">
+const StatCard = ({ icon: Icon, label, value, accent, pulse }: StatCardProps) => (
+  <Card className="relative overflow-hidden p-5 transition-shadow hover:shadow-md">
+    <Icon className={`pointer-events-none absolute -right-3 -top-3 h-24 w-24 ${accent} opacity-[0.08]`} strokeWidth={1.5} />
+    <div className="relative mb-4 flex items-center gap-1.5">
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
-      <div className="flex items-center gap-1.5">
-        {pulse && (
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
-          </span>
-        )}
-        <div className={`p-1.5 rounded-md ${iconBg}`}>
-          <Icon className="h-4 w-4" />
-        </div>
-      </div>
+      {pulse && (
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+        </span>
+      )}
     </div>
-    <div className="text-3xl font-bold tracking-tight">{value}</div>
+    <div className="relative text-3xl font-bold tracking-tight">{value}</div>
   </Card>
 );
 
