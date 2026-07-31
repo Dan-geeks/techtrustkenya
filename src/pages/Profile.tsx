@@ -12,9 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 type Role = "admin" | "vendor" | "customer";
 
 const roleBadge: Record<Role, string> = {
-  admin: "bg-purple-100 text-purple-700",
-  vendor: "bg-blue-100 text-blue-700",
-  customer: "bg-gray-100 text-gray-700",
+  admin: "bg-primary/10 text-primary border-primary/20",
+  vendor: "bg-accent-soft text-accent border-accent/20",
+  customer: "bg-muted text-muted-foreground border-border",
 };
 
 const phoneRegex = /^(07\d{8}|254\d{9})$/;
@@ -138,18 +138,18 @@ const Profile = () => {
     <div className="container py-8 max-w-2xl">
       <h1 className="text-3xl font-bold mb-6">My Profile</h1>
 
-      <Card className="p-6 space-y-6">
-        <div className="flex flex-col items-center gap-3">
+      <Card className="overflow-hidden">
+        <div className="bg-primary px-6 pt-8 pb-14 flex flex-col items-center gap-3">
           <div className="relative">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
                 alt="Avatar"
-                className="w-24 h-24 rounded-full object-cover border"
+                className="w-24 h-24 rounded-full object-cover border-4 border-primary-foreground/10"
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-muted text-foreground grid place-items-center font-bold text-2xl border border-border">
-                {initials || <User className="h-10 w-10 text-muted-foreground" />}
+              <div className="w-24 h-24 rounded-full bg-primary-foreground/10 text-primary-foreground grid place-items-center font-bold text-2xl border-4 border-primary-foreground/10">
+                {initials || <User className="h-10 w-10 text-primary-foreground/60" />}
               </div>
             )}
             {uploading && (
@@ -166,7 +166,7 @@ const Profile = () => {
             onChange={handleAvatarChange}
           />
           <Button
-            variant="outline"
+            variant="outlineLight"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
@@ -176,7 +176,7 @@ const Profile = () => {
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="relative z-10 -mt-8 space-y-4 rounded-t-2xl bg-card p-6 shadow-sm">
           <div className="space-y-1.5">
             <Label htmlFor="fullName">Full name</Label>
             <div className="relative">
@@ -217,29 +217,29 @@ const Profile = () => {
               />
             </div>
           </div>
-        </div>
 
-        {roles.length > 0 && (
-          <div className="space-y-1.5">
-            <Label>Roles</Label>
-            <div className="flex gap-2 flex-wrap">
-              {roles.map((r) => (
-                <Badge key={r} className={roleBadge[r]} variant="outline">
-                  {r.charAt(0).toUpperCase() + r.slice(1)}
-                </Badge>
-              ))}
+          {roles.length > 0 && (
+            <div className="space-y-1.5">
+              <Label>Roles</Label>
+              <div className="flex gap-2 flex-wrap">
+                {roles.map((r) => (
+                  <Badge key={r} className={roleBadge[r]} variant="outline">
+                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                  </Badge>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-
-        <Button onClick={handleSave} disabled={saving} className="w-full">
-          {saving ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4 mr-2" />
           )}
-          Save Changes
-        </Button>
+
+          <Button onClick={handleSave} disabled={saving} className="w-full">
+            {saving ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Save Changes
+          </Button>
+        </div>
       </Card>
 
       <Card className="p-6 mt-6">

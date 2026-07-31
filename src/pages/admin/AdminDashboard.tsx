@@ -181,11 +181,11 @@ interface VendorProfile {
 type VendorTab = "pending" | "approved" | "suspended" | "rejected" | "all";
 
 const vendorStatusConfig: Record<string, { label: string; className: string }> = {
-  pending: { label: "Pending", className: "bg-amber-100 text-amber-700 border-amber-200" },
-  approved: { label: "Approved", className: "bg-green-100 text-green-700 border-green-200" },
-  verified: { label: "Verified", className: "bg-green-100 text-green-700 border-green-200" },
-  suspended: { label: "Suspended", className: "bg-orange-100 text-orange-700 border-orange-200" },
-  rejected: { label: "Rejected", className: "bg-red-100 text-red-700 border-red-200" },
+  pending: { label: "Pending", className: "bg-warning/10 text-warning border-warning/30" },
+  approved: { label: "Approved", className: "bg-success/10 text-success border-success/30" },
+  verified: { label: "Verified", className: "bg-success/10 text-success border-success/30" },
+  suspended: { label: "Suspended", className: "bg-destructive/10 text-destructive border-destructive/30" },
+  rejected: { label: "Rejected", className: "bg-destructive/10 text-destructive border-destructive/30" },
 };
 
 const VendorStatusBadge = ({ status }: { status: string }) => {
@@ -617,7 +617,7 @@ const AdminDisputes = () => {
               <td className="px-4 py-3 font-medium">{formatKsh(o.total_amount_ksh)}</td>
               <td className="px-4 py-3 max-w-xs">
                 {o.dispute_reason ? (
-                  <p className="text-sm bg-red-50 text-red-800 border border-red-200 rounded px-2 py-1 line-clamp-2">{o.dispute_reason}</p>
+                  <p className="text-sm bg-destructive/5 text-destructive border border-destructive/20 rounded px-2 py-1 line-clamp-2">{o.dispute_reason}</p>
                 ) : (
                   <span className="text-muted-foreground">—</span>
                 )}
@@ -627,7 +627,7 @@ const AdminDisputes = () => {
                   <Button size="sm" variant="destructive" className="gap-1" onClick={() => resolve(o, "refund_customer")}>
                     <XCircle className="h-3.5 w-3.5" /> Refund
                   </Button>
-                  <Button size="sm" className="gap-1 bg-green-600 hover:bg-green-700 text-white" onClick={() => resolve(o, "release_to_vendor")}>
+                  <Button size="sm" variant="success" className="gap-1" onClick={() => resolve(o, "release_to_vendor")}>
                     <CheckCircle2 className="h-3.5 w-3.5" /> Release
                   </Button>
                 </div>
@@ -654,9 +654,9 @@ interface UserProfile {
 }
 
 const roleConfig: Record<string, string> = {
-  admin: "bg-purple-100 text-purple-700 border-purple-200",
-  vendor: "bg-blue-100 text-blue-700 border-blue-200",
-  customer: "bg-gray-100 text-gray-700 border-gray-200",
+  admin: "bg-primary/10 text-primary border-primary/20",
+  vendor: "bg-accent-soft text-accent border-accent/20",
+  customer: "bg-muted text-muted-foreground border-border",
 };
 
 const AdminUsers = () => {
@@ -731,7 +731,7 @@ const AdminUsers = () => {
                         <Badge
                           key={r.role}
                           variant="outline"
-                          className={`capitalize text-xs ${roleConfig[r.role] ?? "bg-gray-100 text-gray-700"}`}
+                          className={`capitalize text-xs ${roleConfig[r.role] ?? "bg-muted text-muted-foreground"}`}
                         >
                           {r.role}
                         </Badge>
@@ -775,11 +775,11 @@ interface PaymentOrder {
 }
 
 const paymentStatusConfig: Record<string, { label: string; className: string }> = {
-  released: { label: "Released", className: "bg-green-100 text-green-700 border-green-200" },
-  paid_float: { label: "Held", className: "bg-amber-100 text-amber-700 border-amber-200" },
-  failed: { label: "Failed", className: "bg-red-100 text-red-700 border-red-200" },
-  pending: { label: "Pending", className: "bg-gray-100 text-gray-700 border-gray-200" },
-  refunded: { label: "Refunded", className: "bg-blue-100 text-blue-700 border-blue-200" },
+  released: { label: "Released", className: "bg-success/10 text-success border-success/30" },
+  paid_float: { label: "Held", className: "bg-warning/10 text-warning border-warning/30" },
+  failed: { label: "Failed", className: "bg-destructive/10 text-destructive border-destructive/30" },
+  pending: { label: "Pending", className: "bg-muted text-muted-foreground border-border" },
+  refunded: { label: "Refunded", className: "bg-accent-soft text-accent border-accent/20" },
 };
 
 const PaymentStatusBadge = ({ status }: { status: string }) => {
@@ -791,7 +791,7 @@ const ProviderBadge = ({ provider }: { provider: string | null }) => {
   if (!provider) return <span className="text-muted-foreground text-xs">—</span>;
   const isKcb = provider.toLowerCase().includes("kcb");
   return (
-    <Badge variant="outline" className={`text-xs ${isKcb ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200"}`}>
+    <Badge variant="outline" className={`text-xs ${isKcb ? "bg-accent-soft text-accent border-accent/20" : "bg-success/10 text-success border-success/30"}`}>
       {isKcb ? "KCB" : "Daraja"}
     </Badge>
   );
@@ -847,13 +847,13 @@ const AdminPayments = () => {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        <Card className="p-4 border-l-4 border-l-amber-500">
+        <Card className="p-4 border-l-4 border-l-warning">
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Total Held (in float)</div>
-          <div className="text-xl font-bold text-amber-700">{formatKsh(totalHeld)}</div>
+          <div className="text-xl font-bold text-warning">{formatKsh(totalHeld)}</div>
         </Card>
-        <Card className="p-4 border-l-4 border-l-green-500">
+        <Card className="p-4 border-l-4 border-l-success">
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Total Released</div>
-          <div className="text-xl font-bold text-green-700">{formatKsh(totalReleased)}</div>
+          <div className="text-xl font-bold text-success">{formatKsh(totalReleased)}</div>
         </Card>
       </div>
 
