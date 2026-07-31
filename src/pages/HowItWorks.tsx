@@ -40,15 +40,18 @@ const HowItWorks = () => {
         />
       </header>
 
-      <section className="mt-8 divide-y divide-border">
+      <section className="mt-8 flex flex-col gap-4">
         {steps.map(({ num, title, body }) => (
-          <div key={num} className="py-8 flex gap-8 group">
-            <div className="text-3xl font-black text-border group-hover:text-accent/30 transition-colors tabular-nums shrink-0 w-12 leading-none pt-1">
+          <div
+            key={num}
+            className="group flex gap-6 rounded-2xl bg-primary p-6 text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg sm:p-8"
+          >
+            <div className="text-3xl font-black text-primary-foreground/20 group-hover:text-accent/60 transition-colors tabular-nums shrink-0 w-12 leading-none pt-1">
               {num}
             </div>
             <div>
-              <h2 className="font-semibold text-foreground mb-2">{title}</h2>
-              <p className="text-muted-foreground text-sm leading-relaxed">{body}</p>
+              <h2 className="font-semibold mb-2">{title}</h2>
+              <p className="text-primary-foreground/70 text-sm leading-relaxed">{body}</p>
             </div>
           </div>
         ))}
