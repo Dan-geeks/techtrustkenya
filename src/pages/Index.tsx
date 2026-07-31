@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/marketplace/ProductCard";
 import { VendorCard } from "@/components/marketplace/VendorCard";
 import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
 import { Reveal } from "@/components/marketing/Reveal";
+import { ClosingShowcase } from "@/components/marketing/ClosingShowcase";
 import { supabase } from "@/integrations/supabase/client";
 import { useParallax } from "@/hooks/useParallax";
 
@@ -200,6 +201,8 @@ const Index = () => {
           </Reveal>
         </div>
       </section>
+
+      <ClosingShowcase />
 
       {/* FEATURED PRODUCTS */}
       <section className="container py-16">
