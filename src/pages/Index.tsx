@@ -101,7 +101,7 @@ const Index = () => {
             <div className="relative">
               <div className="rounded-2xl border border-border bg-primary p-6 shadow-lg">
                 <img
-                  src="/coding-with-coffee.svg"
+                  src="/coding-with-coffee-v2.svg"
                   alt="Illustration of a laptop displaying code"
                   loading="eager"
                   className="aspect-square w-full object-contain"
