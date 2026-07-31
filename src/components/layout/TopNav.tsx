@@ -103,9 +103,13 @@ export const TopNav = () => {
                   <DropdownMenuItem onClick={() => navigate("/orders")}>
                     <Package className="mr-2 h-4 w-4" /> My Orders
                   </DropdownMenuItem>
-                  {isVendor && (
+                  {isVendor ? (
                     <DropdownMenuItem onClick={() => navigate("/vendor/dashboard")}>
                       <Store className="mr-2 h-4 w-4" /> Vendor Dashboard
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={() => navigate("/vendor/register", { state: { role: "vendor" } })}>
+                      <Store className="mr-2 h-4 w-4" /> Become a Vendor
                     </DropdownMenuItem>
                   )}
                   {roles.includes("admin") && (

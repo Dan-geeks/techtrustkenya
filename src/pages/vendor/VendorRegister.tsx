@@ -127,14 +127,28 @@ const VendorRegister = () => {
   const [showManualGps, setShowManualGps] = useState(false);
   const [noPhysicalAddress, setNoPhysicalAddress] = useState(false);
 
-  // Redirect logged-in approved vendors away
+  // Redirect logged-in approved vendors/admins away; prefill the account step
+  // for everyone else so an existing customer can add the vendor role onto
+  // their same account instead of being forced through a second signup.
   useEffect(() => {
     if (!user) return;
     (async () => {
       const path = await getPostLoginPath(user.id);
       if (path === "/vendor/dashboard" || path === "/admin/dashboard") {
         navigate(path, { replace: true });
+        return;
       }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, phone_number")
+        .eq("id", user.id)
+        .maybeSingle();
+      setVsu((prev) => ({
+        ...prev,
+        email: user.email ?? prev.email,
+        owner_name: profile?.full_name ?? prev.owner_name,
+        phone: profile?.phone_number ?? prev.phone,
+      }));
     })();
   }, [user, navigate]);
 
@@ -183,8 +197,10 @@ const VendorRegister = () => {
       if (!vsu.owner_name.trim()) errs.owner_name = "Required";
       if (!vsu.email.trim()) errs.email = "Required";
       if (!phoneOk(vsu.phone)) errs.phone = "Use 07XXXXXXXX or 2547XXXXXXXX";
-      if (vsu.password.length < 8) errs.password = "Min 8 characters";
-      if (vsu.password !== vsu.confirm) errs.confirm = "Passwords do not match";
+      if (!user) {
+        if (vsu.password.length < 8) errs.password = "Min 8 characters";
+        if (vsu.password !== vsu.confirm) errs.confirm = "Passwords do not match";
+      }
     } else {
       if (!csu.full_name.trim()) errs.full_name = "Required";
       if (!csu.email.trim()) errs.email = "Required";
@@ -322,25 +338,29 @@ const VendorRegister = () => {
 
     setLoading(true);
     try {
-      // 1. Auth signup
+      // 1. Auth signup — skipped for an already-signed-in user adding the
+      // vendor role onto their existing customer account.
       const email = vsu.email;
       const password = vsu.password;
-      const { data: auth, error: authErr } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: { full_name: vsu.owner_name, phone_number: vsu.phone },
-        },
-      });
-      if (authErr) {
-        if (authErr.message.toLowerCase().includes("registered") || authErr.message.toLowerCase().includes("exists")) {
-          toast.error("An account with this email already exists. Please sign in instead.");
-        } else toast.error(authErr.message);
-        setLoading(false);
-        return;
+      let userId = user?.id;
+      if (!userId) {
+        const { data: auth, error: authErr } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: { full_name: vsu.owner_name, phone_number: vsu.phone },
+          },
+        });
+        if (authErr) {
+          if (authErr.message.toLowerCase().includes("registered") || authErr.message.toLowerCase().includes("exists")) {
+            toast.error("An account with this email already exists. Please sign in instead.");
+          } else toast.error(authErr.message);
+          setLoading(false);
+          return;
+        }
+        userId = auth.user?.id;
       }
-      const userId = auth.user?.id;
       if (!userId) {
         toast.error("Sign-up succeeded but no user ID returned. Please sign in.");
         setLoading(false);
@@ -364,14 +384,17 @@ const VendorRegister = () => {
         }
       }
 
-      // 4. Force an active session using the exact submitted credentials
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) {
-        toast.error(signInError.message.toLowerCase().includes("invalid login credentials")
-          ? "Incorrect email or password. Please try again."
-          : signInError.message);
-        setLoading(false);
-        return;
+      // 4. Force an active session using the exact submitted credentials —
+      // skipped when reusing an already-authenticated session.
+      if (!user) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          toast.error(signInError.message.toLowerCase().includes("invalid login credentials")
+            ? "Incorrect email or password. Please try again."
+            : signInError.message);
+          setLoading(false);
+          return;
+        }
       }
 
       // 5. Create vendor profile + role via privileged edge function (bypasses RLS safely)
@@ -562,6 +585,12 @@ const VendorRegister = () => {
                   <div className="max-w-lg mx-auto">
                     <BackLink onClick={goBack} />
                     <div className="space-y-4">
+                      {user && (
+                        <div className="rounded-lg border border-accent/30 bg-accent-soft px-4 py-3 text-sm text-foreground">
+                          Signed in as <span className="font-semibold">{user.email}</span> — this adds a vendor
+                          account on top of your existing login, so you can shop and sell from the same place.
+                        </div>
+                      )}
                       <div>
                         <Label>Owner / Manager full name</Label>
                         <Input value={vsu.owner_name} onChange={(e) => setVsu({ ...vsu, owner_name: e.target.value })} className="mt-1.5" />
@@ -570,7 +599,7 @@ const VendorRegister = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <Label>Email</Label>
-                          <Input type="email" autoComplete="email" value={vsu.email} onChange={(e) => setVsu({ ...vsu, email: e.target.value })} className="mt-1.5" />
+                          <Input type="email" autoComplete="email" value={vsu.email} disabled={!!user} onChange={(e) => setVsu({ ...vsu, email: e.target.value })} className="mt-1.5" />
                           <ErrorText errors={errors} name="email" />
                         </div>
                         <div>
@@ -579,48 +608,52 @@ const VendorRegister = () => {
                           <ErrorText errors={errors} name="phone" />
                         </div>
                       </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <Label className="text-sm">Password</Label>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const pwd = generateStrongPassword(14);
-                              setVsu((prev) => ({ ...prev, password: pwd, confirm: pwd }));
-                              toast.success("Strong password generated — copy it before submitting");
-                            }}
-                          >
-                            <Sparkles className="h-3.5 w-3.5 mr-1" /> Generate strong password
-                          </Button>
-                          {vsu.password && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={async () => {
-                                await navigator.clipboard.writeText(vsu.password);
-                                toast.success("Password copied to clipboard");
-                              }}
-                            >
-                              <Copy className="h-3.5 w-3.5 mr-1" /> Copy
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label>Password (min 8)</Label>
-                          <PasswordInput autoComplete="new-password" value={vsu.password} onChange={(e) => setVsu({ ...vsu, password: e.target.value })} className="mt-1.5" />
-                          <ErrorText errors={errors} name="password" />
-                        </div>
-                        <div>
-                          <Label>Confirm password</Label>
-                          <PasswordInput autoComplete="new-password" value={vsu.confirm} onChange={(e) => setVsu({ ...vsu, confirm: e.target.value })} className="mt-1.5" />
-                          <ErrorText errors={errors} name="confirm" />
-                        </div>
-                      </div>
+                      {!user && (
+                        <>
+                          <div className="flex items-center justify-between gap-2">
+                            <Label className="text-sm">Password</Label>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const pwd = generateStrongPassword(14);
+                                  setVsu((prev) => ({ ...prev, password: pwd, confirm: pwd }));
+                                  toast.success("Strong password generated — copy it before submitting");
+                                }}
+                              >
+                                <Sparkles className="h-3.5 w-3.5 mr-1" /> Generate strong password
+                              </Button>
+                              {vsu.password && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={async () => {
+                                    await navigator.clipboard.writeText(vsu.password);
+                                    toast.success("Password copied to clipboard");
+                                  }}
+                                >
+                                  <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label>Password (min 8)</Label>
+                              <PasswordInput autoComplete="new-password" value={vsu.password} onChange={(e) => setVsu({ ...vsu, password: e.target.value })} className="mt-1.5" />
+                              <ErrorText errors={errors} name="password" />
+                            </div>
+                            <div>
+                              <Label>Confirm password</Label>
+                              <PasswordInput autoComplete="new-password" value={vsu.confirm} onChange={(e) => setVsu({ ...vsu, confirm: e.target.value })} className="mt-1.5" />
+                              <ErrorText errors={errors} name="confirm" />
+                            </div>
+                          </div>
+                        </>
+                      )}
                       <NextButton onClick={goNext} />
                     </div>
                   </div>
