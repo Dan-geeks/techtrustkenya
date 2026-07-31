@@ -19,7 +19,7 @@ const ShopPage = () => {
     (async () => {
       const { data: v } = await supabase.from("vendor_profiles").select("*").eq("id", vendorId).maybeSingle();
       setVendor(v);
-      if (v) document.title = `${v.business_name} — TechTrust`;
+      if (v) document.title = `${v.business_name} | TechTrust`;
       const { data: p } = await supabase.from("products").select("*, vendor:vendor_profiles(id,business_name,average_rating,verification_status)").eq("vendor_id", vendorId).eq("is_active", true);
       setProducts(p ?? []);
       const { data: s } = await supabase.from("repair_services").select("*").eq("vendor_id", vendorId).eq("is_active", true);

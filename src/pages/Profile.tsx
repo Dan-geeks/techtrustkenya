@@ -35,7 +35,7 @@ const Profile = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    document.title = "My Profile — TechTrust";
+    document.title = "My Profile | TechTrust";
     if (!user) return;
 
     (async () => {

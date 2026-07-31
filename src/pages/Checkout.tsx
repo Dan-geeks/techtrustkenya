@@ -93,7 +93,7 @@ const Checkout = () => {
   };
 
   useEffect(() => {
-    document.title = "Checkout - TechTrust";
+    document.title = "Checkout | TechTrust";
     if (!orderId) return;
     (async () => {
       const { data } = await supabase

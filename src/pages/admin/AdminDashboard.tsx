@@ -23,7 +23,7 @@ import {
 
 const AdminDashboard = () => {
   useEffect(() => {
-    document.title = "Admin Dashboard — TechTrust";
+    document.title = "Admin Dashboard | TechTrust";
   }, []);
 
   return (

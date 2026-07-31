@@ -33,7 +33,7 @@ const sections = [
 
 const Terms = () => {
   useEffect(() => {
-    document.title = "Terms & Conditions — TechTrust";
+    document.title = "Terms & Conditions | TechTrust";
   }, []);
 
   return (

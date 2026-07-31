@@ -61,7 +61,7 @@ const Orders = () => {
   const [filter, setFilter] = useState<StatusFilter>("all");
 
   useEffect(() => {
-    document.title = "My Orders — TechTrust";
+    document.title = "My Orders | TechTrust";
     if (!user) return;
     (async () => {
       const { data } = await supabase

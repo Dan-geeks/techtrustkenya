@@ -27,7 +27,7 @@ const Index = () => {
   const repairArt = useParallax<HTMLDivElement>(-0.08);
 
   useEffect(() => {
-    document.title = "TechTrust — Verified Tech Marketplace in Kenya";
+    document.title = "TechTrust | Verified Tech Marketplace in Kenya";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", "Buy and sell verified laptops and smartphones in Kenya. Pay securely with Float. Trusted vendors, real protection.");
 

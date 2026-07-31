@@ -117,7 +117,7 @@ const Notifications = () => {
   const [markingAll, setMarkingAll] = useState(false);
 
   useEffect(() => {
-    document.title = "Notifications — TechTrust";
+    document.title = "Notifications | TechTrust";
     if (!user) return;
 
     (async () => {

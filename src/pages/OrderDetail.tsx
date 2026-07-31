@@ -129,7 +129,7 @@ const OrderDetail = () => {
   }, [orderId]);
 
   useEffect(() => {
-    document.title = "Order Detail - TechTrust";
+    document.title = "Order Detail | TechTrust";
     load();
   }, [load]);
 

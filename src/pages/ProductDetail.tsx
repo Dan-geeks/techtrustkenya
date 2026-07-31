@@ -102,7 +102,7 @@ const ProductDetail = () => {
         .maybeSingle();
       setProduct(data);
       if (data) {
-        document.title = `${data.brand} ${data.model_name} — TechTrust`;
+        document.title = `${data.brand} ${data.model_name} | TechTrust`;
         const { data: rel } = await supabase
           .from("products")
           .select("*, vendor:vendor_profiles(id,business_name,average_rating,verification_status)")

@@ -40,7 +40,7 @@ const VendorDashboard = () => {
   const [pendingOrders, setPendingOrders] = useState(0);
 
   useEffect(() => {
-    document.title = "Vendor Dashboard — TechTrust";
+    document.title = "Vendor Dashboard | TechTrust";
     if (!user) return;
     (async () => {
       const { data } = await supabase

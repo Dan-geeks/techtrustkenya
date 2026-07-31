@@ -35,7 +35,7 @@ const Cart = () => {
   const [checkingOut, setCheckingOut] = useState(false);
 
   useEffect(() => {
-    document.title = "Your cart — TechTrust";
+    document.title = "Your cart | TechTrust";
   }, []);
 
   useEffect(() => {

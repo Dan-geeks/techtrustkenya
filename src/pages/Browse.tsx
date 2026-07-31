@@ -68,7 +68,7 @@ const Browse = () => {
   const [county, setCounty] = useState<string>("all");
 
   useEffect(() => {
-    document.title = "Browse Products — TechTrust";
+    document.title = "Browse Products | TechTrust";
   }, []);
 
   useEffect(() => {

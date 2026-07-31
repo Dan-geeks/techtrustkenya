@@ -15,7 +15,7 @@ const Repairs = () => {
   const [active, setActive] = useState<any | null>(null);
 
   useEffect(() => {
-    document.title = "Repairs — TechTrust";
+    document.title = "Repairs | TechTrust";
     (async () => {
       const { data } = await supabase
         .from("repair_services")

@@ -10,7 +10,7 @@ const VendorRejected = () => {
   const [reason, setReason] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = "Application Rejected — TechTrust";
+    document.title = "Application Rejected | TechTrust";
     if (!user) return;
     (async () => {
       const { data } = await supabase

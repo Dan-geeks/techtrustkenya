@@ -12,7 +12,7 @@ const VendorPending = () => {
   const [checking, setChecking] = useState(false);
 
   useEffect(() => {
-    document.title = "Application Pending — TechTrust";
+    document.title = "Application Pending | TechTrust";
   }, []);
 
   // Auto-check status on mount so approved vendors don't get stuck here

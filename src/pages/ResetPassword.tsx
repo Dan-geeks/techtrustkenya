@@ -17,7 +17,7 @@ const ResetPassword = () => {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    document.title = "Reset Password — TechTrust";
+    document.title = "Reset Password | TechTrust";
     const hash = window.location.hash.startsWith("#")
       ? window.location.hash.substring(1)
       : window.location.hash;
