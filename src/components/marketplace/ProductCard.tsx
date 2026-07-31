@@ -24,6 +24,7 @@ interface ProductCardProps {
     verification_status: string;
   } | null;
   quantity_in_stock?: number;
+  variant?: "light" | "dark";
 }
 
 const conditionConfig: Record<string, { label: string; cls: string }> = {
@@ -43,7 +44,9 @@ export const ProductCard = ({
   average_rating,
   vendor,
   quantity_in_stock,
+  variant = "light",
 }: ProductCardProps) => {
+  const dark = variant === "dark";
   const { addToCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -67,7 +70,12 @@ export const ProductCard = ({
   return (
     <Link
       to={`/product/${id}`}
-      className="group flex flex-col bg-card border border-border rounded-lg overflow-hidden hover:border-accent/40 transition-colors duration-200"
+      className={cn(
+        "group flex flex-col rounded-lg overflow-hidden transition-colors duration-200",
+        dark
+          ? "bg-primary border border-primary-foreground/10 hover:border-accent/50"
+          : "bg-card border border-border hover:border-accent/40",
+      )}
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
@@ -99,16 +107,20 @@ export const ProductCard = ({
         {vendor && (
           <div className="flex items-center gap-1">
             {isVerified && <ShieldCheck className="h-2.5 w-2.5 text-success shrink-0" />}
-            <span className="text-[10px] text-muted-foreground truncate">{vendor.business_name}</span>
+            <span className={cn("text-[10px] truncate", dark ? "text-primary-foreground/60" : "text-muted-foreground")}>
+              {vendor.business_name}
+            </span>
           </div>
         )}
 
-        <h3 className="font-medium text-sm text-foreground line-clamp-2 leading-snug">
+        <h3 className={cn("font-medium text-sm line-clamp-2 leading-snug", dark ? "text-primary-foreground" : "text-foreground")}>
           {brand} {model_name}
         </h3>
 
         <div className="mt-1">
-          <span className="text-sm font-bold text-foreground">{formatKsh(price_ksh)}</span>
+          <span className={cn("text-sm font-bold", dark ? "text-primary-foreground" : "text-foreground")}>
+            {formatKsh(price_ksh)}
+          </span>
         </div>
 
         {lowStock && (
@@ -122,7 +134,9 @@ export const ProductCard = ({
           className={cn(
             "mt-auto pt-2 flex items-center justify-center gap-1.5 h-8 rounded-md text-xs font-semibold transition-colors",
             outOfStock
-              ? "bg-muted text-muted-foreground/40 cursor-not-allowed"
+              ? dark
+                ? "bg-primary-foreground/10 text-primary-foreground/30 cursor-not-allowed"
+                : "bg-muted text-muted-foreground/40 cursor-not-allowed"
               : "bg-accent text-accent-foreground hover:bg-accent/90"
           )}
         >
