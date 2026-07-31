@@ -41,6 +41,7 @@ const VendorOnboarding = () => {
   const [shopPhotos, setShopPhotos] = useState<File[]>([]);
   const [certificate, setCertificate] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [noPhysicalAddress, setNoPhysicalAddress] = useState(false);
   const [locating, setLocating] = useState(false);
   const [showManualGps, setShowManualGps] = useState(false);
 
@@ -124,7 +125,7 @@ const VendorOnboarding = () => {
     if (!vsu.business_name.trim()) errs.business_name = "Required";
     if (!vsu.county) errs.county = "Required";
     if (!vsu.sub_county.trim()) errs.sub_county = "Required";
-    if (!vsu.physical_address.trim()) errs.physical_address = "Required";
+    if (!noPhysicalAddress && !vsu.physical_address.trim()) errs.physical_address = "Required";
     if (!vsu.latitude || isNaN(Number(vsu.latitude))) errs.latitude = "Valid latitude required";
     if (!vsu.longitude || isNaN(Number(vsu.longitude))) errs.longitude = "Valid longitude required";
     if (shopPhotos.length < 2) errs.photos = "Upload at least 2 shop photos";
@@ -167,7 +168,7 @@ const VendorOnboarding = () => {
           email: user.email,
           county: vsu.county,
           subCounty: vsu.sub_county,
-          physicalAddress: vsu.physical_address,
+          physicalAddress: noPhysicalAddress ? "Online-only — no physical shop location" : vsu.physical_address,
           gpsLatitude: Number(vsu.latitude),
           gpsLongitude: Number(vsu.longitude),
           googleMapsLink: vsu.google_maps_link || null,
@@ -269,11 +270,24 @@ const VendorOnboarding = () => {
                 <Err name="sub_county" />
               </div>
             </div>
-            <div>
-              <Label>Physical shop address</Label>
-              <Input value={vsu.physical_address} onChange={(e) => setVsu({ ...vsu, physical_address: e.target.value })} className="mt-1.5" placeholder="Building name, street, floor / shop number" />
-              <Err name="physical_address" />
-            </div>
+            <label className="flex items-center gap-2.5 text-sm cursor-pointer select-none">
+              <Checkbox
+                checked={noPhysicalAddress}
+                onCheckedChange={(c) => {
+                  const checked = c === true;
+                  setNoPhysicalAddress(checked);
+                  if (checked) setErrors((prev) => ({ ...prev, physical_address: "" }));
+                }}
+              />
+              <span className="text-muted-foreground">I don't have a physical shop location (online-only business)</span>
+            </label>
+            {!noPhysicalAddress && (
+              <div>
+                <Label>Physical shop address</Label>
+                <Input value={vsu.physical_address} onChange={(e) => setVsu({ ...vsu, physical_address: e.target.value })} className="mt-1.5" placeholder="Building name, street, floor / shop number" />
+                <Err name="physical_address" />
+              </div>
+            )}
 
             <div>
               <Label>Shop GPS location</Label>

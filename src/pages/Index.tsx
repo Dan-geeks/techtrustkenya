@@ -157,7 +157,7 @@ const Index = () => {
                 </Button>
               </div>
             </div>
-            <div className="flex-1 divide-y divide-border">
+            <div className="flex-1 flex flex-col gap-4">
               {[
                 {
                   num: "01",
@@ -175,13 +175,16 @@ const Index = () => {
                   desc: "Receive the product, check it thoroughly, then release payment. If anything's wrong, raise a dispute — we step in and your money stays safe.",
                 },
               ].map(({ num, title, desc }) => (
-                <div key={num} className="py-8 flex gap-8 group">
-                  <div className="text-3xl font-black text-border group-hover:text-accent/30 transition-colors tabular-nums shrink-0 w-12 leading-none pt-1">
+                <div
+                  key={num}
+                  className="group flex gap-6 rounded-2xl bg-primary p-6 text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg sm:p-8"
+                >
+                  <div className="w-10 shrink-0 text-3xl font-black leading-none tabular-nums text-white/20 transition-colors group-hover:text-accent/60">
                     {num}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-2">{title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
+                    <h3 className="mb-2 font-semibold">{title}</h3>
+                    <p className="text-sm leading-relaxed text-primary-foreground/60">{desc}</p>
                   </div>
                 </div>
               ))}

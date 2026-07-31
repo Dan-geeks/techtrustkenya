@@ -17,7 +17,9 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         hero: "bg-accent text-accent-foreground hover:bg-accent/90 font-semibold",
         accent: "bg-accent text-accent-foreground hover:bg-accent/90",
-        success: "bg-success text-success-foreground hover:bg-success/90",
+        // bg-success (a mid-brightness green) only hits ~3.2:1 contrast with
+        // white text at this size — fails WCAG AA (4.5:1). Darker green fixes it.
+        success: "bg-emerald-700 text-white hover:bg-emerald-800",
         outlineLight: "border-2 border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20",
       },
       size: {

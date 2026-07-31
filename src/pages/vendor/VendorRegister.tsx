@@ -125,6 +125,7 @@ const VendorRegister = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [locating, setLocating] = useState(false);
   const [showManualGps, setShowManualGps] = useState(false);
+  const [noPhysicalAddress, setNoPhysicalAddress] = useState(false);
 
   // Redirect logged-in approved vendors away
   useEffect(() => {
@@ -200,7 +201,7 @@ const VendorRegister = () => {
     if (!vsu.business_name.trim()) errs.business_name = "Required";
     if (!vsu.county) errs.county = "Required";
     if (!vsu.sub_county.trim()) errs.sub_county = "Required";
-    if (!vsu.physical_address.trim()) errs.physical_address = "Required";
+    if (!noPhysicalAddress && !vsu.physical_address.trim()) errs.physical_address = "Required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -383,7 +384,7 @@ const VendorRegister = () => {
           email: vsu.email,
           county: vsu.county,
           subCounty: vsu.sub_county,
-          physicalAddress: vsu.physical_address,
+          physicalAddress: noPhysicalAddress ? "Online-only — no physical shop location" : vsu.physical_address,
           gpsLatitude: Number(vsu.latitude),
           gpsLongitude: Number(vsu.longitude),
           googleMapsLink: vsu.google_maps_link || null,
@@ -652,11 +653,24 @@ const VendorRegister = () => {
                           <ErrorText errors={errors} name="sub_county" />
                         </div>
                       </div>
-                      <div>
-                        <Label>Physical shop address</Label>
-                        <Input value={vsu.physical_address} onChange={(e) => setVsu({ ...vsu, physical_address: e.target.value })} className="mt-1.5" placeholder="Building name, street, floor / shop number" />
-                        <ErrorText errors={errors} name="physical_address" />
-                      </div>
+                      <label className="flex items-center gap-2.5 text-sm cursor-pointer select-none">
+                        <Checkbox
+                          checked={noPhysicalAddress}
+                          onCheckedChange={(c) => {
+                            const checked = c === true;
+                            setNoPhysicalAddress(checked);
+                            if (checked) setErrors((prev) => ({ ...prev, physical_address: "" }));
+                          }}
+                        />
+                        <span className="text-muted-foreground">I don't have a physical shop location (online-only business)</span>
+                      </label>
+                      {!noPhysicalAddress && (
+                        <div>
+                          <Label>Physical shop address</Label>
+                          <Input value={vsu.physical_address} onChange={(e) => setVsu({ ...vsu, physical_address: e.target.value })} className="mt-1.5" placeholder="Building name, street, floor / shop number" />
+                          <ErrorText errors={errors} name="physical_address" />
+                        </div>
+                      )}
                       <NextButton onClick={goNext} />
                     </div>
                   </div>
