@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -104,7 +104,7 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv11", "ss01", "ss03";
   }
-  h1, h2, h3, h4 { @apply tracking-tight; }
+  h1, h2, h3, h4 { @apply tracking-tight; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; }
 }
 
 @layer utilities {

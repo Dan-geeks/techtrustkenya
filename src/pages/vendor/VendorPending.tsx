@@ -66,7 +66,7 @@ const VendorPending = () => {
       <div className="w-full max-w-lg">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight">
+          <span className="text-base font-bold tracking-tight font-display">
             Tech<span className="text-accent">Trust</span>
           </span>
         </Link>

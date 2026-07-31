@@ -69,7 +69,7 @@ const ResetPassword = () => {
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-2 mb-8 justify-center">
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight">Tech<span className="text-accent">Trust</span></span>
+          <span className="text-base font-bold tracking-tight font-display">Tech<span className="text-accent">Trust</span></span>
         </Link>
 
         <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card">

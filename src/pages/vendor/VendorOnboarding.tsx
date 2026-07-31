@@ -213,7 +213,7 @@ const VendorOnboarding = () => {
       <div className="w-full max-w-3xl">
         <Link to="/" className="flex items-center justify-center gap-2 mb-6">
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight text-white">
+          <span className="text-base font-bold tracking-tight font-display text-white">
             Tech<span className="text-accent">Trust</span>
           </span>
         </Link>

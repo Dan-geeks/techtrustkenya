@@ -41,7 +41,7 @@ export const TopNav = () => {
       <div className="container flex h-16 items-center gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight">
+          <span className="text-base font-bold tracking-tight font-display">
             Tech<span className="text-accent">Trust</span>
           </span>
         </Link>

@@ -53,51 +53,36 @@ const NextButton = ({ onClick }: { onClick: () => void }) => (
   </Button>
 );
 
-const Stepper = ({ steps, step }: { steps: string[]; step: number }) => (
-  <div className="mb-10">
-    <div className="flex items-center">
-      {steps.map((label, i) => (
-        <div key={label} className="flex items-center flex-1 last:flex-none">
-          <div className="flex flex-col items-center gap-2">
-            <div
-              className={cn(
-                "grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-semibold transition-all duration-300",
-                i < step
-                  ? "bg-accent text-accent-foreground shadow-md shadow-accent/30"
-                  : i === step
-                  ? "scale-110 bg-accent text-accent-foreground shadow-lg shadow-accent/40 ring-4 ring-accent/20"
-                  : "bg-secondary text-muted-foreground",
-              )}
-            >
-              {i < step ? <Check className="h-4.5 w-4.5" /> : i + 1}
-            </div>
+const Stepper = ({ steps, step }: { steps: string[]; step: number }) => {
+  const pct = (step / (steps.length - 1)) * 100;
+  return (
+    <div className="mb-10">
+      <div className="mb-2.5 flex items-baseline justify-between gap-3">
+        <span className="text-sm font-semibold text-foreground">{steps[step]}</span>
+        <span className="shrink-0 text-xs font-medium text-muted-foreground">
+          Step {step + 1} of {steps.length}
+        </span>
+      </div>
+      <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-accent to-accent/70 transition-all duration-500 ease-out"
+          style={{ width: `${pct}%` }}
+        />
+        <div className="absolute inset-0 flex items-center justify-between">
+          {steps.map((_, i) => (
             <span
+              key={i}
               className={cn(
-                "hidden whitespace-nowrap text-xs font-medium sm:block",
-                i <= step ? "text-foreground" : "text-muted-foreground",
+                "h-2 w-2 rounded-full ring-2 ring-background transition-colors duration-300",
+                i <= step ? "bg-accent" : "bg-secondary",
               )}
-            >
-              {label}
-            </span>
-          </div>
-          {i < steps.length - 1 && (
-            <div className="mx-3 h-1 flex-1 overflow-hidden rounded-full bg-secondary">
-              <div
-                className={cn(
-                  "h-full rounded-full bg-gradient-to-r from-accent to-accent/70 transition-all duration-500 ease-out",
-                  i < step ? "w-full" : "w-0",
-                )}
-              />
-            </div>
-          )}
+            />
+          ))}
         </div>
-      ))}
+      </div>
     </div>
-    <p className="mt-3 text-center text-xs font-medium text-muted-foreground sm:hidden">
-      Step {step + 1} of {steps.length} — {steps[step]}
-    </p>
-  </div>
-);
+  );
+};
 
 const VendorRegister = () => {
   const navigate = useNavigate();
@@ -425,7 +410,7 @@ const VendorRegister = () => {
       <div className="hidden lg:flex lg:w-2/5 bg-primary text-primary-foreground flex-col justify-center px-12 py-16 shrink-0">
         <Link to="/" className="flex items-center gap-2 mb-12">
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight">Tech<span className="text-accent">Trust</span></span>
+          <span className="text-base font-bold tracking-tight font-display">Tech<span className="text-accent">Trust</span></span>
         </Link>
         <h2 className="text-3xl font-bold leading-tight mb-4 text-balance">
           Verified marketplace for laptops, phones and repairs.
@@ -448,7 +433,7 @@ const VendorRegister = () => {
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-10 lg:py-16">
         <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight">Tech<span className="text-accent">Trust</span></span>
+          <span className="text-base font-bold tracking-tight font-display">Tech<span className="text-accent">Trust</span></span>
         </Link>
 
         <div className="w-full max-w-2xl">
@@ -493,7 +478,7 @@ const VendorRegister = () => {
             <TabsContent value="signup" className="mt-8">
               <Stepper steps={steps} step={step} />
 
-              <div key={`${role ?? "none"}-${step}`} className="animate-in fade-in-0 slide-in-from-right-4 duration-300">
+              <div key={`${role ?? "none"}-${step}`} className="animate-in fade-in-0 duration-300">
                 {/* Step 0 — role */}
                 {step === 0 && (
                   <>

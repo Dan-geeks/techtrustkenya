@@ -12,7 +12,7 @@ export const Footer = () => {
           <div>
             <Link to="/" className="flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-accent" strokeWidth={2.5} />
-              <span className="text-base font-bold tracking-tight">
+              <span className="text-base font-bold tracking-tight font-display">
                 Tech<span className="text-accent">Trust</span>
               </span>
             </Link>

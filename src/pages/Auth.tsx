@@ -192,7 +192,7 @@ const Auth = () => {
       <div className="hidden lg:flex lg:w-2/5 bg-primary text-primary-foreground flex-col justify-center px-12 py-16 shrink-0">
         <Link to="/" className="flex items-center gap-2 mb-12">
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight">Tech<span className="text-accent">Trust</span></span>
+          <span className="text-base font-bold tracking-tight font-display">Tech<span className="text-accent">Trust</span></span>
         </Link>
         <h2 className="text-3xl font-bold leading-tight mb-8 text-balance">
           Buy and sell tech you can actually trust.
@@ -217,7 +217,7 @@ const Auth = () => {
         {/* Mobile logo */}
         <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
           <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight">Tech<span className="text-accent">Trust</span></span>
+          <span className="text-base font-bold tracking-tight font-display">Tech<span className="text-accent">Trust</span></span>
         </Link>
 
         <div className="w-full max-w-md">
