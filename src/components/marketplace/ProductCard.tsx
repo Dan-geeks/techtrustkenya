@@ -123,9 +123,7 @@ export const ProductCard = ({
             "mt-auto pt-2 flex items-center justify-center gap-1.5 h-8 rounded-md text-xs font-semibold transition-colors",
             outOfStock
               ? "bg-muted text-muted-foreground/40 cursor-not-allowed"
-              // bg-success (a mid-brightness green) only hits ~3.2:1 contrast with white
-              // at this text size — fails WCAG AA (4.5:1). Darker green fixes it.
-              : "bg-emerald-700 text-white hover:bg-emerald-800"
+              : "bg-accent text-accent-foreground hover:bg-accent/90"
           )}
         >
           <ShoppingCart className="h-3.5 w-3.5" />
