@@ -250,12 +250,12 @@ const Checkout = () => {
             alt={productName}
             className="w-full h-[200px] object-cover bg-muted"
           />
-          <div className="p-6">
+          <div className="p-6 bg-primary text-primary-foreground">
             <h2 className="text-xl font-bold leading-snug mb-1">
               {productName}
             </h2>
 
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
+            <div className="flex items-center gap-1.5 text-sm text-primary-foreground/60 mb-3">
               <Store className="h-3.5 w-3.5" />
               <span>{order.vendor?.business_name ?? "Unknown vendor"}</span>
             </div>
@@ -264,32 +264,32 @@ const Checkout = () => {
               {condition && (
                 <Badge variant={conditionVariant[condition] ?? "outline"}>{condition}</Badge>
               )}
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-primary-foreground/60">
                 &times;&nbsp;{order.quantity}
               </span>
             </div>
 
-            <div className="border-t border-border pt-4 space-y-2 text-sm">
+            <div className="border-t border-primary-foreground/10 pt-4 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-primary-foreground/60">Subtotal</span>
                 <span>{formatKsh(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">
+                <span className="text-primary-foreground/60">
                   TechTrust service fee (10%)
                 </span>
-                <span className="text-muted-foreground">
+                <span className="text-primary-foreground/60">
                   {formatKsh(Number(order.platform_fee_ksh))}
                 </span>
               </div>
-              <div className="border-t border-border pt-2 flex justify-between font-bold text-base">
+              <div className="border-t border-primary-foreground/10 pt-2 flex justify-between font-bold text-base">
                 <span>Total</span>
                 <span>{formatKsh(Number(order.total_amount_ksh))}</span>
               </div>
             </div>
 
-            <div className="mt-5 flex items-center gap-2 text-xs text-success bg-success/5 border border-success/30 rounded-md px-3 py-2">
-              <Shield className="h-3.5 w-3.5 shrink-0 text-success" />
+            <div className="mt-5 flex items-center gap-2 text-xs text-primary-foreground/80 bg-primary-foreground/5 border border-primary-foreground/10 rounded-md px-3 py-2">
+              <Shield className="h-3.5 w-3.5 shrink-0 text-accent" />
               <span>Protected by Float</span>
             </div>
           </div>

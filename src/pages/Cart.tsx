@@ -229,29 +229,29 @@ const Cart = () => {
         </div>
 
         <div className="w-full lg:w-80 xl:w-96 shrink-0 lg:sticky lg:top-24">
-          <Card className="p-6">
+          <Card className="p-6 bg-primary text-primary-foreground border-primary-foreground/10">
             <h2 className="text-lg font-semibold mb-5">Order Summary</h2>
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">
+                <span className="text-primary-foreground/60">
                   Subtotal ({itemLabel})
                 </span>
                 <span>{formatKsh(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Platform fee (10%)</span>
+                <span className="text-primary-foreground/60">Platform fee (10%)</span>
                 <span>{formatKsh(platformFee)}</span>
               </div>
             </div>
 
-            <div className="flex justify-between items-center mt-5 pt-4 border-t border-border">
+            <div className="flex justify-between items-center mt-5 pt-4 border-t border-primary-foreground/10">
               <span className="font-semibold text-base">Total</span>
               <span className="text-2xl font-bold">{formatKsh(total)}</span>
             </div>
 
             <Button
-              variant="hero"
+              variant="accent"
               size="lg"
               className="w-full mt-5"
               onClick={handleCheckout}
@@ -265,11 +265,11 @@ const Cart = () => {
               {checkingOut ? "Creating orders…" : "Proceed to Checkout"}
             </Button>
 
-            <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-success/5 border border-success/20">
-              <Shield className="h-4 w-4 text-success shrink-0" />
-              <p className="text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-primary-foreground/5 border border-primary-foreground/10">
+              <Shield className="h-4 w-4 text-accent shrink-0" />
+              <p className="text-xs text-primary-foreground/70">
                 Payments are held in{" "}
-                <span className="font-medium text-foreground">
+                <span className="font-medium text-primary-foreground">
                   TechTrust Float
                 </span>{" "}
                 and released only after delivery is confirmed.
