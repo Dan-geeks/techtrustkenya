@@ -10,26 +10,6 @@ import { CountUp } from "@/components/marketing/CountUp";
 import { supabase } from "@/integrations/supabase/client";
 import { useParallax } from "@/hooks/useParallax";
 
-const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-const band = (v: number, inMin: number, inMax: number) => clamp01((v - inMin) / (inMax - inMin));
-
-/** Raw scrollY-based progress — for the hero, which starts at the very top of
- * the page, so the generic viewport-relative useScrollProgress (built for
- * sections further down) would report non-zero progress before any scroll. */
-function useHeroLidClose(closeOverPx = 650) {
-  const [scrollY, setScrollY] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(() => { setScrollY(window.scrollY); raf = 0; });
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
-  }, []);
-  return band(scrollY, 0, closeOverPx);
-}
-
 interface Stats {
   vendors: number;
   products: number;
@@ -44,7 +24,6 @@ const Index = () => {
   const blobOne = useParallax<HTMLDivElement>(0.12);
   const blobTwo = useParallax<HTMLDivElement>(-0.18);
   const repairArt = useParallax<HTMLDivElement>(-0.08);
-  const lidClose = useHeroLidClose(); // 0 = open, 1 = shut, as the page scrolls
 
   useEffect(() => {
     document.title = "TechTrust | Verified Tech Marketplace in Kenya";
@@ -120,40 +99,15 @@ const Index = () => {
             </div>
 
             <div className="relative">
-              <div className="rounded-2xl border border-border bg-card p-3 shadow-lg">
-                <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-[#1a1712]" style={{ perspective: "1400px" }}>
-                  {/* Base layer (keyboard deck + desk) — static, never moves */}
-                  <img
-                    src="/sony-laptop.jpg"
-                    alt="Verified laptop listing, ready for handover"
-                    loading="eager"
-                    className="absolute inset-0 h-full w-full object-cover"
-                    style={{ clipPath: "polygon(0% 58%, 100% 41%, 100% 100%, 0% 100%)" }}
-                  />
-                  {/* Screen layer — only this rotates, hinged at the line where it meets the base.
-                      Clipped a couple points past the seam so it overlaps the base slightly and
-                      never reveals a gap while foreshortening in 3D. */}
-                  <div
-                    className="absolute inset-0 will-change-transform"
-                    style={{
-                      transform: `rotateX(${-lidClose * 72}deg)`,
-                      transformOrigin: "50% 51%",
-                    }}
-                  >
-                    <img
-                      src="/sony-laptop.jpg"
-                      alt=""
-                      aria-hidden="true"
-                      className="absolute inset-0 h-full w-full object-cover"
-                      style={{ clipPath: "polygon(0% 0%, 100% 0%, 100% 44%, 0% 62%)" }}
-                    />
-                  </div>
-                </div>
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
+                <img
+                  src="/coding-with-coffee.svg"
+                  alt="Illustration of a laptop displaying code"
+                  loading="eager"
+                  className="aspect-square w-full object-contain"
+                />
               </div>
-              <div
-                className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-lg bg-success px-4 py-2.5 text-success-foreground shadow-lg sm:left-6 transition-opacity duration-300"
-                style={{ opacity: 1 - lidClose }}
-              >
+              <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-lg bg-success px-4 py-2.5 text-success-foreground shadow-lg sm:left-6">
                 <BadgeCheck className="h-5 w-5 shrink-0" />
                 <div className="leading-tight">
                   <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">Verified Listing</p>
