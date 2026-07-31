@@ -282,11 +282,19 @@ const Index = () => {
             <p className="text-background/60 text-sm leading-relaxed mb-6 max-w-md">
               Certified technicians. Payment released only after you approve the repair. Same Float protection, same zero risk.
             </p>
+            <div className="mb-8 flex flex-col gap-2.5">
+              {["Diagnosis before you pay a shilling", "Genuine spare parts, approved by you first", "Same escrow protection as every purchase"].map((t) => (
+                <div key={t} className="flex items-center gap-2.5 text-sm text-background/70">
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-accent" />
+                  {t}
+                </div>
+              ))}
+            </div>
             <Button asChild className="bg-accent text-white hover:bg-accent/90">
               <Link to="/repairs">Find a technician <ArrowRight className="h-4 w-4" /></Link>
             </Button>
           </Reveal>
-          <div ref={repairArt} className="md:w-[46%] shrink-0 will-change-transform">
+          <div ref={repairArt} className="md:w-[30%] max-w-[280px] shrink-0 will-change-transform">
             <AnimatedArt
               src={art.repairs}
               alt="Technicians diagnosing and repairing customer devices"
