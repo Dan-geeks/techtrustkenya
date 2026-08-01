@@ -1,147 +1,26 @@
-import { useEffect, useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import {
-  Loader2,
-  LayoutDashboard,
-  Package,
-  ShoppingBag,
-  Wrench,
-  Star,
-  Zap,
-  BarChart2,
-  Settings,
-  Store,
-} from "lucide-react";
-import { OverviewTab } from "@/components/vendor/OverviewTab";
-import { ProductsTab } from "@/components/vendor/ProductsTab";
-import { OrdersTab } from "@/components/vendor/OrdersTab";
-import { RepairsTab } from "@/components/vendor/RepairsTab";
-import { ReviewsTab } from "@/components/vendor/ReviewsTab";
-import { PromotionsTab } from "@/components/vendor/PromotionsTab";
-import { AnalyticsTab } from "@/components/vendor/AnalyticsTab";
-import { SettingsTab } from "@/components/vendor/SettingsTab";
+import { useEffect } from "react";
 
-const tabs = [
-  { value: "overview", label: "Overview", Icon: LayoutDashboard },
-  { value: "products", label: "Products", Icon: Package },
-  { value: "orders", label: "Orders", Icon: ShoppingBag },
-  { value: "repairs", label: "Repairs", Icon: Wrench },
-  { value: "reviews", label: "Reviews", Icon: Star },
-  { value: "promotions", label: "Promotions", Icon: Zap },
-  { value: "analytics", label: "Analytics", Icon: BarChart2 },
-  { value: "settings", label: "Settings", Icon: Settings },
-] as const;
+const pageHtml = "<!-- SideNavBar (Shared Component) -->\n<!-- Executing styles from JSON mapping -->\n\n<!-- Main Content Canvas -->\n<main class=\"flex-1 md:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen bg-background\">\n<div class=\"max-w-container-max mx-auto\">\n<!-- Page Header -->\n<div class=\"flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4\">\n<div>\n<h1 class=\"font-display-h2 text-display-h2 text-on-surface mb-2\">Overview</h1>\n<p class=\"font-body-md text-body-md text-on-surface-variant\">Your business performance and current escrow balances.</p>\n</div>\n</div>\n<!-- Stats Grid -->\n<div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-8\">\n<!-- Total Sales -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-default p-6 hover:shadow-elevated hover:border-[#EEF2FF] border border-transparent transition-all group\">\n<div class=\"flex justify-between items-start mb-4\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant\">Total Sales (30d)</span>\n<div class=\"w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-on-primary transition-colors\">\n<span class=\"material-symbols-outlined text-[20px]\">payments</span>\n</div>\n</div>\n<div class=\"font-data-price text-data-price text-on-surface text-[24px] leading-tight mb-2\">KES 1,245,000.00</div>\n<div class=\"flex items-center gap-1 font-data-id text-data-id text-[#22C55E]\">\n<span class=\"material-symbols-outlined text-[14px]\">trending_up</span>\n                        +12.5% vs last month\n                    </div>\n</div>\n<!-- Active Orders -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-default p-6 hover:shadow-elevated hover:border-[#EEF2FF] border border-transparent transition-all group\">\n<div class=\"flex justify-between items-start mb-4\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant\">Active Orders</span>\n<div class=\"w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-on-primary transition-colors\">\n<span class=\"material-symbols-outlined text-[20px]\">local_shipping</span>\n</div>\n</div>\n<div class=\"font-data-price text-data-price text-on-surface text-[24px] leading-tight mb-2\">42</div>\n<div class=\"flex items-center gap-1 font-data-id text-data-id text-on-surface-variant\">\n<span>12 awaiting shipment</span>\n</div>\n</div>\n<!-- Pending Float Funds -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-default p-6 hover:shadow-elevated hover:border-[#EEF2FF] border border-transparent transition-all group relative overflow-hidden\">\n<div class=\"absolute top-0 left-0 w-1 h-full bg-[#3B82F6]\"></div>\n<div class=\"flex justify-between items-start mb-4\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant\">Pending Float Funds</span>\n<div class=\"w-8 h-8 rounded-full bg-[#EEF2FF] flex items-center justify-center text-[#3B82F6] group-hover:bg-[#3B82F6] group-hover:text-white transition-colors\">\n<span class=\"material-symbols-outlined text-[20px]\">lock_clock</span>\n</div>\n</div>\n<div class=\"font-data-price text-data-price text-on-surface text-[24px] leading-tight mb-2\">KES 450,000.00</div>\n<div class=\"flex items-center gap-1 font-data-id text-data-id text-[#3B82F6]\">\n<span class=\"material-symbols-outlined text-[14px]\">shield</span>\n                        Secured in Escrow\n                    </div>\n</div>\n<!-- Rating -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-default p-6 hover:shadow-elevated hover:border-[#EEF2FF] border border-transparent transition-all group\">\n<div class=\"flex justify-between items-start mb-4\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant\">Seller Rating</span>\n<div class=\"w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-on-primary transition-colors\">\n<span class=\"material-symbols-outlined text-[20px]\" style=\"font-variation-settings: 'FILL' 1;\">star</span>\n</div>\n</div>\n<div class=\"font-data-price text-data-price text-on-surface text-[24px] leading-tight mb-2\">4.9/5.0</div>\n<div class=\"flex items-center gap-1 font-data-id text-data-id text-on-surface-variant\">\n<span>Based on 328 reviews</span>\n</div>\n</div>\n</div>\n<!-- Recent Orders Data Table -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-default overflow-hidden\">\n<div class=\"p-6 border-b border-outline-variant flex justify-between items-center bg-surface-bright\">\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Recent Orders</h3>\n<button class=\"text-secondary font-ui-label text-ui-label hover:underline\">View All Orders</button>\n</div>\n<div class=\"overflow-x-auto\">\n<table class=\"w-full text-left border-collapse\">\n<thead>\n<tr class=\"border-b border-outline-variant bg-surface-container-low\">\n<th class=\"p-4 font-ui-label text-ui-label text-on-surface-variant uppercase tracking-[0.05em]\">Order ID</th>\n<th class=\"p-4 font-ui-label text-ui-label text-on-surface-variant uppercase tracking-[0.05em]\">Item</th>\n<th class=\"p-4 font-ui-label text-ui-label text-on-surface-variant uppercase tracking-[0.05em]\">Amount</th>\n<th class=\"p-4 font-ui-label text-ui-label text-on-surface-variant uppercase tracking-[0.05em]\">Date</th>\n<th class=\"p-4 font-ui-label text-ui-label text-on-surface-variant uppercase tracking-[0.05em]\">Float Status</th>\n<th class=\"p-4 font-ui-label text-ui-label text-on-surface-variant uppercase tracking-[0.05em] text-right\">Action</th>\n</tr>\n</thead>\n<tbody class=\"font-data-id text-data-id text-on-surface divide-y divide-outline-variant\">\n<!-- Row 1 -->\n<tr class=\"hover:bg-surface-container-low transition-colors\">\n<td class=\"p-4 text-on-surface-variant\">#ORD-9082-A</td>\n<td class=\"p-4\">MacBook Pro M2 Max</td>\n<td class=\"p-4\">KES 320,000</td>\n<td class=\"p-4 text-on-surface-variant\">24 Oct, 2023</td>\n<td class=\"p-4\">\n<span class=\"inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#EEF2FF] text-[#3B82F6] font-ui-label text-[12px]\">\n<span class=\"material-symbols-outlined text-[14px]\">lock</span>\n                                        Held\n                                    </span>\n</td>\n<td class=\"p-4 text-right\">\n<button class=\"font-ui-label text-ui-label text-secondary hover:underline\">Manage</button>\n</td>\n</tr>\n<!-- Row 2 -->\n<tr class=\"hover:bg-surface-container-low transition-colors\">\n<td class=\"p-4 text-on-surface-variant\">#ORD-9081-B</td>\n<td class=\"p-4\">Sony A7IV Camera Body</td>\n<td class=\"p-4\">KES 285,000</td>\n<td class=\"p-4 text-on-surface-variant\">22 Oct, 2023</td>\n<td class=\"p-4\">\n<span class=\"inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#F0FDF4] text-[#166534] font-ui-label text-[12px]\">\n<span class=\"material-symbols-outlined text-[14px]\">check_circle</span>\n                                        Released\n                                    </span>\n</td>\n<td class=\"p-4 text-right\">\n<button class=\"font-ui-label text-ui-label text-secondary hover:underline\">Manage</button>\n</td>\n</tr>\n<!-- Row 3 -->\n<tr class=\"hover:bg-surface-container-low transition-colors\">\n<td class=\"p-4 text-on-surface-variant\">#ORD-9079-C</td>\n<td class=\"p-4\">Dell UltraSharp 32\" 4K</td>\n<td class=\"p-4\">KES 115,000</td>\n<td class=\"p-4 text-on-surface-variant\">20 Oct, 2023</td>\n<td class=\"p-4\">\n<span class=\"inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#F0FDF4] text-[#166534] font-ui-label text-[12px]\">\n<span class=\"material-symbols-outlined text-[14px]\">check_circle</span>\n                                        Released\n                                    </span>\n</td>\n<td class=\"p-4 text-right\">\n<button class=\"font-ui-label text-ui-label text-secondary hover:underline\">Manage</button>\n</td>\n</tr>\n</tbody>\n</table>\n</div>\n</div>\n</div>\n</main>";
 
 const VendorDashboard = () => {
-  const { user } = useAuth();
-  const [vendor, setVendor] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [pendingOrders, setPendingOrders] = useState(0);
-
   useEffect(() => {
     document.title = "Vendor Dashboard | TechTrust";
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("vendor_profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      setVendor(data);
-      setLoading(false);
 
-      if (data) {
-        const { count } = await supabase
-          .from("orders")
-          .select("id", { count: "exact", head: true })
-          .eq("vendor_id", data.id)
-          .eq("status", "pending");
-        setPendingOrders(count ?? 0);
-      }
-    })();
-  }, [user]);
+    const ensureStylesheet = (href: string) => {
+      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
+        (link) => link.getAttribute("href") === href,
+      );
+      if (exists) return;
+      const el = document.createElement("link");
+      el.rel = "stylesheet";
+      el.href = href;
+      document.head.appendChild(el);
+    };
 
-  const [activeTab, setActiveTab] = useState("overview");
+    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+  }, []);
 
-  if (loading)
-    return (
-      <div className="grid place-items-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-accent" />
-      </div>
-    );
-
-  if (!vendor)
-    return (
-      <div className="container py-20 text-center text-muted-foreground">
-        Vendor profile not found.
-      </div>
-    );
-
-  return (
-    <div className="flex flex-col">
-      <div className="bg-primary text-primary-foreground">
-        <div className="container py-8">
-          <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-accent">
-            <Store className="h-3 w-3" /> Vendor
-          </span>
-          <h1 className="text-2xl md:text-3xl font-bold">{vendor.business_name}</h1>
-          <p className="text-sm text-primary-foreground/60 mt-1">
-            Manage your shop, products, orders, repairs and more.
-          </p>
-        </div>
-      </div>
-
-      <div className="container py-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex flex-wrap h-auto justify-start gap-1 bg-muted/50 p-1">
-          {tabs.map(({ value, label, Icon }) => (
-            <TabsTrigger
-              key={value}
-              value={value}
-              className="relative flex items-center gap-1.5"
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">{label}</span>
-
-              {value === "orders" && pendingOrders > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
-                  {pendingOrders > 9 ? "9+" : pendingOrders}
-                </span>
-              )}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value="overview" className="mt-6">
-          <OverviewTab vendor={vendor} onSelectTab={setActiveTab} />
-        </TabsContent>
-        <TabsContent value="products" className="mt-6">
-          <ProductsTab vendor={vendor} />
-        </TabsContent>
-        <TabsContent value="orders" className="mt-6">
-          <OrdersTab vendor={vendor} />
-        </TabsContent>
-        <TabsContent value="repairs" className="mt-6">
-          <RepairsTab vendor={vendor} />
-        </TabsContent>
-        <TabsContent value="reviews" className="mt-6">
-          <ReviewsTab vendor={vendor} />
-        </TabsContent>
-        <TabsContent value="promotions" className="mt-6">
-          <PromotionsTab vendor={vendor} />
-        </TabsContent>
-        <TabsContent value="analytics" className="mt-6">
-          <AnalyticsTab vendor={vendor} />
-        </TabsContent>
-        <TabsContent value="settings" className="mt-6">
-          <SettingsTab vendor={vendor} onUpdated={(v) => setVendor(v)} />
-        </TabsContent>
-      </Tabs>
-      </div>
-    </div>
-  );
+  return <div dangerouslySetInnerHTML={{ __html: pageHtml }} />;
 };
 
 export default VendorDashboard;

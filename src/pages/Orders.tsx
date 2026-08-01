@@ -1,176 +1,26 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { formatKsh, formatDate } from "@/lib/format";
-import { ShoppingBag, ChevronRight } from "lucide-react";
+import { useEffect } from "react";
 
-type StatusFilter = "all" | "pending" | "held" | "completed" | "cancelled" | "disputed";
-
-const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "pending", label: "Pending" },
-  { key: "held", label: "Held" },
-  { key: "completed", label: "Completed" },
-  { key: "cancelled", label: "Cancelled" },
-  { key: "disputed", label: "Disputed" },
-];
-
-const STATUS_GROUPS: Record<StatusFilter, string[]> = {
-  all: [],
-  pending: ["pending_payment", "vendor_preparing", "out_for_delivery", "ready_for_pickup", "delivered_awaiting_confirmation"],
-  held: ["payment_held"],
-  completed: ["confirmed", "refunded"],
-  cancelled: ["cancelled"],
-  disputed: ["disputed"],
-};
-
-const statusVariant = (s: string): { label: string; cls: string } => {
-  const map: Record<string, { label: string; cls: string }> = {
-    pending_payment: { label: "Awaiting payment", cls: "bg-muted text-muted-foreground" },
-    payment_held: { label: "Float held", cls: "bg-warning/10 text-warning border-warning/30" },
-    vendor_preparing: { label: "Preparing", cls: "bg-warning/10 text-warning border-warning/30" },
-    out_for_delivery: { label: "Out for delivery", cls: "bg-accent/10 text-accent border-accent/30" },
-    ready_for_pickup: { label: "Ready for pickup", cls: "bg-accent/10 text-accent border-accent/30" },
-    delivered_awaiting_confirmation: { label: "Confirm receipt", cls: "bg-warning/10 text-warning border-warning/30" },
-    confirmed: { label: "Completed", cls: "bg-success/10 text-success border-success/30" },
-    disputed: { label: "Disputed", cls: "bg-destructive/10 text-destructive border-destructive/30" },
-    cancelled: { label: "Cancelled", cls: "bg-muted text-muted-foreground" },
-    refunded: { label: "Refunded", cls: "bg-muted text-muted-foreground" },
-  };
-  return map[s] ?? { label: s, cls: "bg-muted text-muted-foreground" };
-};
-
-const groupByMonth = (orders: any[]): { month: string; items: any[] }[] => {
-  const groups: Record<string, any[]> = {};
-  for (const o of orders) {
-    const label = new Date(o.created_at).toLocaleDateString("en-KE", { month: "long", year: "numeric" });
-    if (!groups[label]) groups[label] = [];
-    groups[label].push(o);
-  }
-  return Object.entries(groups).map(([month, items]) => ({ month, items }));
-};
+const pageHtml = "\n<!-- Actions -->\n<div class=\"flex items-center gap-4\">\n<div class=\"flex gap-2\">\n<button class=\"text-on-surface-variant hover:text-secondary transition-colors opacity-80 hover:opacity-100\">\n<span class=\"material-symbols-outlined\">shopping_cart</span>\n</button>\n<button class=\"text-secondary dark:text-secondary-fixed border-b-2 border-secondary pb-1 opacity-80 hover:opacity-100\">\n<span class=\"material-symbols-outlined\">account_circle</span>\n</button>\n</div>\n</div>\n</div>\n</header>\n<!-- Main Content -->\n<main class=\"flex-grow pt-[104px] pb-margin-desktop px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full\">\n<!-- Page Header -->\n<div class=\"mb-gutter flex flex-col md:flex-row md:items-end justify-between gap-4\">\n<div>\n<h1 class=\"font-display-h1 text-display-h1-mobile md:text-display-h1 text-on-background mb-2\">Order History</h1>\n<p class=\"font-body-lg text-body-lg text-on-surface-variant\">Track and manage your secured electronics purchases.</p>\n</div>\n<!-- Filters (Simplified for visual) -->\n<div class=\"flex gap-2\">\n<button class=\"bg-surface border border-outline-variant rounded px-4 py-2 font-ui-label text-ui-label text-on-surface flex items-center gap-2 hover:border-primary-container transition-colors\">\n<span class=\"material-symbols-outlined text-[18px]\">filter_list</span> Filter\n                </button>\n<div class=\"relative\">\n<span class=\"material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]\">search</span>\n<input class=\"bg-surface border border-outline-variant rounded pl-9 pr-4 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container w-full md:w-64 transition-colors\" placeholder=\"Search orders...\" type=\"text\"/>\n</div>\n</div>\n</div>\n<!-- Order List (Bento-style Cards instead of standard table for modern look) -->\n<div class=\"grid grid-cols-1 gap-4\">\n<!-- Order Card 1: Funds Held -->\n<div class=\"bg-surface rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200 group\">\n<div class=\"flex flex-col lg:flex-row lg:items-center justify-between gap-6\">\n<!-- Meta & ID -->\n<div class=\"flex flex-col gap-1 min-w-[200px]\">\n<div class=\"flex items-center gap-2\">\n<span class=\"font-data-id text-data-id text-on-surface-variant uppercase tracking-wider\">#ORD-2024-892A</span>\n<span class=\"w-1.5 h-1.5 rounded-full bg-outline-variant\"></span>\n<span class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Oct 24, 2024</span>\n</div>\n<div class=\"flex items-center gap-2 mt-2\">\n<div class=\"w-8 h-8 rounded-full bg-surface-container flex items-center justify-center\">\n<span class=\"material-symbols-outlined text-primary text-[16px]\">store</span>\n</div>\n<span class=\"font-body-md-bold text-body-md-bold text-on-surface\">Nairobi Tech Hub</span>\n<span class=\"bg-[#22C55E] text-white rounded-full px-2 py-0.5 flex items-center gap-1 font-ui-label text-[10px]\">\n<span class=\"material-symbols-outlined text-[10px]\" style=\"font-variation-settings: 'FILL' 1;\">shield</span> Verified\n                            </span>\n</div>\n</div>\n<!-- Item Details -->\n<div class=\"flex-grow\">\n<div class=\"flex gap-4 items-start\">\n<div class=\"w-16 h-16 rounded bg-surface-container flex-shrink-0 relative overflow-hidden\" data-alt=\"A pristine, high-end laptop sitting on a clean, modern white desk in a minimalist office setting. Soft, natural daylight illuminates the sleek silver chassis. The aesthetic is corporate modern and secure.\">\n<img alt=\"Product\" class=\"w-full h-full object-cover\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuAGFGl-X0PYNyfNaJOSb3CmC4DwjSTlBQmQllM0eYeUwylZIqg9t89y24rMtDDtvPZRs-E4wMAOuWFDzHRI9IJioMimlYBVKQs50N-yEdLF1vgw7YzhetPHf85ylixZg8ClM95hwV-Wewy6LB1ClwgFNoLvsrSZJREzUc9Atn_nKcri15Vyd73EuMe9ZfzySX6CTBOymIO63fvfcFNRlNOfgATYWZfwcKmV-RzCBvVllCz4Azl9ivQKTw\"/>\n</div>\n<div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">MacBook Pro 16\" M3 Max</h3>\n<p class=\"font-body-md text-body-md text-on-surface-variant text-sm line-clamp-1\">Space Black, 36GB RAM, 1TB SSD. Condition: Brand New.</p>\n</div>\n</div>\n</div>\n<!-- Price & Status -->\n<div class=\"flex flex-col lg:items-end gap-2 min-w-[150px]\">\n<span class=\"font-data-price text-data-price text-on-surface font-semibold\">KES 450,000</span>\n<!-- Float Indicator: Funds Held (Blue) -->\n<div class=\"flex items-center gap-2 bg-[#EEF2FF] text-[#0F3D8C] px-3 py-1 rounded-full\">\n<span class=\"w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse\"></span>\n<span class=\"font-ui-label text-ui-label text-xs font-semibold\">Funds in Escrow</span>\n</div>\n</div>\n<!-- Actions -->\n<div class=\"flex flex-row lg:flex-col gap-2 min-w-[140px] mt-4 lg:mt-0\">\n<button class=\"flex-1 bg-[#0F3D8C] hover:bg-[#0A2D6B] text-white font-ui-label text-ui-label py-2 px-4 rounded-[8px] transition-colors flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined text-[18px]\">local_shipping</span> Track\n                        </button>\n<button class=\"flex-1 bg-surface-container hover:bg-surface-container-high text-on-surface font-ui-label text-ui-label py-2 px-4 rounded-[8px] transition-colors flex items-center justify-center gap-2\">\n                            Dispute\n                        </button>\n</div>\n</div>\n</div>\n<!-- Order Card 2: Released -->\n<div class=\"bg-surface rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200\">\n<div class=\"flex flex-col lg:flex-row lg:items-center justify-between gap-6\">\n<!-- Meta & ID -->\n<div class=\"flex flex-col gap-1 min-w-[200px]\">\n<div class=\"flex items-center gap-2\">\n<span class=\"font-data-id text-data-id text-on-surface-variant uppercase tracking-wider\">#ORD-2024-710B</span>\n<span class=\"w-1.5 h-1.5 rounded-full bg-outline-variant\"></span>\n<span class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Oct 15, 2024</span>\n</div>\n<div class=\"flex items-center gap-2 mt-2\">\n<div class=\"w-8 h-8 rounded-full bg-surface-container flex items-center justify-center\">\n<span class=\"material-symbols-outlined text-primary text-[16px]\">store</span>\n</div>\n<span class=\"font-body-md-bold text-body-md-bold text-on-surface\">ElectroWorld KE</span>\n</div>\n</div>\n<!-- Item Details -->\n<div class=\"flex-grow\">\n<div class=\"flex gap-4 items-start\">\n<div class=\"w-16 h-16 rounded bg-surface-container flex-shrink-0 relative overflow-hidden\" data-alt=\"A sleek new smartphone displaying a security lock icon on screen, resting on a stark white pedestal against a minimal gray background. Lighting is sharp and professional.\">\n<img alt=\"Product\" class=\"w-full h-full object-cover grayscale opacity-80\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuDePp9S0hmi4CpjM6IPRv_ktt-1DZw4M3iOB2tjVw4D269KxXb4tnq22ATwSu5ryENYRyRd8v6l2C47Oez8mhZqRKKKNlaTDIj0lVB8VEANt-srVxoIF_FFvtW53KEv0-PiZ06ASfo_RTKh3wB9NFJXcm_oQXeD-VUYmw6r6qXREdEV-uC6XHtw5BQzsbhWRNDuivVlhpie3fSGunQAaNbL0if1b1EpPhqO6YkbGr0IgmUuJ-BN6f2X1g\"/>\n</div>\n<div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">iPhone 15 Pro Max</h3>\n<p class=\"font-body-md text-body-md text-on-surface-variant text-sm line-clamp-1\">Natural Titanium, 256GB. Condition: Refurbished.</p>\n</div>\n</div>\n</div>\n<!-- Price & Status -->\n<div class=\"flex flex-col lg:items-end gap-2 min-w-[150px]\">\n<span class=\"font-data-price text-data-price text-on-surface font-semibold text-outline\">KES 185,000</span>\n<!-- Float Indicator: Released (Green) -->\n<div class=\"flex items-center gap-2 bg-[#F0FDF4] text-[#166534] px-3 py-1 rounded-full border border-[#DCFCE7]\">\n<span class=\"material-symbols-outlined text-[#22C55E] text-[14px]\">check_circle</span>\n<span class=\"font-ui-label text-ui-label text-xs font-semibold\">Funds Released</span>\n</div>\n</div>\n<!-- Actions -->\n<div class=\"flex flex-row lg:flex-col gap-2 min-w-[140px] mt-4 lg:mt-0\">\n<button class=\"flex-1 bg-surface-container hover:bg-surface-container-high text-on-surface font-ui-label text-ui-label py-2 px-4 rounded-[8px] transition-colors flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined text-[18px]\">receipt_long</span> Receipt\n                        </button>\n</div>\n</div>\n</div>\n</div>\n</main>\n";
 
 const Orders = () => {
-  const { user } = useAuth();
-  const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<StatusFilter>("all");
-
   useEffect(() => {
-    document.title = "My Orders | TechTrust";
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select(
-          "id, status, payment_status, total_amount_ksh, quantity, created_at, product:products(brand, model_name, image_urls), vendor:vendor_profiles(business_name)"
-        )
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
-      setOrders(data ?? []);
-      setLoading(false);
-    })();
-  }, [user]);
+    document.title = "Order History - TechTrust Kenya";
 
-  const filtered =
-    filter === "all"
-      ? orders
-      : orders.filter((o) => STATUS_GROUPS[filter].includes(o.status));
+    const ensureStylesheet = (href: string) => {
+      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
+        (link) => link.getAttribute("href") === href,
+      );
+      if (exists) return;
+      const el = document.createElement("link");
+      el.rel = "stylesheet";
+      el.href = href;
+      document.head.appendChild(el);
+    };
 
-  const groups = groupByMonth(filtered);
+    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+  }, []);
 
-  if (loading)
-    return <div className="container py-20 text-center text-muted-foreground">Loading orders…</div>;
-
-  return (
-    <div className="container py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">My Orders</h1>
-
-      <div className="flex flex-wrap gap-2 mb-6">
-        {STATUS_FILTERS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-              filter === f.key
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-background text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 ? (
-        <Card className="p-12 text-center">
-          <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <h2 className="font-semibold mb-1">No orders yet</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Browse the marketplace to find your next device.
-          </p>
-          <Button asChild variant="default">
-            <Link to="/browse">Start Shopping</Link>
-          </Button>
-        </Card>
-      ) : (
-        <div className="space-y-8">
-          {groups.map(({ month, items }) => (
-            <div key={month}>
-              <h2 className="text-eyebrow text-muted-foreground mb-3">
-                {month}
-              </h2>
-              <div className="space-y-3">
-                {items.map((o) => {
-                  const sv = statusVariant(o.status);
-                  return (
-                    <Link key={o.id} to={`/orders/${o.id}`} className="block">
-                      <Card className="p-4 hover:shadow-card transition-smooth">
-                        <div className="flex gap-3 items-center">
-                          <img
-                            src={o.product?.image_urls?.[0] ?? "/placeholder.svg"}
-                            alt={o.product?.model_name}
-                            className="w-10 h-10 rounded-md object-cover bg-muted shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-sm truncate">
-                                {o.product?.brand} {o.product?.model_name}
-                              </span>
-                              <span className="text-data-id text-muted-foreground shrink-0">
-                                #{o.id.slice(0, 8).toUpperCase()}
-                              </span>
-                            </div>
-                            <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
-                              <span>{o.vendor?.business_name}</span>
-                              <span>·</span>
-                              <span>Qty <span className="text-stat">{o.quantity}</span></span>
-                            </div>
-                          </div>
-                          <div className="text-right shrink-0 flex flex-col items-end gap-1">
-                            <div className="text-xs text-muted-foreground">{formatDate(o.created_at)}</div>
-                            <div className="font-semibold text-sm"><span className="text-price">{formatKsh(Number(o.total_amount_ksh))}</span></div>
-                            <Badge className={`${sv.cls} text-[10px] px-2 py-0`} variant="outline">
-                              {sv.label}
-                            </Badge>
-                          </div>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 ml-1" />
-                        </div>
-                      </Card>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return <div className="bg-[#F8FAFC] text-on-surface antialiased min-h-screen flex flex-col" dangerouslySetInnerHTML={{ __html: pageHtml }} />;
 };
 
 export default Orders;

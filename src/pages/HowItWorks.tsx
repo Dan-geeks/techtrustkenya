@@ -1,68 +1,26 @@
 import { useEffect } from "react";
-import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
 
-const steps = [
-  {
-    num: "01",
-    title: "Vendor Verification",
-    body: "Every vendor on TechTrust has been physically inspected. We visit their shop, check their documents, and only approve businesses with a real, traceable presence.",
-  },
-  {
-    num: "02",
-    title: "Float Protected Payment",
-    body: "When you pay via M-Pesa, your money goes into Float — a protected account TechTrust controls. The vendor sees your order but cannot access the funds until you confirm receipt.",
-  },
-  {
-    num: "03",
-    title: "Confirm and Release",
-    body: "Once you receive the product and verify it matches the listing, you tap Confirm. Float releases the payment to the vendor instantly via M-Pesa B2C.",
-  },
-  {
-    num: "04",
-    title: "Disputes & Protection",
-    body: "Something wrong? Raise a dispute within 48 hours. Float stays frozen until our team reviews evidence from both sides. Refunds happen quickly when warranted.",
-  },
-];
+const pageHtml = "<!-- TopNavBar (Shared Component) -->\n\n<!-- Main Content -->\n<main class=\"flex-grow pt-[104px] pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full\">\n<!-- Hero Section -->\n<section class=\"mb-24 text-center max-w-3xl mx-auto\">\n<h1 class=\"font-display-h1-mobile text-display-h1-mobile md:font-display-h1 md:text-display-h1 text-primary mb-6\">\n                Financial-Grade Security for Electronics\n            </h1>\n<p class=\"font-body-lg text-body-lg text-on-surface-variant\">\n                We operate a strict escrow process to guarantee the safety of your funds and the authenticity of your devices. Understand exactly how your transaction is protected.\n            </p>\n</section>\n<!-- The Process Container (Asymmetric / Modern layout) -->\n<section class=\"space-y-32 relative\">\n<!-- Connection Line (Desktop only) -->\n<div class=\"hidden md:block absolute left-[50%] top-12 bottom-12 w-px bg-surface-variant z-0 -translate-x-1/2\"></div>\n<!-- Step 1: Verification -->\n<div class=\"relative z-10 flex flex-col md:flex-row items-center gap-gutter md:gap-16 group\">\n<!-- Content -->\n<div class=\"md:w-1/2 order-2 md:order-1 text-left md:text-right md:pr-12\">\n<div class=\"inline-flex items-center gap-2 bg-surface-container-high text-primary px-3 py-1 rounded-full mb-4\">\n<span class=\"font-data-id text-data-id uppercase tracking-wider\">Step 01</span>\n</div>\n<h2 class=\"font-display-h2 text-display-h2 text-primary mb-4\">Physical Verification of Vendors</h2>\n<p class=\"font-body-md text-body-md text-on-surface-variant mb-6\">\n                        Before a merchant can list high-value electronics on our platform, they undergo rigorous vetting. We conduct physical site visits and verify business credentials to ensure legitimacy.\n                    </p>\n<ul class=\"space-y-3 inline-block text-left\">\n<li class=\"flex items-center gap-3\">\n<span class=\"material-symbols-outlined text-secondary\" style=\"font-variation-settings: 'FILL' 1;\">verified</span>\n<span class=\"font-body-md text-body-md text-on-background\">Physical address confirmation</span>\n</li>\n<li class=\"flex items-center gap-3\">\n<span class=\"material-symbols-outlined text-secondary\" style=\"font-variation-settings: 'FILL' 1;\">verified</span>\n<span class=\"font-body-md text-body-md text-on-background\">Business license validation</span>\n</li>\n</ul>\n</div>\n<!-- Center Marker -->\n<div class=\"hidden md:flex w-16 h-16 rounded-full bg-surface border-4 border-surface-variant items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm group-hover:border-primary-container group-hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 z-20\">\n<span class=\"material-symbols-outlined text-primary-container text-3xl\">storefront</span>\n</div>\n<!-- Visual -->\n<div class=\"md:w-1/2 order-1 md:order-2 w-full\">\n<div class=\"bg-surface rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-2 w-full h-[320px] group-hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] group-hover:border-[#EEF2FF] border border-transparent transition-all duration-300\">\n<div class=\"bg-cover bg-center w-full h-full rounded-lg\" data-alt=\"A brightly lit, modern electronics retail store interior viewed from a low angle. The focus is on a sleek glass display case housing premium smartphones and laptops. In the background, out of focus, a professional inspector holding a digital tablet is speaking with a store manager. The aesthetic is clean, well-lit, corporate modern with a cool color temperature conveying trust and professional verification.\" style=\"background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCEDU3mXcgzsogAN1cju7drN7f8ojrnD0WXewJTgbkGYei0-0pZWIYrWmKZvJpPzzXnlkPLxtIj7KEZ4Tw1aeZrkWU7hiKtRXw9QH3xPt5w51_LvB92C1aj76CkCxpaRFV1hXlczvg5_drdSe7Zec1uTzqhBaCKa6wac7Ag7eTC9dB6rt8RaqmZBx7gEXJ7TPtIEViQvonkB5amzKu7EWPrmBYAq_wQK8m8xpf6IOOEs51C3dIAPt77Vw')\"></div>\n</div>\n</div>\n</div>\n<!-- Step 2: Escrow -->\n<div class=\"relative z-10 flex flex-col md:flex-row items-center gap-gutter md:gap-16 group\">\n<!-- Visual -->\n<div class=\"md:w-1/2 w-full\">\n<div class=\"bg-surface rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 w-full h-[320px] flex flex-col justify-center items-center group-hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] group-hover:border-[#EEF2FF] border border-transparent transition-all duration-300 bg-gradient-to-br from-surface to-surface-container\">\n<!-- UI Abstraction -->\n<div class=\"bg-surface w-full max-w-sm rounded-lg shadow-sm border border-outline-variant p-6 space-y-6\">\n<div class=\"flex justify-between items-center pb-4 border-b border-surface-variant\">\n<span class=\"font-body-md text-body-md text-on-surface-variant\">Status</span>\n<div class=\"bg-[#3B82F6] text-white px-3 py-1 rounded-full font-data-id text-data-id uppercase tracking-wider flex items-center gap-1\">\n<span class=\"material-symbols-outlined text-[14px]\">lock</span> In Escrow\n                                </div>\n</div>\n<div>\n<span class=\"block font-ui-label text-ui-label text-outline mb-1\">Held Amount</span>\n<span class=\"font-data-price text-data-price text-2xl text-primary\">KES 145,000</span>\n</div>\n<div class=\"w-full bg-surface-variant rounded-full h-2\">\n<div class=\"bg-primary-container h-2 rounded-full w-1/2\"></div>\n</div>\n</div>\n</div>\n</div>\n<!-- Center Marker -->\n<div class=\"hidden md:flex w-16 h-16 rounded-full bg-surface border-4 border-surface-variant items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm group-hover:border-primary-container group-hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 z-20\">\n<span class=\"material-symbols-outlined text-primary-container text-3xl\">account_balance</span>\n</div>\n<!-- Content -->\n<div class=\"md:w-1/2 text-left md:pl-12\">\n<div class=\"inline-flex items-center gap-2 bg-surface-container-high text-primary px-3 py-1 rounded-full mb-4\">\n<span class=\"font-data-id text-data-id uppercase tracking-wider\">Step 02</span>\n</div>\n<h2 class=\"font-display-h2 text-display-h2 text-primary mb-4\">The Float Hold</h2>\n<p class=\"font-body-md text-body-md text-on-surface-variant mb-6\">\n                        When you initiate a purchase, your funds are completely protected. We hold the payment in a secure escrow float account. The merchant is notified to dispatch the item, but they do not receive the funds.\n                    </p>\n<p class=\"font-body-md-bold text-body-md-bold text-primary\">\n                        Your money remains yours until you are satisfied.\n                    </p>\n</div>\n</div>\n<!-- Step 3: Release -->\n<div class=\"relative z-10 flex flex-col md:flex-row items-center gap-gutter md:gap-16 group\">\n<!-- Content -->\n<div class=\"md:w-1/2 order-2 md:order-1 text-left md:text-right md:pr-12\">\n<div class=\"inline-flex items-center gap-2 bg-surface-container-high text-primary px-3 py-1 rounded-full mb-4\">\n<span class=\"font-data-id text-data-id uppercase tracking-wider\">Step 03</span>\n</div>\n<h2 class=\"font-display-h2 text-display-h2 text-primary mb-4\">Safe Delivery and Release</h2>\n<p class=\"font-body-md text-body-md text-on-surface-variant mb-6\">\n                        Upon delivery, you have a 48-hour window to inspect the electronics. Confirm the specifications match the listing. Only when you explicitly approve the condition within our dashboard are the funds released to the merchant.\n                    </p>\n<button class=\"bg-[#0F3D8C] text-white hover:bg-[#0A2D6B] transition-colors duration-200 px-6 py-3 rounded-lg font-body-md-bold text-body-md-bold inline-flex items-center gap-2\">\n                        View Inspection Checklist <span class=\"material-symbols-outlined\">arrow_forward</span>\n</button>\n</div>\n<!-- Center Marker -->\n<div class=\"hidden md:flex w-16 h-16 rounded-full bg-surface border-4 border-surface-variant items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm group-hover:border-primary-container group-hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 z-20\">\n<span class=\"material-symbols-outlined text-primary-container text-3xl\">task_alt</span>\n</div>\n<!-- Visual -->\n<div class=\"md:w-1/2 order-1 md:order-2 w-full\">\n<div class=\"bg-surface rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-2 w-full h-[320px] group-hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] group-hover:border-[#EEF2FF] border border-transparent transition-all duration-300\">\n<div class=\"bg-cover bg-center w-full h-full rounded-lg\" data-alt=\"A close-up shot of a person's hands carefully unboxing a pristine, high-end laptop on a clean, white minimalist desk. Next to the laptop is a smartphone displaying a prominent, glowing green 'Approve Release' button on its screen. The lighting is soft, natural, and bright, emphasizing clarity, safety, and a successful transaction completion in a modern home environment.\" style=\"background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD7BXDCgKlvJmsHQQAJwqXMLE0-jPS6Z01x2_EvGgRc565m4c6ifThJBSfOxv4UwTc8sLOkOoCSxFb3D-Cd5F1kyPZaWKQY4HAPIKVe8qdQm3z4ptiN-ZcWbWmqUmZyREHRt7nYKzSscLqFFnR7nznzR-Fep1n8DmMiy_YYAChaylU2482qoGRcAonjJgiq51MwZZxk8h-KleUYWjFQ613N-ENKuU00XIrdRBkG1BoinJpiGKEd72RLpw')\"></div>\n</div>\n</div>\n</div>\n</section>\n</main>\n<!-- Footer (Shared Component) -->\n";
 
 const HowItWorks = () => {
   useEffect(() => {
-    document.title = "How TechTrust Works | Float-protected payments";
+    document.title = "How It Works - TechTrust Kenya";
+
+    const ensureStylesheet = (href: string) => {
+      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
+        (link) => link.getAttribute("href") === href,
+      );
+      if (exists) return;
+      const el = document.createElement("link");
+      el.rel = "stylesheet";
+      el.href = href;
+      document.head.appendChild(el);
+    };
+
+    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
   }, []);
 
-  return (
-    <div className="container py-12 max-w-5xl">
-      <header className="grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">How TechTrust Works</h1>
-          <p className="text-lg text-muted-foreground mt-3">
-            Trust isn't a promise — it's a system. Here's exactly how we protect every transaction.
-          </p>
-        </div>
-        <AnimatedArt
-          src={art.steps}
-          alt="Working through the TechTrust Float protection checklist step by step"
-          eager
-        />
-      </header>
-
-      <section className="mt-8 flex flex-col gap-4">
-        {steps.map(({ num, title, body }) => (
-          <div
-            key={num}
-            className="group flex gap-6 rounded-2xl bg-primary p-6 text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg sm:p-8"
-          >
-            <div className="text-stat text-3xl font-black text-primary-foreground/20 group-hover:text-accent/60 transition-colors shrink-0 w-12 leading-none pt-1">
-              {num}
-            </div>
-            <div>
-              <h2 className="font-semibold mb-2">{title}</h2>
-              <p className="text-primary-foreground/70 text-sm leading-relaxed">{body}</p>
-            </div>
-          </div>
-        ))}
-      </section>
-    </div>
-  );
+  return <div className="bg-background text-on-background antialiased min-h-screen flex flex-col" dangerouslySetInnerHTML={{ __html: pageHtml }} />;
 };
 
 export default HowItWorks;

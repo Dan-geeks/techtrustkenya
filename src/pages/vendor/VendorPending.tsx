@@ -1,114 +1,26 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Clock, ShieldCheck, RefreshCw, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { useEffect } from "react";
+
+const pageHtml = "<!-- Header -->\n\n<main class=\"flex-grow pt-[104px] pb-margin-desktop px-margin-mobile md:px-margin-desktop flex flex-col items-center justify-center\">\n<div class=\"w-full max-w-3xl mx-auto flex flex-col gap-8\">\n<!-- Hero Trust Section -->\n<div class=\"text-center flex flex-col items-center gap-4\">\n<div class=\"w-20 h-20 rounded-full bg-secondary-fixed flex items-center justify-center mb-4\">\n<span class=\"material-symbols-outlined text-4xl text-primary\" style=\"font-variation-settings: 'FILL' 1;\">\nshield_person\n</span>\n</div>\n<h2 class=\"font-display-h2 text-display-h2 text-primary\">Verification in Progress</h2>\n<p class=\"font-body-lg text-body-lg text-on-surface-variant max-w-xl\">\nThank you for submitting your documentation. We are currently reviewing your profile to ensure the highest security standards for our marketplace.\n</p>\n</div>\n<!-- Bento Layout for Status & Actions -->\n<div class=\"grid grid-cols-1 md:grid-cols-3 gap-6 mt-8\">\n<!-- Timeline Card (Spans 2 columns) -->\n<div class=\"md:col-span-2 bg-surface rounded-xl shadow-sm border border-surface-variant p-8 flex flex-col gap-6 relative overflow-hidden group hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-shadow\">\n<div class=\"flex items-center gap-3 border-b border-surface-variant pb-4\">\n<span class=\"material-symbols-outlined text-primary\">pending_actions</span>\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary\">Verification Timeline</h3>\n</div>\n<div class=\"relative flex flex-col gap-8 pt-4 ml-4\">\n<!-- Connecting Line -->\n<div class=\"absolute left-[11px] top-[24px] bottom-8 w-[2px] bg-surface-container-highest z-0\"></div>\n<div class=\"absolute left-[11px] top-[24px] h-[50%] w-[2px] bg-secondary z-0\"></div>\n<!-- Step 1: Done -->\n<div class=\"flex gap-6 relative z-10\">\n<div class=\"w-6 h-6 rounded-full bg-secondary flex items-center justify-center shrink-0 shadow-sm ring-4 ring-surface\">\n<span class=\"material-symbols-outlined text-[14px] text-on-secondary\" style=\"font-variation-settings: 'FILL' 1;\">check</span>\n</div>\n<div class=\"flex flex-col gap-1\">\n<span class=\"font-body-md-bold text-body-md-bold text-on-background\">Documents Submitted</span>\n<span class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Identity and business registration received on Oct 24, 2024.</span>\n</div>\n</div>\n<!-- Step 2: Current -->\n<div class=\"flex gap-6 relative z-10\">\n<div class=\"w-6 h-6 rounded-full bg-surface border-2 border-secondary flex items-center justify-center shrink-0 ring-4 ring-surface\">\n<div class=\"w-2 h-2 rounded-full bg-secondary animate-pulse\"></div>\n</div>\n<div class=\"flex flex-col gap-1\">\n<span class=\"font-body-md-bold text-body-md-bold text-primary\">Document Review</span>\n<span class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Our compliance team is currently analyzing your submission.</span>\n</div>\n</div>\n<!-- Step 3: Pending -->\n<div class=\"flex gap-6 relative z-10\">\n<div class=\"w-6 h-6 rounded-full bg-surface border-2 border-surface-variant flex items-center justify-center shrink-0 ring-4 ring-surface\"></div>\n<div class=\"flex flex-col gap-1\">\n<span class=\"font-body-md-bold text-body-md-bold text-outline\">Physical Visit Pending</span>\n<span class=\"font-body-md text-body-md text-outline text-sm\">A representative will schedule a site visit upon document approval.</span>\n</div>\n</div>\n</div>\n</div>\n<!-- Support & Info Card (1 Column) -->\n<div class=\"flex flex-col gap-6\">\n<div class=\"bg-surface rounded-xl shadow-sm border border-surface-variant p-6 flex flex-col gap-4\">\n<h3 class=\"font-ui-label text-ui-label text-on-surface-variant uppercase tracking-wider\">Application Details</h3>\n<div class=\"flex flex-col gap-2\">\n<div class=\"flex justify-between items-center\">\n<span class=\"font-body-md text-body-md text-on-surface-variant\">Reference</span>\n<span class=\"font-data-id text-data-id text-primary bg-surface-container px-2 py-1 rounded\">APP-8492-TTK</span>\n</div>\n<div class=\"flex justify-between items-center\">\n<span class=\"font-body-md text-body-md text-on-surface-variant\">Est. Time</span>\n<span class=\"font-body-md-bold text-body-md-bold text-on-background\">2-4 Bus. Days</span>\n</div>\n</div>\n</div>\n<!-- Support Card -->\n<div class=\"bg-inverse-surface rounded-xl p-6 flex flex-col gap-4 text-surface\">\n<div class=\"flex items-center gap-2\">\n<span class=\"material-symbols-outlined text-secondary-fixed-dim\">support_agent</span>\n<h3 class=\"font-body-md-bold text-body-md-bold\">Need Assistance?</h3>\n</div>\n<p class=\"font-body-md text-body-md text-outline-variant text-sm\">\nIf you have questions about the verification process, our support team is available.\n</p>\n<button class=\"w-full py-2 bg-secondary text-on-secondary rounded-lg font-ui-label text-ui-label hover:bg-on-secondary-fixed-variant transition-colors mt-2\">\nContact Support\n</button>\n</div>\n</div>\n</div>\n</div>\n</main>\n<!-- Footer Component from JSON -->\n";
 
 const VendorPending = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [checking, setChecking] = useState(false);
-
   useEffect(() => {
-    document.title = "Application Pending | TechTrust";
+    document.title = "Application Pending - TechTrust Kenya";
+
+    const ensureStylesheet = (href: string) => {
+      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
+        (link) => link.getAttribute("href") === href,
+      );
+      if (exists) return;
+      const el = document.createElement("link");
+      el.rel = "stylesheet";
+      el.href = href;
+      document.head.appendChild(el);
+    };
+
+    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
   }, []);
 
-  // Auto-check status on mount so approved vendors don't get stuck here
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("vendor_profiles")
-        .select("verification_status")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      const status = data?.verification_status;
-      if (status === "approved" || status === "verified") {
-        navigate("/vendor/dashboard", { replace: true });
-      } else if (status === "suspended") {
-        navigate("/vendor/suspended", { replace: true });
-      } else if (status === "rejected") {
-        navigate("/vendor/rejected", { replace: true });
-      }
-    })();
-  }, [user, navigate]);
-
-  const refreshStatus = async () => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    setChecking(true);
-    const { data, error } = await supabase
-      .from("vendor_profiles")
-      .select("verification_status")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    setChecking(false);
-    if (error) { toast.error(error.message); return; }
-    const status = data?.verification_status;
-    if (status === "approved" || status === "verified") {
-      toast.success("You've been approved! Redirecting to your dashboard…");
-      navigate("/vendor/dashboard", { replace: true });
-    } else if (status === "suspended") {
-      navigate("/vendor/suspended", { replace: true });
-    } else if (status === "rejected") {
-      toast.error("Your application was rejected. Please contact support.");
-    } else {
-      toast("Still pending review. Please check back later.");
-    }
-  };
-
-  return (
-    <div className="min-h-[calc(100vh-4rem)] grid place-items-center px-4 py-10">
-      <div className="w-full max-w-lg">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight font-display">
-            Tech<span className="text-accent">Trust</span>
-          </span>
-        </Link>
-
-        <div className="bg-card border border-border rounded-2xl p-8 md:p-10 shadow-card text-center">
-          <div className="mx-auto h-16 w-16 rounded-full bg-success/10 grid place-items-center mb-5">
-            <Clock className="h-8 w-8 text-success" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-3">Application Submitted</h1>
-          <p className="text-muted-foreground leading-relaxed">
-            Thank you for registering your shop on TechTrust. Our verification team
-            will review your submitted business details, shop photos, GPS coordinates
-            and Google Maps link from the Admin Dashboard within{" "}
-            <span className="text-foreground font-medium">24 to 48 hours</span>.
-            A physical visit may be arranged in some cases, but the approval
-            decision is recorded inside the app.
-          </p>
-          <p className="text-muted-foreground leading-relaxed mt-3">
-            Once approved you will receive an email notification at the address you
-            registered with. You can then log in and you will be taken directly to
-            your vendor dashboard.
-          </p>
-
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button onClick={refreshStatus} disabled={checking} variant="hero">
-              {checking ? <><Loader2 className="h-4 w-4 animate-spin" /> Checking…</> : <><RefreshCw className="h-4 w-4" /> Refresh status</>}
-            </Button>
-            <Button variant="secondary" asChild>
-              <Link to="/">Back to Home</Link>
-            </Button>
-          </div>
-
-          <p className="text-xs text-muted-foreground mt-6">
-            Questions? Contact us at{" "}
-            <a href="mailto:johnmwangimegwe@gmail.com" className="text-accent hover:underline">johnmwangimegwe@gmail.com</a>{" "}
-            or{" "}
-            <a href="mailto:support@techtrust.co.ke" className="text-accent hover:underline">support@techtrust.co.ke</a>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="bg-[#F8FAFC] text-on-surface antialiased min-h-screen flex flex-col" dangerouslySetInnerHTML={{ __html: pageHtml }} />;
 };
 
 export default VendorPending;

@@ -1,21 +1,29 @@
-## 2026-08-01T13:50:15Z
+# Dispatch Log — sub_orch_m2
 
-<USER_REQUEST>
-You are the Sub-orchestrator for Milestone 2 (M2: Vendor & Admin Portals & Interactive Queues).
-Your working directory is: C:\Users\Administrator\techtrustkenya\.agents\sub_orch_m2
-Read C:\Users\Administrator\techtrustkenya\.agents\ORIGINAL_REQUEST.md and C:\Users\Administrator\techtrustkenya\.agents\orchestrator_r1\PROJECT.md.
+## 2026-08-01T16:40:06Z
 
-Task Objective: Execute Milestone 2 (Vendor Dashboard, Vendor Onboarding, Admin Dashboard, M-Pesa STK payment, Float escrow release, Vendor approval/rejection, Repairs queue, Disputes queue).
+You are the Sub-orchestrator for Milestone 2 & Final Milestone (M2 & M3) of TechTrust Kenya.
+Your working directory is C:\Users\Administrator\techtrustkenya\.agents\sub_orch_m2.
+Create your working directory and briefing files inside C:\Users\Administrator\techtrustkenya\.agents\sub_orch_m2\.
 
-Instructions:
-1. Create directory C:\Users\Administrator\techtrustkenya\.agents\sub_orch_m2 if it doesn't exist, and initialize BRIEFING.md, SCOPE.md, and progress.md.
-2. Dispatch 3 parallel Explorers (`teamwork_preview_explorer`):
-   - Explorer 1: Audit Vendor Dashboard & Onboarding flows (VendorDashboard, VendorRegister, VendorOnboarding, VendorPending, OverviewTab, ProductsTab, OrdersTab, RepairsTab, ReviewsTab, PromotionsTab, AnalyticsTab, SettingsTab). Check Stitch tokens (.text-price, .text-stat, .text-data-id, Sora, Inter, #002766, #0058be, #25c65f).
-   - Explorer 2: Audit Admin Dashboard & Queues (AdminDashboard, AdminVendors, AdminDisputes, AdminUsers, AdminPayments). Check physical address display, document links, dispute handling, account roles, and escrow ledger. Check Stitch tokens.
-   - Explorer 3: Audit Interactive Flows & Edge Functions (M-Pesa STK push simulation, Float escrow release logic, repair service booking queue, buyer dispute submission on OrderDetail).
-3. Synthesize explorer findings into worker task instructions.
-4. Dispatch Worker (`teamwork_preview_worker`) to implement all required fixes and verify `npx tsc --noEmit` and `npm run build` succeed with 0 errors.
-   - Include mandatory integrity warning: "DO NOT CHEAT. All implementations must be genuine. DO NOT hardcode test results, create dummy/facade implementations, or circumvent the intended task. A teamwork_preview_auditor will independently verify your work."
-5. Dispatch 2 Reviewers (`teamwork_preview_reviewer`), 2 Challengers (`teamwork_preview_challenger`), and 1 Auditor (`teamwork_preview_auditor`) to verify code quality, token adherence, build, and integrity.
-6. Evaluate gate in GATE_STATUS.md. On PASS, mark M2 Status as DONE in C:\Users\Administrator\techtrustkenya\.agents\orchestrator_r1\PROJECT.md and report completion to parent orchestrator.
-</USER_REQUEST>
+Your parent conversation ID is: 2f9f5c74-8d81-432e-9df6-b00a0a4acd40.
+
+Scope & Task Requirements:
+1. Read C:\Users\Administrator\techtrustkenya\.agents\ORIGINAL_REQUEST.md, C:\Users\Administrator\techtrustkenya\.agents\orchestrator_r1\PROJECT.md, and C:\Users\Administrator\techtrustkenya\TEST_READY.md.
+2. Milestone 2 & 3 Execution Scope:
+   - **M2 (Vendor & Admin Portals & Interactive Queues)**:
+     - Verify/implement Defect D2 fix in `src/components/vendor/OverviewTab.tsx` (add `Lock` and `ShieldCheck` imports from `lucide-react`).
+     - Verify/implement Defect D3 fix in `src/components/vendor/OrdersTab.tsx` (add `.text-data-id` to order ID) and `src/components/vendor/AnalyticsTab.tsx` (add `.text-stat` to stat counters).
+     - Audit & verify Vendor Dashboard, Vendor Onboarding, Admin Dashboard, M-Pesa STK payment simulation, Float escrow release mechanism, vendor approval/rejection queue, repair booking queue, dispute submission & resolution.
+   - **M3 Phase 1 (100% E2E Test Pass)**:
+     - Run `npm test` or `npx vitest run` or `npm run build` and `npx tsc --noEmit`. Verify all 232 E2E test cases pass with exit code 0.
+   - **M3 Phase 2 (Tier 5 Adversarial Coverage Hardening)**:
+     - Dispatch Challenger (`teamwork_preview_challenger`) with Model: "flash" to analyze source + tests for any edge case gaps or untested code paths.
+     - Dispatch Worker (`teamwork_preview_worker`) with Model: "flash" to fix any identified gaps and ensure build/tests pass cleanly.
+     - Dispatch Reviewer (`teamwork_preview_reviewer`) with Model: "flash" to independently review correctness and interface compliance.
+     - Dispatch Forensic Auditor (`teamwork_preview_auditor`) with Model: "flash" to conduct integrity audit.
+3. Mandatory Rules:
+   - Worker prompt must include verbatim: "DO NOT CHEAT. All implementations must be genuine...".
+   - Gate passes ONLY if build succeeds with 0 TypeScript/Vite errors, all tests pass, Reviewer APPROVES, Challenger CONFIRMS, and Auditor is CLEAN.
+4. Record progress in `progress.md` and `handoff.md` within C:\Users\Administrator\techtrustkenya\.agents\sub_orch_m2\.
+5. Send a completion message to your parent (conversation ID: 2f9f5c74-8d81-432e-9df6-b00a0a4acd40) when all milestones are finished, verified, and audited.

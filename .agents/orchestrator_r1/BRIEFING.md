@@ -49,14 +49,13 @@ Orchestrate full UI polish and page-by-page audit/implementation for TechTrust K
 | Explorer 1 | teamwork_preview_explorer | Build & Styling Survey | completed | 636c33cf-e8f2-46db-a9dd-cc190c2d5f36 |
 | Explorer 2 | teamwork_preview_explorer | Public Buyer Pages Survey | completed | 07c7b272-286f-443b-92d8-551936efd0e7 |
 | Explorer 3 | teamwork_preview_explorer | Vendor/Admin & Backend Survey | completed | 24107542-24e4-45a2-8776-19ce0b28266a |
-| Sub-orch M1 | self | Milestone 1 (Core Design System & Public Pages) | in-progress | e8959f52-e5e1-4a69-ad4c-8554ead77aae |
-| Sub-orch E2E | self | E2E Testing Track | in-progress | b303c02b-7ecd-4d3a-9d1c-de6af8059762 |
-| Sub-orch M2 | self | Milestone 2 (Vendor & Admin Portals & Queues) | in-progress | 93fab34f-2b14-4033-811d-2911dff9839a |
+| Sub-orch E2E | self | E2E Testing Track | completed | b303c02b-7ecd-4d3a-9d1c-de6af8059762 |
+| Sub-orch M2&3 | self | M2 & Final Milestone Verification | in-progress | 4e7829ea-ca92-4e73-8118-8a421bf82ed8 |
 
 ## Succession Status
 - Succession required: no
 - Spawn count: 6 / 20
-- Pending subagents: e8959f52-e5e1-4a69-ad4c-8554ead77aae, b303c02b-7ecd-4d3a-9d1c-de6af8059762, 93fab34f-2b14-4033-811d-2911dff9839a
+- Pending subagents: 4e7829ea-ca92-4e73-8118-8a421bf82ed8
 - Predecessor: none
 - Successor: not yet spawned
 

@@ -1,179 +1,26 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { ShieldCheck, Star, MapPin, Clock, Wrench } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProductCard } from "@/components/marketplace/ProductCard";
-import { supabase } from "@/integrations/supabase/client";
-import { formatKsh } from "@/lib/format";
-import { Badge } from "@/components/ui/badge";
+import { useEffect } from "react";
+
+const pageHtml = "\n<!-- Main Content -->\n<main class=\"flex-grow pt-[88px] pb-margin-desktop px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-gutter\">\n<!-- Sidebar / Vendor Info -->\n<aside class=\"col-span-1 lg:col-span-3 flex flex-col gap-unit\">\n<!-- Vendor Profile Card -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 flex flex-col items-center text-center border border-surface-container\">\n<div class=\"w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-surface-container-high\">\n<img alt=\"Vendor Logo\" class=\"w-full h-full object-cover\" data-alt=\"A clean, modern corporate logo for a high-end electronics retailer, featuring a stylized geometric 'E' in deep navy blue on a pristine white background. The aesthetic is professional, minimalist, and conveys absolute trust and technical precision.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuDLsL6PVGo3y65riFq_vTJaKbNY4b0CEY7RlDjRQJHQPD2g_dCnM4I7BjW643W2_3qpHkyk_E6W8EWzw308t6k1-G-mGEQ6zJAoiQflI2vPzLpJGr8BdNxzWdB-AsTZCu018PLhKnh5u42kq7kKd0FVp9fxKz9iDziUxeVtHbTz3x8pqhvf1ynrwBWdsB0e7IE7xJPwggwlHxIvy2XZ7h8yM2pniQ08Uou0039jcSqfRuea6dBqjmUzUQ\"/>\n</div>\n<h1 class=\"font-display-h2 text-display-h2 text-primary mb-1\">ElectroHub Nairobi</h1>\n<!-- Verified Badge -->\n<div class=\"inline-flex items-center gap-1 bg-[#22C55E] text-white px-3 py-1 rounded-full mb-4\">\n<span class=\"material-symbols-outlined text-[16px]\" style=\"font-variation-settings: 'FILL' 1;\">shield</span>\n<span class=\"font-ui-label text-ui-label\">Verified Merchant</span>\n</div>\n<div class=\"flex items-center gap-2 text-on-surface-variant font-body-md text-body-md mb-6\">\n<span class=\"material-symbols-outlined text-[18px]\">location_on</span>\n<span>CBD, Nairobi</span>\n</div>\n<div class=\"w-full flex justify-between px-4 py-3 bg-surface-container-low rounded-lg mb-6\">\n<div class=\"flex flex-col items-center\">\n<span class=\"font-data-price text-data-price text-primary\">4.9</span>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Rating</span>\n</div>\n<div class=\"w-[1px] bg-outline-variant\"></div>\n<div class=\"flex flex-col items-center\">\n<span class=\"font-data-price text-data-price text-primary\">1.2k</span>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Sales</span>\n</div>\n<div class=\"w-[1px] bg-outline-variant\"></div>\n<div class=\"flex flex-col items-center\">\n<span class=\"font-data-price text-data-price text-primary\">100%</span>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Fulfillment</span>\n</div>\n</div>\n<button class=\"w-full bg-primary-container text-on-primary font-body-md-bold text-body-md-bold py-2 rounded-lg hover:bg-primary transition-colors flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined text-[20px]\">chat</span>\n                    Contact Vendor\n                </button>\n</div>\n<!-- Verification Details -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 border border-surface-container mt-4\">\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary mb-4 uppercase tracking-wider text-[12px]\">Verification Details</h3>\n<ul class=\"flex flex-col gap-4\">\n<li class=\"flex items-start gap-3\">\n<span class=\"material-symbols-outlined text-secondary text-[20px] mt-0.5\">verified_user</span>\n<div>\n<p class=\"font-ui-label text-ui-label text-on-surface\">Identity Verified</p>\n<p class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Government ID matched</p>\n</div>\n</li>\n<li class=\"flex items-start gap-3\">\n<span class=\"material-symbols-outlined text-secondary text-[20px] mt-0.5\">store</span>\n<div>\n<p class=\"font-ui-label text-ui-label text-on-surface\">Physical Store Verified</p>\n<p class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Kimathi Street, Nairobi CBD</p>\n</div>\n</li>\n<li class=\"flex items-start gap-3\">\n<span class=\"material-symbols-outlined text-secondary text-[20px] mt-0.5\">description</span>\n<div>\n<p class=\"font-ui-label text-ui-label text-on-surface\">Business License Valid</p>\n<p class=\"font-data-id text-data-id text-on-surface-variant text-sm mt-1\">ID: BZK-894-2023</p>\n</div>\n</li>\n</ul>\n</div>\n<!-- About Section -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 border border-surface-container mt-4\">\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary mb-2 uppercase tracking-wider text-[12px]\">About</h3>\n<p class=\"font-body-md text-body-md text-on-surface-variant leading-relaxed\">\n                    Premium electronics retailer specializing in high-end laptops, smartphones, and professional networking gear. Authorized reseller for major brands. All devices pass a strict 40-point inspection before listing.\n                </p>\n</div>\n</aside>\n<!-- Product Grid -->\n<section class=\"col-span-1 lg:col-span-9 flex flex-col gap-6\">\n<!-- Filters / Sorting Header -->\n<div class=\"flex flex-col sm:flex-row justify-between items-center bg-surface-container-lowest p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-surface-container\">\n<div class=\"flex items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0\">\n<div class=\"relative w-full sm:w-64\">\n<span class=\"material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline\">search</span>\n<input class=\"w-full pl-10 pr-4 py-2 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md focus:border-primary focus:ring-0 transition-colors\" placeholder=\"Search this store...\" type=\"text\"/>\n</div>\n</div>\n<div class=\"flex items-center gap-3 w-full sm:w-auto\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant whitespace-nowrap\">Sort by:</span>\n<select class=\"bg-surface border border-outline-variant rounded-lg font-ui-label text-ui-label px-3 py-2 pr-8 focus:border-primary focus:ring-0 cursor-pointer\">\n<option>Newest Arrivals</option>\n<option>Price: Low to High</option>\n<option>Price: High to Low</option>\n<option>Highest Rated</option>\n</select>\n</div>\n</div>\n<!-- Grid -->\n<div class=\"grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter\">\n<!-- Product Card 1 -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-transparent hover:border-[#EEF2FF] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 flex flex-col overflow-hidden group cursor-pointer\">\n<div class=\"aspect-square bg-surface-container-low relative overflow-hidden\">\n<img alt=\"Product Image\" class=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-500\" data-alt=\"A sleek, high-end professional laptop resting on a clean, white modern desk. The lighting is bright and studio-quality, highlighting the brushed aluminum chassis. The aesthetic is premium corporate tech, with no background clutter, focusing purely on the pristine device.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuCokv45mRVrSIXOWebAFT4UoYazAFFcUbgCGEbnmD9yGyNV54x7N43L91196famiDQcKRBVxbcpDt2X4sEIkqlbHZYWIDsXksFw49njdx5TJb8PLi75aaZAXYAfs7-3sxTCNLBO7OYOPqEquk_48fNbyYChnf2_w9YLaoxr4MXfqm0oWPd7x4sYs05pH9KAgelZoOvLMbksbYq9D99zvRU4PTIp6icBuvUj7K_LLbFHW4-k_oiQwwCUFg\"/>\n<!-- Float Indicator -->\n<div class=\"absolute top-3 left-3 bg-[#3B82F6] text-white px-2 py-1 rounded-sm flex items-center gap-1 shadow-sm\">\n<span class=\"material-symbols-outlined text-[14px]\">local_shipping</span>\n<span class=\"font-data-id text-data-id uppercase tracking-wider\">Fast Ship</span>\n</div>\n</div>\n<div class=\"p-4 flex flex-col flex-grow\">\n<div class=\"flex justify-between items-start mb-2\">\n<h4 class=\"font-body-md-bold text-body-md-bold text-primary line-clamp-2\">ThinkPad X1 Carbon Gen 10</h4>\n<button class=\"text-outline-variant hover:text-error transition-colors\">\n<span class=\"material-symbols-outlined\" data-icon=\"favorite_border\">favorite_border</span>\n</button>\n</div>\n<p class=\"font-data-id text-data-id text-outline mb-4\">SKU: LNV-X1-8492</p>\n<div class=\"mt-auto flex justify-between items-end\">\n<div class=\"flex flex-col\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Escrow Price</span>\n<span class=\"font-data-price text-data-price text-secondary font-bold\">KES 185,000</span>\n</div>\n<span class=\"material-symbols-outlined text-outline group-hover:text-secondary transition-colors\">arrow_forward</span>\n</div>\n</div>\n</div>\n<!-- Product Card 2 -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-transparent hover:border-[#EEF2FF] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 flex flex-col overflow-hidden group cursor-pointer\">\n<div class=\"aspect-square bg-surface-container-low relative overflow-hidden\">\n<img alt=\"Product Image\" class=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-500\" data-alt=\"A pristine, latest-model premium smartphone sitting upright on a minimalist white display stand. The studio lighting casts a soft reflection on the glass back. The environment is clinical, bright, and highly professional, emphasizing the mint condition of the tech device.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuBjjJ9N_yTUiaw6_mQSmGEhSshU2fSCpnJ30l4x7wmSPOFjuomWHAR482UNqaUcquKZmOuN6R2_BxrRLgOzSsuPjLKGV90G92ApbixdgjmhfS21hQO86p3kaXasrD9jkrHpgAZwpePYfeE3MD2tpAwRjeDsMjXvUtjakTBen8YpdMR_S14RfHp-L06v1RcxnDlRMn0RiVO9OYSOk6UcEhr5avQELw6iso5cy7WAUrVuOJWm0HlJXACttQ\"/>\n</div>\n<div class=\"p-4 flex flex-col flex-grow\">\n<div class=\"flex justify-between items-start mb-2\">\n<h4 class=\"font-body-md-bold text-body-md-bold text-primary line-clamp-2\">iPhone 14 Pro Max 256GB - Deep Purple</h4>\n<button class=\"text-outline-variant hover:text-error transition-colors\">\n<span class=\"material-symbols-outlined\" data-icon=\"favorite_border\">favorite_border</span>\n</button>\n</div>\n<p class=\"font-data-id text-data-id text-outline mb-4\">SKU: APL-14PM-256</p>\n<div class=\"mt-auto flex justify-between items-end\">\n<div class=\"flex flex-col\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Escrow Price</span>\n<span class=\"font-data-price text-data-price text-secondary font-bold\">KES 142,000</span>\n</div>\n<span class=\"material-symbols-outlined text-outline group-hover:text-secondary transition-colors\">arrow_forward</span>\n</div>\n</div>\n</div>\n<!-- Product Card 3 -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-transparent hover:border-[#EEF2FF] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 flex flex-col overflow-hidden group cursor-pointer\">\n<div class=\"aspect-square bg-surface-container-low relative overflow-hidden\">\n<img alt=\"Product Image\" class=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-500\" data-alt=\"A professional-grade networking switch or enterprise router shot in macro detail against a clean white backdrop. The metallic ports and subtle LED indicators are sharp and in focus. The lighting is cool, corporate, and evokes enterprise-level technical infrastructure.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuCAIw68Od2d-magWgsPSjhLpFSB-xeiT16teJeRUZ7kYslGqFv4ZjJ4Jm_l9d3DR-5OK9tsf5FhXSCMIly8LBbumdWCGR-ozo_fhPPfHuNcC2TJvGzNCymkzUdNPzYGT3jJkw74NsSXhksTr-APx-qLHEhOmwqwf0PLMROldHdvwtpZ_kaqACX5Z7iOI8_qdS47jKYjGqzIZxl8LZF7iK29dhGf82PafORHCDJzF85OaHzhDNDjGspAvw\"/>\n<!-- Float Indicator -->\n<div class=\"absolute top-3 left-3 bg-surface-container-high text-on-surface px-2 py-1 rounded-sm flex items-center gap-1 shadow-sm\">\n<span class=\"font-data-id text-data-id uppercase tracking-wider text-[10px]\">Only 2 Left</span>\n</div>\n</div>\n<div class=\"p-4 flex flex-col flex-grow\">\n<div class=\"flex justify-between items-start mb-2\">\n<h4 class=\"font-body-md-bold text-body-md-bold text-primary line-clamp-2\">Cisco Catalyst 9300 Series Switch</h4>\n<button class=\"text-outline-variant hover:text-error transition-colors\">\n<span class=\"material-symbols-outlined\" data-icon=\"favorite_border\">favorite_border</span>\n</button>\n</div>\n<p class=\"font-data-id text-data-id text-outline mb-4\">SKU: CSC-9300-48P</p>\n<div class=\"mt-auto flex justify-between items-end\">\n<div class=\"flex flex-col\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Escrow Price</span>\n<span class=\"font-data-price text-data-price text-secondary font-bold\">KES 320,000</span>\n</div>\n<span class=\"material-symbols-outlined text-outline group-hover:text-secondary transition-colors\">arrow_forward</span>\n</div>\n</div>\n</div>\n</div>\n<!-- Pagination -->\n<div class=\"flex justify-center items-center gap-2 mt-8\">\n<button class=\"w-10 h-10 rounded-lg border border-outline-variant flex items-center justify-center text-outline hover:border-primary hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed\" disabled=\"\">\n<span class=\"material-symbols-outlined\">chevron_left</span>\n</button>\n<button class=\"w-10 h-10 rounded-lg bg-primary-container text-on-primary font-body-md-bold flex items-center justify-center transition-colors\">1</button>\n<button class=\"w-10 h-10 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary font-body-md-bold transition-colors\">2</button>\n<button class=\"w-10 h-10 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary font-body-md-bold transition-colors\">3</button>\n<button class=\"w-10 h-10 rounded-lg border border-outline-variant flex items-center justify-center text-outline hover:border-primary hover:text-primary transition-colors\">\n<span class=\"material-symbols-outlined\">chevron_right</span>\n</button>\n</div>\n</section>\n</main>\n";
 
 const ShopPage = () => {
-  const { vendorId } = useParams();
-  const [vendor, setVendor] = useState<any>(null);
-  const [products, setProducts] = useState<any[]>([]);
-  const [services, setServices] = useState<any[]>([]);
-  const [reviews, setReviews] = useState<any[]>([]);
-
   useEffect(() => {
-    if (!vendorId) return;
-    (async () => {
-      const { data: v } = await supabase.from("vendor_profiles").select("*").eq("id", vendorId).maybeSingle();
-      setVendor(v);
-      if (v) document.title = `${v.business_name} | TechTrust`;
-      const { data: p } = await supabase.from("products").select("*, vendor:vendor_profiles(id,business_name,average_rating,verification_status)").eq("vendor_id", vendorId).eq("is_active", true);
-      setProducts(p ?? []);
-      const { data: s } = await supabase.from("repair_services").select("*").eq("vendor_id", vendorId).eq("is_active", true);
-      setServices(s ?? []);
-      const { data: r } = await supabase.from("reviews").select("*, customer:profiles(full_name)").eq("vendor_id", vendorId).order("created_at", { ascending: false });
-      setReviews(r ?? []);
-    })();
-  }, [vendorId]);
+    document.title = "Vendor Storefront - TechTrust Kenya";
 
-  if (!vendor) {
-    return <div className="container py-20 text-center text-muted-foreground">Loading shop…</div>;
-  }
+    const ensureStylesheet = (href: string) => {
+      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
+        (link) => link.getAttribute("href") === href,
+      );
+      if (exists) return;
+      const el = document.createElement("link");
+      el.rel = "stylesheet";
+      el.href = href;
+      document.head.appendChild(el);
+    };
 
-  const filterByCategory = (cat?: string) => cat ? products.filter((p) => p.category === cat) : products;
+    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+  }, []);
 
-  return (
-    <div>
-      {/* HEADER */}
-      <section className="bg-muted/40 border-b border-border">
-        <div className="container py-12">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="h-16 w-16 md:h-20 md:w-20 rounded-md bg-primary text-primary-foreground grid place-items-center font-bold text-2xl shrink-0">
-              {vendor.business_name[0]}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-3xl md:text-4xl font-bold text-foreground">{vendor.business_name}</h1>
-                {(vendor.verification_status === "verified" || vendor.verification_status === "approved") && (
-                  <Badge className="bg-success/10 text-success border border-success/30">
-                    <ShieldCheck className="h-3 w-3 mr-1" /> Verified
-                  </Badge>
-                )}
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-                {vendor.physical_address && (
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4" />
-                    {vendor.physical_address}{vendor.sub_county ? `, ${vendor.sub_county}` : ""}{vendor.county ? `, ${vendor.county} County` : (vendor.city ? `, ${vendor.city}` : "")}
-                  </span>
-                )}
-                {vendor.operating_hours && (
-                  <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {vendor.operating_hours}</span>
-                )}
-              </div>
-              <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
-                {Number(vendor.average_rating) > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-warning text-warning" />
-                    <span className="text-stat font-medium text-foreground">{Number(vendor.average_rating).toFixed(1)}</span>
-                    <span>rating</span>
-                  </span>
-                )}
-                {vendor.total_completed_transactions > 0 && (
-                  <>
-                    <span className="text-border">·</span>
-                    <span><strong className="text-stat text-foreground">{vendor.total_completed_transactions}</strong> sales</span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* MAP */}
-          {vendor.latitude && vendor.longitude && (
-            <div className="mt-8 rounded-xl overflow-hidden border border-border aspect-[16/5] max-h-56">
-              <iframe
-                title="Shop location"
-                src={`https://www.google.com/maps?q=${vendor.latitude},${vendor.longitude}&hl=en&z=16&output=embed`}
-                className="w-full h-full"
-                loading="lazy"
-              />
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* TABS */}
-      <div className="container py-10">
-        <Tabs defaultValue="all">
-          <TabsList className="flex-wrap h-auto">
-            <TabsTrigger value="all">All Products</TabsTrigger>
-            <TabsTrigger value="laptop">Laptops</TabsTrigger>
-            <TabsTrigger value="smartphone">Smartphones</TabsTrigger>
-            <TabsTrigger value="accessory">Accessories</TabsTrigger>
-            {services.length > 0 && <TabsTrigger value="repairs">Repair Services</TabsTrigger>}
-          </TabsList>
-
-          {(["all", "laptop", "smartphone", "accessory"] as const).map((cat) => (
-            <TabsContent key={cat} value={cat} className="mt-6">
-              {(cat === "all" ? products : filterByCategory(cat)).length === 0 ? (
-                <p className="text-center py-12 text-muted-foreground">No products in this category.</p>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                  {(cat === "all" ? products : filterByCategory(cat)).map((p) => <ProductCard key={p.id} {...p} />)}
-                </div>
-              )}
-            </TabsContent>
-          ))}
-
-          {services.length > 0 && (
-            <TabsContent value="repairs" className="mt-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                {services.map((s) => (
-                  <div key={s.id} className="p-5 bg-card border border-border rounded-xl shadow-card">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <Wrench className="h-5 w-5 text-accent" />
-                          <h3 className="font-semibold">{s.service_name}</h3>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-2">{s.description}</p>
-                        <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                          <Badge variant="outline" className="capitalize">{s.device_type}</Badge>
-                          <Badge variant="outline"><span className="text-stat">{s.estimated_turnaround_days}</span> days</Badge>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-sm text-muted-foreground">From</div>
-                        <div className="font-bold text-primary"><span className="text-price">{formatKsh(s.price_min_ksh)}</span></div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-          )}
-        </Tabs>
-
-        {/* REVIEWS */}
-        <section className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
-          {reviews.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No reviews yet.</p>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-4">
-              {reviews.map((r) => (
-                <div key={r.id} className="p-5 bg-card border border-border rounded-xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold">{r.customer?.full_name ?? "Customer"}</span>
-                    <div className="flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className={`h-4 w-4 ${i < r.service_rating ? "fill-warning text-warning" : "text-muted"}`} />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-sm text-foreground/80">{r.comment}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
-  );
+  return <div className="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col" dangerouslySetInnerHTML={{ __html: pageHtml }} />;
 };
 
 export default ShopPage;

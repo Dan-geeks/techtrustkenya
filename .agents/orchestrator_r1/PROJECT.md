@@ -36,9 +36,9 @@
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Core Design System & Public Pages Polish | Fix D1 (notification route), D2 (icon imports), D3 (typography classes), audit & polish 13 public buyer pages | none | IN_PROGRESS (`00ba8e2f-a90f-4c4f-9b61-3b07ff626b2c`) |
-| M2 | Vendor & Admin Portals & Interactive Queues | Audit & verify Vendor Dashboard, Vendor Onboarding, Admin Dashboard, M-Pesa payment, Float escrow release, vendor approvals, repairs, disputes | M1 | PLANNED |
-| M3 | Final Milestone (E2E Test Verification & Hardening) | Phase 1: 100% pass on Tiers 1-4 test suite. Phase 2: Tier 5 adversarial coverage hardening | M1, M2 | PLANNED |
+| M1 | Core Design System & Public Pages Polish | Fix D1 (notification route), D2 (icon imports), D3 (typography classes), audit & polish 13 public buyer pages | none | DONE |
+| M2 | Vendor & Admin Portals & Interactive Queues | Audit & verify Vendor Dashboard, Vendor Onboarding, Admin Dashboard, M-Pesa payment, Float escrow release, vendor approvals, repairs, disputes | M1 | IN_PROGRESS (`4e7829ea-ca92-4e73-8118-8a421bf82ed8`) |
+| M3 | Final Milestone (E2E Test Verification & Hardening) | Phase 1: 100% pass on Tiers 1-4 test suite. Phase 2: Tier 5 adversarial coverage hardening | M1, M2 | IN_PROGRESS (`4e7829ea-ca92-4e73-8118-8a421bf82ed8`) |
 
 ## Interface Contracts
 ### Public Pages ↔ Shared Components

@@ -1,172 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { Wrench, Star, Clock, ShieldCheck, Search, ReceiptText, Lock, CheckCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { formatKsh } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import { RepairRequestDialog } from "@/components/repairs/RepairRequestDialog";
-import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
+import { useEffect } from "react";
 
-const repairSteps = [
-  { icon: Search, title: "Diagnosis", note: "Shop inspects device", tone: "outline" },
-  { icon: ReceiptText, title: "Quote", note: "Receive exact price", tone: "outline" },
-  { icon: Lock, title: "Float hold", note: "Funds secured", tone: "filled" },
-  { icon: Wrench, title: "Repair", note: "Work performed", tone: "outline" },
-  { icon: CheckCheck, title: "Release", note: "You approve payout", tone: "success" },
-] as const;
+const pageHtml = "\n</div>\n<div class=\"flex items-center gap-4\">\n<button class=\"font-ui-label text-ui-label text-on-surface-variant hover:text-secondary transition-colors duration-200\">List Your Shop</button>\n<button class=\"font-ui-label text-ui-label text-on-surface-variant hover:text-secondary transition-colors duration-200\">Sign In</button>\n<button class=\"text-on-surface-variant hover:text-secondary transition-colors duration-200 flex items-center justify-center p-2\">\n<span class=\"material-symbols-outlined\" data-icon=\"shopping_cart\">shopping_cart</span>\n</button>\n<img alt=\"User profile\" class=\"w-10 h-10 rounded-full object-cover shadow-sm bg-surface-container\" data-alt=\"A small circular user profile placeholder image with a clean, professional grey background.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuCvjf2xW7XTGIMOhvf6KHmpGf9VyzgJFV3CqfWOlg5lok45klTKhVu3oc0sLHKPjbwD5ehRcrdGs7M9wp9dpZ-a2djzUrSKPCZGnuDKYkJdAi-96YxPKrA-BAiFbYftm7CJg996pb9h59D1t3IyPEcUreZMfJe3OFsB2ggwOz4m_ROauhShFz1U_PjIZF5pcJVOePqvHlS1p_P8I67f5Km1BBh3NVRsTtvrvIBTJoBqhugnYit5PSGVng\"/>\n</div>\n</header>\n<main class=\"flex-grow pt-20\">\n<!-- Hero Section -->\n<section class=\"hero-pattern py-24 px-margin-mobile md:px-margin-desktop border-b border-outline-variant/30\">\n<div class=\"max-w-container-max mx-auto flex flex-col md:flex-row gap-gutter items-center\">\n<div class=\"flex-1 text-left space-y-6\">\n<h1 class=\"font-display-h1-mobile md:font-display-h1 text-display-h1-mobile md:text-display-h1 text-on-surface\">Certified Tech Repairs</h1>\n<p class=\"font-body-lg text-body-lg text-on-surface-variant max-w-2xl\">Connect with rigorously vetted technicians. Your funds are secured in financial-grade escrow until you confirm the repair is successful.</p>\n<div class=\"pt-4 flex gap-4\">\n<button class=\"bg-primary-container text-on-primary font-ui-label text-ui-label px-6 py-3 rounded-lg hover:bg-[#0A2D6B] active:scale-95 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.08)]\">Find a Repair Shop</button>\n<div class=\"flex items-center gap-2 px-4 py-3 bg-[#EEF2FF] rounded-lg text-primary font-ui-label text-ui-label\">\n<span class=\"material-symbols-outlined text-[20px]\" data-icon=\"shield\">shield</span>\n<span>Float Protected Escrow</span>\n</div>\n</div>\n</div>\n<div class=\"flex-1 w-full relative h-[400px]\">\n<div class=\"absolute inset-0 bg-cover bg-center rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-outline-variant/20\" data-alt=\"A high-quality, professional photograph of a pristine, well-lit electronics repair workspace. The setting is modern and clinical, featuring a disassembled smartphone on a white antistatic mat. Precise tools like micro-screwdrivers and tweezers are arranged neatly. The lighting is bright and cool, reflecting a sterile, premium tech environment.\" style=\"background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC2TUz52lHXtE5HuMmxUxTM9wAGitz7ARgCTKhnpn_XPap05bITnDuSpgZFZsWsU81AqKwPLwm2vgjQD9LpPFPie9PXyuF0Pjwr_RmCG9f4ODkyIBlIbzbvCTpRQpP_-95yUZbTptuJi8R5pE9uHFvZD5ptVjKQUoqzhYH8qGlvXzf1iSjxWhnp96JHQe5ZtzrE3FLnWhNu6Jh1a2c5Ookzizc2GdXXrEUJLEUgCQPz5PZO2ilpevEICw')\"></div>\n</div>\n</div>\n</section>\n<!-- Process Section -->\n<section class=\"py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto\">\n<h2 class=\"font-display-h2 text-display-h2 text-on-surface mb-12 text-center md:text-left\">The Secure Process</h2>\n<div class=\"grid grid-cols-1 md:grid-cols-5 gap-4 relative\">\n<div class=\"hidden md:block absolute top-[28px] left-[10%] right-[10%] h-0.5 bg-surface-container-high -z-10\"></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-surface-container-lowest border-2 border-primary flex items-center justify-center text-primary z-10 shadow-sm\"><span class=\"material-symbols-outlined\" data-icon=\"build\">build</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Diagnosis</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Shop inspects device</p></div></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-surface-container-lowest border-2 border-primary flex items-center justify-center text-primary z-10 shadow-sm\"><span class=\"material-symbols-outlined\" data-icon=\"request_quote\">request_quote</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Quote</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Receive exact price</p></div></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-primary-container text-on-primary flex items-center justify-center z-10 shadow-[0_4px_16px_rgba(0,0,0,0.04)]\"><span class=\"material-symbols-outlined\" data-icon=\"lock\">lock</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-primary\">Float Hold</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Funds secured</p></div></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-surface-container-lowest border-2 border-primary flex items-center justify-center text-primary z-10 shadow-sm\"><span class=\"material-symbols-outlined\" data-icon=\"hardware\">hardware</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Repair</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Work performed</p></div></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-surface-container-lowest border-2 border-[#22C55E] flex items-center justify-center text-[#22C55E] z-10 shadow-sm\"><span class=\"material-symbols-outlined\" data-icon=\"task_alt\">task_alt</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Release</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">You approve payout</p></div></div>\n</div>\n</section>\n<!-- Services Cards -->\n<section class=\"bg-surface-container-low py-24 px-margin-mobile md:px-margin-desktop\">\n<div class=\"max-w-container-max mx-auto\">\n<div class=\"flex justify-between items-end mb-12\"><h2 class=\"font-display-h2 text-display-h2 text-on-surface\">Standard Services</h2><span class=\"hidden md:inline-flex items-center gap-1 bg-[#22C55E] text-white px-3 py-1 rounded font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"verified_user\">verified_user</span> Physical inspection badges for all shops</span></div>\n<div class=\"grid grid-cols-1 md:grid-cols-3 gap-gutter\">\n<div class=\"bg-surface-container-lowest rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200 group flex flex-col h-full\"><div class=\"flex items-start justify-between mb-4\"><div class=\"w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-[#EEF2FF] transition-colors\"><span class=\"material-symbols-outlined text-2xl\" data-icon=\"smartphone\">smartphone</span></div><span class=\"font-data-price text-data-price text-on-surface-variant\">$80 - $250</span></div><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-2\">Screen Replacement</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mb-6 flex-grow\">OEM and premium aftermarket OLED/LCD options available.</p><div class=\"space-y-2 pt-4 border-t border-outline-variant/30\"><div class=\"flex items-center gap-2 text-primary font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"engineering\">engineering</span> Certified Technicians Only</div><div class=\"flex items-center gap-2 text-[#22C55E] font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"gpp_good\">gpp_good</span> Float Protected Escrow</div></div></div>\n<div class=\"bg-surface-container-lowest rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200 group flex flex-col h-full\"><div class=\"flex items-start justify-between mb-4\"><div class=\"w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-[#EEF2FF] transition-colors\"><span class=\"material-symbols-outlined text-2xl\" data-icon=\"battery_charging_full\">battery_charging_full</span></div><span class=\"font-data-price text-data-price text-on-surface-variant\">$45 - $90</span></div><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-2\">Battery Replacement</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mb-6 flex-grow\">Diagnostic check included. Restore your device's original capacity.</p><div class=\"space-y-2 pt-4 border-t border-outline-variant/30\"><div class=\"flex items-center gap-2 text-primary font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"engineering\">engineering</span> Certified Technicians Only</div><div class=\"flex items-center gap-2 text-[#22C55E] font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"gpp_good\">gpp_good</span> Float Protected Escrow</div></div></div>\n<div class=\"bg-surface-container-lowest rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200 group flex flex-col h-full\"><div class=\"flex items-start justify-between mb-4\"><div class=\"w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-[#EEF2FF] transition-colors\"><span class=\"material-symbols-outlined text-2xl\" data-icon=\"memory\">memory</span></div><span class=\"font-data-price text-data-price text-on-surface-variant\">$150 - $400</span></div><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-2\">Logic Board</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mb-6 flex-grow\">Micro-soldering, water damage recovery, and complex board-level repairs.</p><div class=\"space-y-2 pt-4 border-t border-outline-variant/30\"><div class=\"flex items-center gap-2 text-primary font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"engineering\">engineering</span> Certified Technicians Only</div><div class=\"flex items-center gap-2 text-[#22C55E] font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"gpp_good\">gpp_good</span> Float Protected Escrow</div></div></div>\n</div>\n</div>\n</section>\n</main>\n";
 
 const Repairs = () => {
-  const [services, setServices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState<any | null>(null);
-
   useEffect(() => {
-    document.title = "Repairs | TechTrust";
-    (async () => {
-      const { data } = await supabase
-        .from("repair_services")
-        .select("*, vendor:vendor_profiles!inner(id,user_id,business_name,city,average_rating,physical_address,verification_status)")
-        .eq("is_active", true)
-        // "verified" and "approved" both mean a live vendor — see Browse.tsx.
-        .in("vendor.verification_status", ["verified", "approved"]);
-      setServices(data ?? []);
-      setLoading(false);
-    })();
+    document.title = "Certified Tech Repairs - TechTrust";
+
+    const ensureStylesheet = (href: string) => {
+      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
+        (link) => link.getAttribute("href") === href,
+      );
+      if (exists) return;
+      const el = document.createElement("link");
+      el.rel = "stylesheet";
+      el.href = href;
+      document.head.appendChild(el);
+    };
+
+    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
   }, []);
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, { vendor: any; services: any[] }>();
-    for (const s of services) {
-      const key = s.vendor.id;
-      if (!map.has(key)) map.set(key, { vendor: s.vendor, services: [] });
-      map.get(key)!.services.push(s);
-    }
-    return Array.from(map.values());
-  }, [services]);
-
-  return (
-    <div className="container py-10">
-      <header className="grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold">Repair Services</h1>
-          <p className="text-muted-foreground mt-2">Get your laptop or phone fixed by certified technicians. Pay only after the job is done.</p>
-        </div>
-        <AnimatedArt
-          src={art.repairs}
-          alt="Certified technicians repairing laptops and phones"
-          eager
-        />
-      </header>
-
-      {/* The secure process — static, so the page still explains the Float
-          guarantee on days when no technician has a service listed. */}
-      <section className="mt-16">
-        <h2 className="text-2xl font-bold md:text-3xl">The secure process</h2>
-        <div className="relative mt-10 grid grid-cols-2 gap-6 md:grid-cols-5">
-          <div
-            aria-hidden="true"
-            className="absolute left-[10%] right-[10%] top-7 -z-10 hidden h-0.5 bg-border md:block"
-          />
-          {repairSteps.map(({ icon: Icon, title, note, tone }) => (
-            <div key={title} className="flex flex-col items-center gap-4 md:items-start">
-              <div
-                className={cn(
-                  "z-10 grid h-14 w-14 place-items-center rounded-full shadow-card",
-                  tone === "filled"
-                    ? "bg-primary text-primary-foreground"
-                    : tone === "success"
-                      ? "border-2 border-success bg-card text-success"
-                      : "border-2 border-primary bg-card text-primary",
-                )}
-              >
-                <Icon className="h-6 w-6" />
-              </div>
-              <div className="text-center md:text-left">
-                <h3 className={cn("font-semibold", tone === "filled" && "text-primary")}>{title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{note}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {loading ? (
-        <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-48 bg-muted rounded-xl animate-pulse" />
-          ))}
-        </div>
-      ) : grouped.length === 0 ? (
-        <div className="mt-12 text-center py-20">
-          <p className="text-lg font-medium">No repair services available yet</p>
-          <p className="text-sm text-muted-foreground mt-2">Check back soon as more vendors join.</p>
-        </div>
-      ) : (
-        <div className="mt-8 space-y-10">
-          {grouped.map(({ vendor, services }) => (
-            <section key={vendor.id}>
-              <div className="flex items-center gap-2 mb-3">
-                <Link to={`/shop/${vendor.id}`} className="text-lg font-semibold hover:text-accent">
-                  {vendor.business_name}
-                </Link>
-                {(vendor.verification_status === "verified" || vendor.verification_status === "approved") && (
-                  <ShieldCheck className="h-4 w-4 text-success" />
-                )}
-                {vendor.city && <Badge variant="outline">{vendor.city}</Badge>}
-                <span className="flex items-center gap-0.5 text-xs text-muted-foreground ml-auto">
-                  <Star className="h-3 w-3 fill-warning text-warning" />
-                  <span className="text-stat">{Number(vendor.average_rating).toFixed(1)}</span>
-                </span>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {services.map((s) => (
-                  <div key={s.id} className="p-5 bg-card border border-border rounded-xl hover:border-accent/40 transition-colors flex flex-col">
-                    <div className="flex items-start gap-3">
-                      <Wrench className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold">{s.service_name}</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5 capitalize">{s.device_type}</p>
-                      </div>
-                    </div>
-                    {s.description && (
-                      <p className="text-sm text-muted-foreground mt-3 flex-1">{s.description}</p>
-                    )}
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                      <Badge variant="outline" className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span className="text-stat">{s.estimated_turnaround_days}</span> day{s.estimated_turnaround_days !== 1 ? "s" : ""}
-                      </Badge>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
-                      <div>
-                        <div className="text-xs text-muted-foreground">From</div>
-                        <div className="font-bold text-primary"><span className="text-price">{formatKsh(s.price_min_ksh)}</span></div>
-                      </div>
-                      <Button
-                        variant="accent"
-                        size="sm"
-                        onClick={() => {
-                          setActive(s);
-                          setOpen(true);
-                        }}
-                      >
-                        Request Repair
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      )}
-
-      <RepairRequestDialog open={open} onOpenChange={setOpen} service={active} />
-    </div>
-  );
+  return <div dangerouslySetInnerHTML={{ __html: pageHtml }} />;
 };
 
 export default Repairs;
