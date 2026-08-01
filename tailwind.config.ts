@@ -15,7 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Sora', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -27,6 +28,13 @@ export default {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
           glow: "hsl(var(--primary-glow))",
+          hover: "hsl(var(--primary-hover))",
+          deep: "hsl(var(--primary-deep))",
+        },
+        /* Reserved for escrow / "money held" state — never for generic CTAs. */
+        float: {
+          DEFAULT: "hsl(var(--float))",
+          foreground: "hsl(var(--float-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -40,6 +48,10 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
           soft: "hsl(var(--success-soft))",
+        },
+        approve: {
+          DEFAULT: "hsl(var(--approve))",
+          foreground: "hsl(var(--approve-foreground))",
         },
         warning: {
           DEFAULT: "hsl(var(--warning))",
@@ -75,7 +87,7 @@ export default {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
+        md: "var(--radius-control)",
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {

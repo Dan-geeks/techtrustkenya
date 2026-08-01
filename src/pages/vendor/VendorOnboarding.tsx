@@ -77,6 +77,10 @@ const VendorOnboarding = () => {
   };
 
   useEffect(() => {
+    document.title = "Vendor onboarding | TechTrust";
+  }, []);
+
+  useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth", { replace: true });
       return;

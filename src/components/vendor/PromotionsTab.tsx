@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKsh, formatDate } from "@/lib/format";
 import { toast } from "sonner";
-import { Megaphone, Loader2 } from "lucide-react";
+import { Megaphone, Loader2, Smartphone, CheckCircle2, ShieldCheck } from "lucide-react";
 
 const PRICES: Record<string, number> = {
   featured_homepage: 2000,
@@ -25,6 +26,11 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
   const [productId, setProductId] = useState<string>("");
   const [days, setDays] = useState<string>("7");
 
+  // STK Push Simulation State
+  const [stkOpen, setStkOpen] = useState(false);
+  const [phone, setPhone] = useState(vendor.phone ?? vendor.phone_number ?? "0712345678");
+  const [stkPhase, setStkPhase] = useState<"idle" | "sending" | "success">("idle");
+
   const load = async () => {
     setLoading(true);
     const [p, pr] = await Promise.all([
@@ -40,22 +46,46 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
     load();
   }, [vendor.id]);
 
-  const create = async () => {
-    const expires = new Date();
-    expires.setDate(expires.getDate() + Number(days));
-    const { error } = await supabase.from("promotions").insert({
-      vendor_id: vendor.id,
-      product_id: productId || null,
-      promotion_type: type as any,
-      amount_paid_ksh: PRICES[type] * Number(days) / 7,
-      expires_at: expires.toISOString(),
-    });
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Promotion created. Awaiting payment confirmation.");
-      setOpen(false);
-      load();
+  const handleStartPayment = () => {
+    setOpen(false);
+    setStkPhase("idle");
+    setStkOpen(true);
+  };
+
+  const executeStkPush = async () => {
+    if (!phone || phone.length < 10) {
+      toast.error("Please enter a valid M-Pesa phone number");
+      return;
     }
+    setStkPhase("sending");
+    
+    // Simulate STK Push delay (1.8 seconds)
+    setTimeout(async () => {
+      const totalAmount = (PRICES[type] * Number(days)) / 7;
+      const expires = new Date();
+      expires.setDate(expires.getDate() + Number(days));
+
+      const { error } = await supabase.from("promotions").insert({
+        vendor_id: vendor.id,
+        product_id: productId || null,
+        promotion_type: type as any,
+        amount_paid_ksh: totalAmount,
+        is_active: true,
+        expires_at: expires.toISOString(),
+      });
+
+      if (error) {
+        toast.error(error.message);
+        setStkPhase("idle");
+      } else {
+        setStkPhase("success");
+        toast.success(`M-Pesa payment of KES ${totalAmount} confirmed! Promotion activated.`);
+        setTimeout(() => {
+          setStkOpen(false);
+          load();
+        }, 1200);
+      }
+    }, 1800);
   };
 
   return (
@@ -83,14 +113,17 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-semibold">{formatKsh(p.amount_paid_ksh)}</div>
-                <Badge variant="outline">{p.is_active ? "Active" : "Inactive"}</Badge>
+                <div className="font-semibold"><span className="text-price">{formatKsh(p.amount_paid_ksh)}</span></div>
+                <Badge variant={p.is_active ? "default" : "outline"} className={p.is_active ? "bg-success text-success-foreground" : ""}>
+                  {p.is_active ? "Active" : "Inactive"}
+                </Badge>
               </div>
             </Card>
           ))}
         </div>
       )}
 
+      {/* New Promotion Configuration Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>New promotion</DialogTitle></DialogHeader>
@@ -129,13 +162,85 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
               </Select>
             </div>
             <p className="text-xs text-muted-foreground">
-              Total: {formatKsh(PRICES[type] * Number(days) / 7)}
+              Total: <span className="text-price">{formatKsh((PRICES[type] * Number(days)) / 7)}</span>
             </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={create}>Create</Button>
+            <Button onClick={handleStartPayment} className="gap-1.5 bg-success hover:bg-success/90 text-success-foreground font-semibold">
+              <Smartphone className="h-4 w-4" /> Pay with M-Pesa
+            </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* M-Pesa STK Push Simulation Modal */}
+      <Dialog open={stkOpen} onOpenChange={setStkOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-primary font-bold">
+              <Smartphone className="h-5 w-5 text-success" /> M-Pesa Express Checkout
+            </DialogTitle>
+          </DialogHeader>
+          {stkPhase === "idle" && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-secondary p-3 text-sm space-y-1 border">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Promotion:</span>
+                  <span className="font-semibold capitalize">{type.replace(/_/g, " ")}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Duration:</span>
+                  <span>{days} days</span>
+                </div>
+                <div className="flex justify-between pt-1 border-t">
+                  <span className="font-semibold">Amount to Pay:</span>
+                  <span className="text-price font-bold text-success">{formatKsh((PRICES[type] * Number(days)) / 7)}</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>M-Pesa Phone Number</Label>
+                <Input
+                  placeholder="07XXXXXXXX or 2547XXXXXXXX"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <ShieldCheck className="h-3.5 w-3.5 text-accent" /> An STK push prompt will be sent to your phone.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {stkPhase === "sending" && (
+            <div className="py-8 text-center space-y-3">
+              <div className="relative mx-auto w-12 h-12 flex items-center justify-center">
+                <Loader2 className="h-10 w-10 animate-spin text-success" />
+              </div>
+              <p className="font-medium text-foreground">STK Push Sent!</p>
+              <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                Please check phone <span className="font-bold text-foreground">{phone}</span> and enter your M-Pesa PIN to complete payment of <span className="text-price font-semibold">{formatKsh((PRICES[type] * Number(days)) / 7)}</span>.
+              </p>
+            </div>
+          )}
+
+          {stkPhase === "success" && (
+            <div className="py-8 text-center space-y-2">
+              <CheckCircle2 className="h-12 w-12 text-success mx-auto animate-bounce" />
+              <p className="font-bold text-lg text-foreground">Payment Received!</p>
+              <p className="text-xs text-muted-foreground">Your promotion has been successfully activated.</p>
+            </div>
+          )}
+
+          {stkPhase === "idle" && (
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setStkOpen(false)}>Cancel</Button>
+              <Button onClick={executeStkPush} className="bg-success hover:bg-success/90 text-success-foreground font-semibold">
+                Confirm & Pay
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
     </div>

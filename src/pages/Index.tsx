@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ShieldCheck, ArrowRight, Wrench, BadgeCheck } from "lucide-react";
+import { ShieldCheck, ArrowRight, Wrench, BadgeCheck, Handshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/marketplace/ProductCard";
 import { VendorCard } from "@/components/marketplace/VendorCard";
@@ -33,8 +33,10 @@ const Index = () => {
     (async () => {
       const [{ data: prods }, { data: vens }, vendorCount, productCount, txCount] = await Promise.all([
         supabase.from("products").select("*, vendor:vendor_profiles(id,business_name,average_rating,verification_status)").eq("is_active", true).order("created_at", { ascending: false }).limit(8),
-        supabase.from("vendor_profiles").select("id,business_name,physical_address,average_rating,total_completed_transactions").eq("verification_status", "approved").order("average_rating", { ascending: false }).limit(6),
-        supabase.from("vendor_profiles").select("*", { count: "exact", head: true }).eq("verification_status", "approved"),
+        // Both "verified" and "approved" mean a live vendor — filtering on only
+        // one of them under-counted the marketplace on the homepage.
+        supabase.from("vendor_profiles").select("id,business_name,physical_address,average_rating,total_completed_transactions").in("verification_status", ["verified", "approved"]).order("average_rating", { ascending: false }).limit(6),
+        supabase.from("vendor_profiles").select("*", { count: "exact", head: true }).in("verification_status", ["verified", "approved"]),
         supabase.from("products").select("*", { count: "exact", head: true }).eq("is_active", true),
         supabase.from("vendor_profiles").select("total_completed_transactions"),
       ]);
@@ -72,14 +74,41 @@ const Index = () => {
                 Kenya's Verified Tech Marketplace
               </p>
               <h1 className="text-balance text-5xl font-extrabold leading-[1.0] tracking-tight text-foreground md:text-6xl">
-                Buy and Sell Tech You Can{" "}
-                <em className="not-italic text-accent">Actually</em>{" "}
-                Trust.
+                Buy and Sell Tech You Can Actually{" "}
+                {/* Hand-drawn underline under "Trust", straight from the mockup */}
+                <span className="relative whitespace-nowrap text-accent">
+                  Trust
+                  <svg
+                    aria-hidden="true"
+                    className="absolute -bottom-1 left-0 h-3 w-full text-success"
+                    preserveAspectRatio="none"
+                    viewBox="0 0 100 20"
+                  >
+                    <path d="M0,10 Q50,20 100,10" fill="none" stroke="currentColor" strokeWidth="4" />
+                  </svg>
+                </span>
+                .
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
                 Every vendor is physically inspected. Every payment held in Float until you confirm delivery.
                 No risk. No surprises.
               </p>
+              {/* Trust signals as chips, matching the mockup's pill row */}
+              <div className="mt-7 flex flex-wrap gap-2.5">
+                {[
+                  { icon: ShieldCheck, label: "Float-protected", tone: "text-accent" },
+                  { icon: BadgeCheck, label: "Verified vendors", tone: "text-success" },
+                  { icon: Handshake, label: "Dispute resolution", tone: "text-primary" },
+                ].map(({ icon: Icon, label, tone }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 shadow-card"
+                  >
+                    <Icon className={`h-4 w-4 shrink-0 ${tone}`} />
+                    <span className="text-sm font-medium text-foreground">{label}</span>
+                  </div>
+                ))}
+              </div>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button size="xl" asChild>
                   <Link to="/browse">Browse Verified Tech <ArrowRight className="h-4 w-4" /></Link>
@@ -87,14 +116,6 @@ const Index = () => {
                 <Button variant="outline" size="xl" asChild>
                   <Link to="/how-it-works">Learn How It Works</Link>
                 </Button>
-              </div>
-              <div className="mt-8 flex flex-col gap-2">
-                {["Float Protected Payments", "Vendor Verified Physically", "Dispute Resolution Included"].map((t) => (
-                  <div key={t} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                    <ShieldCheck className="h-4 w-4 shrink-0 text-success" />
-                    {t}
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -119,26 +140,42 @@ const Index = () => {
 
           {/* Only shown once real numbers exist — "0+ vendors" reads as broken. */}
           {(stats.vendors > 0 || stats.products > 0 || stats.transactions > 0) && (
-            <div className="mt-16 flex flex-wrap justify-center gap-10 border-t border-border pt-10 text-base text-muted-foreground sm:gap-24">
-              {stats.vendors > 0 && (
-                <span className="text-center"><strong className="block text-4xl font-bold text-foreground"><CountUp value={stats.vendors} />+</strong> Verified vendors</span>
-              )}
-              {stats.products > 0 && (
-                <span className="text-center"><strong className="block text-4xl font-bold text-foreground"><CountUp value={stats.products} />+</strong> Products listed</span>
-              )}
-              {stats.transactions > 0 && (
-                <span className="text-center"><strong className="block text-4xl font-bold text-foreground"><CountUp value={stats.transactions} />+</strong> Safe transactions</span>
-              )}
+            <div className="mt-16 flex flex-wrap items-center justify-center gap-10 border-t border-border pt-10 sm:gap-16">
+              {[
+                { show: stats.vendors > 0, value: stats.vendors, label: "Verified vendors" },
+                { show: stats.products > 0, value: stats.products, label: "Products listed" },
+                { show: stats.transactions > 0, value: stats.transactions, label: "Safe transactions" },
+              ]
+                .filter((s) => s.show)
+                .map((s, i) => (
+                  <div key={s.label} className="flex items-center gap-10 sm:gap-16">
+                    {i > 0 && <div className="hidden h-12 w-px bg-border sm:block" aria-hidden="true" />}
+                    <div className="text-center">
+                      <div className="text-stat mb-1 text-4xl font-semibold text-accent">
+                        <CountUp value={s.value} />+
+                      </div>
+                      <div className="text-eyebrow text-muted-foreground">{s.label}</div>
+                    </div>
+                  </div>
+                ))}
             </div>
           )}
         </div>
 
         {/* Reassurance strip — reinforces Float escrow right under the fold */}
-        <div className="bg-primary py-3 text-center text-sm font-medium text-primary-foreground/90">
-          <span className="inline-flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-accent" />
-            Your money is held safely by Float until you confirm your order
-          </span>
+        <div className="bg-primary py-4 text-primary-foreground">
+          <div className="container flex flex-col items-center justify-between gap-3 md:flex-row">
+            <span className="inline-flex items-center gap-2.5 text-sm font-semibold">
+              <ShieldCheck className="h-5 w-5 shrink-0 text-success" />
+              Your money is held safely by Float until you confirm your order.
+            </span>
+            <Link
+              to="/how-it-works"
+              className="inline-flex items-center gap-1 text-sm font-medium text-success underline underline-offset-4 transition-colors hover:text-primary-foreground"
+            >
+              How Float works <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -179,7 +216,7 @@ const Index = () => {
                   key={num}
                   className="group flex gap-6 rounded-2xl bg-primary p-6 text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg sm:p-8"
                 >
-                  <div className="w-10 shrink-0 text-3xl font-black leading-none tabular-nums text-white/20 transition-colors group-hover:text-accent/60">
+                  <div className="text-stat w-10 shrink-0 text-3xl font-black leading-none text-primary-foreground/20 transition-colors group-hover:text-accent/60">
                     {num}
                   </div>
                   <div>
@@ -288,7 +325,7 @@ const Index = () => {
                 </div>
               ))}
             </div>
-            <Button asChild className="bg-accent text-white hover:bg-accent/90">
+            <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
               <Link to="/repairs">Find a technician <ArrowRight className="h-4 w-4" /></Link>
             </Button>
           </Reveal>

@@ -18,6 +18,10 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    document.title = "Admin sign in | TechTrust";
+  }, []);
+
   // Landing here already signed in (not right after this form's own submit,
   // which routes itself below) — e.g. a direct visit while a session exists.
   useEffect(() => {

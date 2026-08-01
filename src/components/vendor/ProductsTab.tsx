@@ -218,8 +218,8 @@ export const ProductsTab = ({ vendor }: Props) => {
 
   const stockBadge = (qty: number) => {
     if (qty === 0) return <Badge variant="destructive">Out of stock</Badge>;
-    if (qty <= 5) return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">Low: {qty}</Badge>;
-    return <Badge variant="outline" className="bg-success/10 text-success border-success/30">In stock: {qty}</Badge>;
+    if (qty <= 5) return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">Low: <span className="text-stat">{qty}</span></Badge>;
+    return <Badge variant="outline" className="bg-success/10 text-success border-success/30">In stock: <span className="text-stat">{qty}</span></Badge>;
   };
 
   return (
@@ -256,7 +256,7 @@ export const ProductsTab = ({ vendor }: Props) => {
                 />
                 <div className="absolute top-2 right-2 flex gap-1">
                   <Badge className="bg-background/90 text-foreground border font-semibold">
-                    {formatKsh(p.price_ksh)}
+                    <span className="text-price">{formatKsh(p.price_ksh)}</span>
                   </Badge>
                 </div>
               </div>

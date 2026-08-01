@@ -1,8 +1,13 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const VendorSuspended = () => {
+  useEffect(() => {
+    document.title = "Account suspended | TechTrust";
+  }, []);
+
   return (
     <div className="min-h-[calc(100vh-4rem)] grid place-items-center px-4 py-10">
       <div className="w-full max-w-lg">

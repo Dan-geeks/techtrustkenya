@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   Zap,
+  Landmark,
 } from "lucide-react";
 import { CartLargeIcon } from "@/components/icons/CartLargeIcon";
 import { StoreIcon } from "@/components/icons/StoreIcon";
@@ -66,10 +67,10 @@ function StarRow({ star, count, total }: { star: number; count: number; total: n
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
     <div className="flex items-center gap-2 text-sm">
-      <span className="w-4 text-right text-muted-foreground">{star}</span>
+      <span className="text-stat w-4 text-right text-muted-foreground">{star}</span>
       <Star className="h-3.5 w-3.5 fill-warning text-warning shrink-0" />
       <Progress value={pct} className="h-2 flex-1" />
-      <span className="w-6 text-right text-muted-foreground text-xs">{count}</span>
+      <span className="text-stat w-6 text-right text-muted-foreground text-xs">{count}</span>
     </div>
   );
 }
@@ -300,13 +301,13 @@ const ProductDetail = () => {
             {reviews.length > 0 && (
               <div className="flex items-center gap-2">
                 <Stars rating={avgRating} />
-                <span className="text-sm font-medium">{avgRating.toFixed(1)}</span>
-                <span className="text-sm text-muted-foreground">({reviews.length} reviews)</span>
+                <span className="text-stat text-sm font-medium">{avgRating.toFixed(1)}</span>
+                <span className="text-sm text-muted-foreground">(<span className="text-stat">{reviews.length}</span> reviews)</span>
               </div>
             )}
 
             <div className="text-4xl font-extrabold text-accent">
-              {formatKsh(product.price_ksh)}
+              <span className="text-price">{formatKsh(product.price_ksh)}</span>
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm">
@@ -331,12 +332,12 @@ const ProductDetail = () => {
               ) : lowStock ? (
                 <span className="flex items-center gap-1.5 text-warning font-medium">
                   <Package className="h-4 w-4" />
-                  Low stock — only {product.quantity_in_stock} left
+                  Low stock — only <span className="text-stat">{product.quantity_in_stock}</span> left
                 </span>
               ) : (
                 <span className="flex items-center gap-1.5 text-success font-medium">
                   <Package className="h-4 w-4" />
-                  In stock ({product.quantity_in_stock} units)
+                  In stock (<span className="text-stat">{product.quantity_in_stock}</span> units)
                 </span>
               )}
             </div>
@@ -367,14 +368,33 @@ const ProductDetail = () => {
                 <Button variant="ghost" size="icon" onClick={() => setQty(Math.max(1, qty - 1))} disabled={outOfStock}>
                   <Minus className="h-4 w-4" />
                 </Button>
-                <span className="w-10 text-center font-semibold">{qty}</span>
+                <span className="text-stat w-10 text-center font-semibold">{qty}</span>
                 <Button variant="ghost" size="icon" onClick={() => setQty(Math.min(product.quantity_in_stock, qty + 1))} disabled={outOfStock}>
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
               <span className="text-sm text-muted-foreground">
-                Total: <span className="font-semibold text-foreground">{formatKsh(product.price_ksh * qty)}</span>
+                Total: <span className="font-semibold text-foreground"><span className="text-price">{formatKsh(product.price_ksh * qty)}</span></span>
               </span>
+            </div>
+
+            {/* Float protection explainer — the mockup's signature blue panel,
+                placed directly above the CTAs so the promise is read before the click. */}
+            <div className="relative overflow-hidden rounded-xl border border-float/25 bg-accent-soft p-5 shadow-card">
+              <div className="relative flex items-center gap-3">
+                <Landmark className="h-6 w-6 shrink-0 text-primary" />
+                <h3 className="font-semibold text-primary">Financial-grade Float protection</h3>
+              </div>
+              <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
+                Your payment is held by TechTrust Float, never sent straight to the vendor. You have a
+                48-hour window after delivery to check the device before the funds are released.
+              </p>
+              <div className="relative mt-3 flex items-center gap-2">
+                <span className="h-1 w-full rounded-full bg-float" />
+                <span className="h-1 w-full rounded-full bg-float/30" />
+                <span className="h-1 w-full rounded-full bg-float/30" />
+              </div>
+              <span className="relative mt-2 block text-xs font-semibold text-primary">Step 1: Secure funds</span>
             </div>
 
             <div className="hidden md:flex gap-3">
@@ -405,11 +425,11 @@ const ProductDetail = () => {
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                       <span className="flex items-center gap-1">
                         <Star className="h-3 w-3 fill-warning text-warning" />
-                        {Number(product.vendor.average_rating ?? 0).toFixed(1)}
+                        <span className="text-stat">{Number(product.vendor.average_rating ?? 0).toFixed(1)}</span>
                       </span>
                       <span className="flex items-center gap-1">
                         <StoreIcon className="h-3 w-3" />
-                        {product.vendor.total_completed_transactions ?? 0} sales
+                        <span className="text-stat">{product.vendor.total_completed_transactions ?? 0}</span> sales
                       </span>
                     </div>
                   </div>
@@ -443,7 +463,7 @@ const ProductDetail = () => {
 
         <Tabs defaultValue="reviews" className="mt-16">
           <TabsList>
-            <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews (<span className="text-stat">{reviews.length}</span>)</TabsTrigger>
             <TabsTrigger value="related">More from this vendor</TabsTrigger>
           </TabsList>
 
@@ -455,12 +475,12 @@ const ProductDetail = () => {
             ) : (
               <div className="grid lg:grid-cols-[280px_1fr] gap-8">
                 <div className="p-5 bg-card border border-border rounded-xl shadow-card self-start">
-                  <div className="text-4xl font-extrabold text-center mb-1">{avgRating.toFixed(1)}</div>
+                  <div className="text-stat text-4xl font-extrabold text-center mb-1">{avgRating.toFixed(1)}</div>
                   <div className="flex justify-center mb-1">
                     <Stars rating={avgRating} />
                   </div>
                   <p className="text-xs text-center text-muted-foreground mb-4">
-                    {reviews.length} review{reviews.length !== 1 ? "s" : ""}
+                    <span className="text-stat">{reviews.length}</span> review{reviews.length !== 1 ? "s" : ""}
                   </p>
                   <div className="space-y-2">
                     {ratingCounts.map(({ star, count }) => (

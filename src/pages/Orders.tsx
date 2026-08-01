@@ -97,7 +97,7 @@ const Orders = () => {
             onClick={() => setFilter(f.key)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
               filter === f.key
-                ? "bg-foreground text-background border-foreground"
+                ? "bg-primary text-primary-foreground border-primary"
                 : "bg-background text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
             }`}
           >
@@ -121,7 +121,7 @@ const Orders = () => {
         <div className="space-y-8">
           {groups.map(({ month, items }) => (
             <div key={month}>
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+              <h2 className="text-eyebrow text-muted-foreground mb-3">
                 {month}
               </h2>
               <div className="space-y-3">
@@ -137,16 +137,23 @@ const Orders = () => {
                             className="w-10 h-10 rounded-md object-cover bg-muted shrink-0"
                           />
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm truncate">
-                              {o.product?.brand} {o.product?.model_name}
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm truncate">
+                                {o.product?.brand} {o.product?.model_name}
+                              </span>
+                              <span className="text-data-id text-muted-foreground shrink-0">
+                                #{o.id.slice(0, 8).toUpperCase()}
+                              </span>
                             </div>
-                            <div className="text-xs text-muted-foreground truncate">
-                              {o.vendor?.business_name}
+                            <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
+                              <span>{o.vendor?.business_name}</span>
+                              <span>·</span>
+                              <span>Qty <span className="text-stat">{o.quantity}</span></span>
                             </div>
                           </div>
                           <div className="text-right shrink-0 flex flex-col items-end gap-1">
                             <div className="text-xs text-muted-foreground">{formatDate(o.created_at)}</div>
-                            <div className="font-semibold text-sm">{formatKsh(Number(o.total_amount_ksh))}</div>
+                            <div className="font-semibold text-sm"><span className="text-price">{formatKsh(Number(o.total_amount_ksh))}</span></div>
                             <Badge className={`${sv.cls} text-[10px] px-2 py-0`} variant="outline">
                               {sv.label}
                             </Badge>

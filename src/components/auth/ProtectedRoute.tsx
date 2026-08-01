@@ -52,6 +52,7 @@ export const ProtectedRoute = ({ children, roles, requireApprovedVendor, loginPa
 
   if (requireApprovedVendor) {
     if (vendorStatus === "suspended") return <Navigate to="/vendor/suspended" replace />;
+    if (vendorStatus === "rejected") return <Navigate to="/vendor/rejected" replace />;
     if (vendorStatus !== "approved" && vendorStatus !== "verified")
       return <Navigate to="/vendor/pending" replace />;
   }

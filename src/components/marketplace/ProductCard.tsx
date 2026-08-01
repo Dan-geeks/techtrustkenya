@@ -92,11 +92,13 @@ export const ProductCard = ({
             <Package className="h-10 w-10" />
           </div>
         )}
-        <Badge className={cn("absolute top-2 left-2 text-[10px] px-1.5 py-0.5", cond.cls)}>
+        {/* Mockup puts the condition chip top-right and keeps it quiet, so the
+            green "Protected by Float" line stays the loudest signal on the card. */}
+        <Badge className={cn("absolute top-2 right-2 text-data-id px-1.5 py-0.5", cond.cls)}>
           {cond.label}
         </Badge>
         {is_boosted && (
-          <span className="absolute top-2 right-2 bg-primary/80 text-primary-foreground text-[10px] font-semibold px-1.5 py-0.5 rounded">
+          <span className="absolute top-2 left-2 rounded bg-primary/80 px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
             Featured
           </span>
         )}
@@ -106,10 +108,10 @@ export const ProductCard = ({
       <div className="flex flex-col flex-1 p-3 gap-1">
         {vendor && (
           <div className="flex items-center gap-1">
-            {isVerified && <ShieldCheck className="h-2.5 w-2.5 text-success shrink-0" />}
-            <span className={cn("text-[10px] truncate", dark ? "text-primary-foreground/60" : "text-muted-foreground")}>
+            <span className={cn("text-data-id truncate", dark ? "text-primary-foreground/60" : "text-muted-foreground")}>
               {vendor.business_name}
             </span>
+            {isVerified && <ShieldCheck className="h-3 w-3 shrink-0 text-success" />}
           </div>
         )}
 
@@ -118,13 +120,18 @@ export const ProductCard = ({
         </h3>
 
         <div className="mt-1">
-          <span className={cn("text-sm font-bold", dark ? "text-primary-foreground" : "text-foreground")}>
+          <span className={cn("text-price text-base font-bold", dark ? "text-primary-foreground" : "text-accent")}>
             {formatKsh(price_ksh)}
           </span>
         </div>
 
+        <div className={cn("flex items-center gap-1 text-data-id", dark ? "text-success/90" : "text-success")}>
+          <ShieldCheck className="h-3 w-3 shrink-0" />
+          Protected by Float
+        </div>
+
         {lowStock && (
-          <p className="text-[10px] text-warning font-medium">Only {quantity_in_stock} left</p>
+          <p className="text-[10px] font-medium text-warning">Only <span className="text-stat">{quantity_in_stock}</span> left</p>
         )}
 
         <button

@@ -197,8 +197,8 @@ const Notifications = () => {
         <div className="space-y-6">
           {unread.length > 0 && (
             <section>
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                Unread ({unread.length})
+              <h2 className="text-eyebrow text-muted-foreground mb-2">
+                Unread (<span className="text-stat">{unread.length}</span>)
               </h2>
               <Card className="divide-y overflow-hidden p-0">
                 {unread.map((n) => (
@@ -211,7 +211,7 @@ const Notifications = () => {
           {read.length > 0 && (
             <section>
               {unread.length > 0 && (
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                <h2 className="text-eyebrow text-muted-foreground mb-2">
                   Earlier
                 </h2>
               )}

@@ -50,6 +50,10 @@ const Auth = () => {
   const [agreedAge, setAgreedAge] = useState(false);
 
   useEffect(() => {
+    document.title = "Sign in or create an account | TechTrust";
+  }, []);
+
+  useEffect(() => {
     if (!authLoading && user) {
       void getPostLoginPath(user.id).then((path) => navigate(path, { replace: true }));
     }

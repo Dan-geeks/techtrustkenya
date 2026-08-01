@@ -63,6 +63,8 @@ const VendorDashboard = () => {
     })();
   }, [user]);
 
+  const [activeTab, setActiveTab] = useState("overview");
+
   if (loading)
     return (
       <div className="grid place-items-center min-h-[60vh]">
@@ -92,7 +94,7 @@ const VendorDashboard = () => {
       </div>
 
       <div className="container py-6">
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex flex-wrap h-auto justify-start gap-1 bg-muted/50 p-1">
           {tabs.map(({ value, label, Icon }) => (
             <TabsTrigger
@@ -113,7 +115,7 @@ const VendorDashboard = () => {
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
-          <OverviewTab vendor={vendor} />
+          <OverviewTab vendor={vendor} onSelectTab={setActiveTab} />
         </TabsContent>
         <TabsContent value="products" className="mt-6">
           <ProductsTab vendor={vendor} />

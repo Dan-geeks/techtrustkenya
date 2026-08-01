@@ -127,6 +127,10 @@ const VendorRegister = () => {
   const [showManualGps, setShowManualGps] = useState(false);
   const [noPhysicalAddress, setNoPhysicalAddress] = useState(false);
 
+  useEffect(() => {
+    document.title = "List your shop on TechTrust | Vendor registration";
+  }, []);
+
   // Redirect logged-in approved vendors/admins away; prefill the account step
   // for everyone else so an existing customer can add the vendor role onto
   // their same account instead of being forced through a second signup.

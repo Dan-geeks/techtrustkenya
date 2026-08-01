@@ -50,10 +50,10 @@ export const AnalyticsTab = ({ vendor }: { vendor: any }) => {
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">Analytics (last 30 days)</h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="p-4"><div className="text-xs text-muted-foreground">Orders</div><div className="text-2xl font-bold">{data.totalOrders}</div></Card>
-        <Card className="p-4"><div className="text-xs text-muted-foreground">Completed</div><div className="text-2xl font-bold">{data.completedOrders}</div></Card>
-        <Card className="p-4"><div className="text-xs text-muted-foreground">Revenue (payout)</div><div className="text-xl font-bold">{formatKsh(data.revenue)}</div></Card>
-        <Card className="p-4"><div className="text-xs text-muted-foreground">Avg order</div><div className="text-xl font-bold">{formatKsh(Math.round(data.avgOrder))}</div></Card>
+        <Card className="p-4"><div className="text-xs text-muted-foreground">Orders</div><div className="text-2xl font-bold text-stat">{data.totalOrders}</div></Card>
+        <Card className="p-4"><div className="text-xs text-muted-foreground">Completed</div><div className="text-2xl font-bold text-stat">{data.completedOrders}</div></Card>
+        <Card className="p-4"><div className="text-xs text-muted-foreground">Revenue (payout)</div><div className="text-xl font-bold"><span className="text-price">{formatKsh(data.revenue)}</span></div></Card>
+        <Card className="p-4"><div className="text-xs text-muted-foreground">Avg order</div><div className="text-xl font-bold"><span className="text-price">{formatKsh(Math.round(data.avgOrder))}</span></div></Card>
       </div>
       <Card className="p-5">
         <h3 className="font-semibold mb-3">Top products</h3>
@@ -64,7 +64,7 @@ export const AnalyticsTab = ({ vendor }: { vendor: any }) => {
             {data.topProducts.map((p: any, i: number) => (
               <li key={i} className="py-2 flex items-center justify-between text-sm">
                 <span>{p.name}</span>
-                <span className="text-muted-foreground">{p.count} sold · {formatKsh(p.revenue)}</span>
+                <span className="text-muted-foreground"><span className="text-stat">{p.count}</span> sold · <span className="text-price">{formatKsh(p.revenue)}</span></span>
               </li>
             ))}
           </ul>

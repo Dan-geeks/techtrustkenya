@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { formatKsh } from "@/lib/format";
-import { Package, ShoppingCart, Wrench, Wallet, Star, AlertTriangle } from "lucide-react";
+import { formatKsh, formatDate } from "@/lib/format";
+import { Package, ShoppingCart, Wrench, Wallet, Star, AlertTriangle, Lock, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
 interface Props {
   vendor: any;
+  onSelectTab?: (tab: string) => void;
 }
 
-export const OverviewTab = ({ vendor }: Props) => {
+export const OverviewTab = ({ vendor, onSelectTab }: Props) => {
   const [stats, setStats] = useState({
     activeProducts: 0,
     pendingOrders: 0,
@@ -63,28 +64,36 @@ export const OverviewTab = ({ vendor }: Props) => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={Package} label="Active products" value={stats.activeProducts.toString()} />
-        <StatCard icon={ShoppingCart} label="Pending orders" value={stats.pendingOrders.toString()} />
-        <StatCard icon={Wrench} label="Active repairs" value={stats.activeRepairs.toString()} />
-        <StatCard icon={Star} label="Avg rating" value={Number(stats.avgRating).toFixed(1)} />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <Card className="p-5">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <Wallet className="h-4 w-4" /> Float held
-          </div>
-          <div className="text-2xl font-bold text-warning">{formatKsh(stats.floatHeld)}</div>
-          <p className="text-xs text-muted-foreground mt-1">Released after customer confirms delivery (max 48h).</p>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <Wallet className="h-4 w-4" /> Float released (lifetime)
-          </div>
-          <div className="text-2xl font-bold text-success">{formatKsh(stats.floatReleased)}</div>
-          <p className="text-xs text-muted-foreground mt-1">Paid out to your M-Pesa.</p>
-        </Card>
+      {/* Stats grid, per the Vendor Center mockup: label + icon tile, mono
+          figure, one supporting line. Float funds get the blue accent rail. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={Wallet}
+          label="Float released (lifetime)"
+          value={formatKsh(stats.floatReleased)}
+          note="Paid out to your M-Pesa."
+          isPrice
+        />
+        <StatCard
+          icon={ShoppingCart}
+          label="Active orders"
+          value={stats.pendingOrders.toString()}
+          note={`${stats.activeProducts} products listed`}
+        />
+        <StatCard
+          icon={Lock}
+          label="Pending Float funds"
+          value={formatKsh(stats.floatHeld)}
+          note="Secured in Float"
+          highlight
+          isPrice
+        />
+        <StatCard
+          icon={Star}
+          label="Seller rating"
+          value={`${Number(stats.avgRating).toFixed(1)}/5.0`}
+          note={`${stats.activeRepairs} active repairs`}
+        />
       </div>
 
       {actionItems.length > 0 && (
@@ -103,37 +112,110 @@ export const OverviewTab = ({ vendor }: Props) => {
         </Card>
       )}
 
-      <Card className="p-5">
-        <h3 className="font-semibold mb-3">Recent orders</h3>
+      <Card className="overflow-hidden p-0">
+        <div className="flex items-center justify-between gap-3 px-5 py-4">
+          <h3 className="font-semibold">Recent orders</h3>
+          <button
+            type="button"
+            onClick={() => onSelectTab?.("orders")}
+            className="text-sm font-medium text-accent hover:underline bg-transparent border-0 p-0 cursor-pointer"
+          >
+            View all orders
+          </button>
+        </div>
         {recentOrders.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No orders yet.</p>
+          <p className="px-5 pb-8 text-sm text-muted-foreground">No orders yet.</p>
         ) : (
-          <ul className="divide-y">
-            {recentOrders.map((o) => (
-              <li key={o.id} className="py-2 flex items-center justify-between text-sm">
-                <div>
-                  <div className="font-medium">{o.product?.brand} {o.product?.model_name}</div>
-                  <div className="text-xs text-muted-foreground">#{o.id.slice(0, 8).toUpperCase()} · Qty {o.quantity}</div>
-                </div>
-                <div className="text-right">
-                  <div>{formatKsh(Number(o.total_amount_ksh))}</div>
-                  <div className="text-xs text-muted-foreground capitalize">{o.status.replace(/_/g, " ")}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-y border-border bg-secondary text-eyebrow text-muted-foreground">
+                  <th className="px-5 py-3">Order ID</th>
+                  <th className="px-5 py-3">Item</th>
+                  <th className="px-5 py-3 text-right">Amount</th>
+                  <th className="px-5 py-3">Date</th>
+                  <th className="px-5 py-3">Float status</th>
+                  <th className="px-5 py-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {recentOrders.map((o) => (
+                  <tr key={o.id} className="transition-colors hover:bg-secondary/50">
+                    <td className="px-5 py-3 text-data-id text-muted-foreground">#{o.id.slice(0, 8).toUpperCase()}</td>
+                    <td className="px-5 py-3 font-medium">
+                      {o.product?.brand} {o.product?.model_name}
+                      <span className="ml-1 text-xs text-muted-foreground">×{o.quantity}</span>
+                    </td>
+                    <td className="px-5 py-3 text-right"><span className="text-price">{formatKsh(Number(o.total_amount_ksh))}</span></td>
+                    <td className="px-5 py-3 text-xs text-muted-foreground">{formatDate(o.created_at)}</td>
+                    <td className="px-5 py-3"><FloatStatusPill paymentStatus={o.payment_status} /></td>
+                    <td className="px-5 py-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() => onSelectTab?.("orders")}
+                        className="text-sm font-medium text-accent hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                      >
+                        Manage
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </Card>
     </div>
   );
 };
 
-const StatCard = ({ icon: Icon, label, value }: { icon: any; label: string; value: string }) => (
-  <Card className="p-4">
-    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-      <Icon className="h-4 w-4" />
-      {label}
+const FloatStatusPill = ({ paymentStatus }: { paymentStatus: string }) => {
+  if (paymentStatus === "released") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-xs font-medium text-success">
+        <ShieldCheck className="h-3 w-3" /> Released
+      </span>
+    );
+  }
+  if (paymentStatus === "paid_float") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-float">
+        <Lock className="h-3 w-3" /> Held
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium capitalize text-muted-foreground">
+      {String(paymentStatus ?? "—").replace(/_/g, " ")}
+    </span>
+  );
+};
+
+const StatCard = ({
+  icon: Icon,
+  label,
+  value,
+  note,
+  highlight,
+  isPrice = false,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+  note?: string;
+  highlight?: boolean;
+  isPrice?: boolean;
+}) => (
+  <Card className={`p-5 ${highlight ? "border-l-4 border-l-float" : ""}`}>
+    <div className="mb-3 flex items-start justify-between gap-3">
+      <span className="text-sm font-medium text-foreground">{label}</span>
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-accent-soft text-primary">
+        <Icon className="h-4 w-4" />
+      </span>
     </div>
-    <div className="text-2xl font-bold">{value}</div>
+    <div className={`${isPrice ? "text-price" : "text-stat"} text-xl font-bold text-foreground`}>{value}</div>
+    {note && (
+      <p className={`mt-1 text-xs ${highlight ? "font-medium text-float" : "text-muted-foreground"}`}>{note}</p>
+    )}
   </Card>
 );

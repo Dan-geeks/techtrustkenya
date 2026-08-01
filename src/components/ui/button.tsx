@@ -18,6 +18,8 @@ const buttonVariants = cva(
         hero: "bg-accent text-accent-foreground hover:bg-accent/90 font-semibold",
         accent: "bg-accent text-accent-foreground hover:bg-accent/90",
         success: "bg-accent text-accent-foreground hover:bg-accent/90",
+        /* Admin-only affirmative action (deep green), per the Stitch admin frame. */
+        approve: "bg-approve text-approve-foreground hover:bg-approve/90",
         outlineLight: "border-2 border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20",
       },
       size: {

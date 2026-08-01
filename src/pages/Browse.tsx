@@ -176,7 +176,7 @@ const Browse = () => {
             max={priceRange[1]}
             value={priceRange[0]}
             onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-            className="text-xs h-8"
+            className="text-price text-xs h-8"
             placeholder="Min"
           />
           <Input
@@ -185,7 +185,7 @@ const Browse = () => {
             max={200000}
             value={priceRange[1]}
             onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-            className="text-xs h-8"
+            className="text-price text-xs h-8"
             placeholder="Max"
           />
         </div>
@@ -261,7 +261,7 @@ const Browse = () => {
           <h1 className="text-2xl font-bold">Browse Products</h1>
           {!loading && (
             <p className="text-sm text-muted-foreground mt-0.5">
-              {products.length} {products.length === 1 ? "product" : "products"} found
+              <span className="text-stat font-medium">{products.length}</span> {products.length === 1 ? "product" : "products"} found
             </p>
           )}
         </div>
@@ -351,7 +351,7 @@ const Browse = () => {
                     Previous
                   </Button>
                   <span className="text-sm text-muted-foreground px-2">
-                    Page {page} of {totalPages}
+                    Page <span className="text-stat font-medium">{page}</span> of <span className="text-stat font-medium">{totalPages}</span>
                   </span>
                   <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
                     Next

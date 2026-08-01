@@ -1,12 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Wrench, Star, Clock, ShieldCheck } from "lucide-react";
+import { Wrench, Star, Clock, ShieldCheck, Search, ReceiptText, Lock, CheckCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKsh } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { RepairRequestDialog } from "@/components/repairs/RepairRequestDialog";
 import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
+
+const repairSteps = [
+  { icon: Search, title: "Diagnosis", note: "Shop inspects device", tone: "outline" },
+  { icon: ReceiptText, title: "Quote", note: "Receive exact price", tone: "outline" },
+  { icon: Lock, title: "Float hold", note: "Funds secured", tone: "filled" },
+  { icon: Wrench, title: "Repair", note: "Work performed", tone: "outline" },
+  { icon: CheckCheck, title: "Release", note: "You approve payout", tone: "success" },
+] as const;
 
 const Repairs = () => {
   const [services, setServices] = useState<any[]>([]);
@@ -21,7 +30,8 @@ const Repairs = () => {
         .from("repair_services")
         .select("*, vendor:vendor_profiles!inner(id,user_id,business_name,city,average_rating,physical_address,verification_status)")
         .eq("is_active", true)
-        .eq("vendor.verification_status", "approved");
+        // "verified" and "approved" both mean a live vendor — see Browse.tsx.
+        .in("vendor.verification_status", ["verified", "approved"]);
       setServices(data ?? []);
       setLoading(false);
     })();
@@ -51,6 +61,38 @@ const Repairs = () => {
         />
       </header>
 
+      {/* The secure process — static, so the page still explains the Float
+          guarantee on days when no technician has a service listed. */}
+      <section className="mt-16">
+        <h2 className="text-2xl font-bold md:text-3xl">The secure process</h2>
+        <div className="relative mt-10 grid grid-cols-2 gap-6 md:grid-cols-5">
+          <div
+            aria-hidden="true"
+            className="absolute left-[10%] right-[10%] top-7 -z-10 hidden h-0.5 bg-border md:block"
+          />
+          {repairSteps.map(({ icon: Icon, title, note, tone }) => (
+            <div key={title} className="flex flex-col items-center gap-4 md:items-start">
+              <div
+                className={cn(
+                  "z-10 grid h-14 w-14 place-items-center rounded-full shadow-card",
+                  tone === "filled"
+                    ? "bg-primary text-primary-foreground"
+                    : tone === "success"
+                      ? "border-2 border-success bg-card text-success"
+                      : "border-2 border-primary bg-card text-primary",
+                )}
+              >
+                <Icon className="h-6 w-6" />
+              </div>
+              <div className="text-center md:text-left">
+                <h3 className={cn("font-semibold", tone === "filled" && "text-primary")}>{title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{note}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {loading ? (
         <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -76,7 +118,7 @@ const Repairs = () => {
                 {vendor.city && <Badge variant="outline">{vendor.city}</Badge>}
                 <span className="flex items-center gap-0.5 text-xs text-muted-foreground ml-auto">
                   <Star className="h-3 w-3 fill-warning text-warning" />
-                  {Number(vendor.average_rating).toFixed(1)}
+                  <span className="text-stat">{Number(vendor.average_rating).toFixed(1)}</span>
                 </span>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -95,13 +137,13 @@ const Repairs = () => {
                     <div className="mt-3 flex flex-wrap gap-2 text-xs">
                       <Badge variant="outline" className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {s.estimated_turnaround_days} day{s.estimated_turnaround_days !== 1 ? "s" : ""}
+                        <span className="text-stat">{s.estimated_turnaround_days}</span> day{s.estimated_turnaround_days !== 1 ? "s" : ""}
                       </Badge>
                     </div>
                     <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
                       <div>
                         <div className="text-xs text-muted-foreground">From</div>
-                        <div className="font-bold text-primary">{formatKsh(s.price_min_ksh)}</div>
+                        <div className="font-bold text-primary"><span className="text-price">{formatKsh(s.price_min_ksh)}</span></div>
                       </div>
                       <Button
                         variant="accent"

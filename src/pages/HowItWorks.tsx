@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AnimatedArt, art } from "@/components/marketing/AnimatedArt";
 
 const steps = [
@@ -24,6 +25,10 @@ const steps = [
 ];
 
 const HowItWorks = () => {
+  useEffect(() => {
+    document.title = "How TechTrust Works | Float-protected payments";
+  }, []);
+
   return (
     <div className="container py-12 max-w-5xl">
       <header className="grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -46,7 +51,7 @@ const HowItWorks = () => {
             key={num}
             className="group flex gap-6 rounded-2xl bg-primary p-6 text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg sm:p-8"
           >
-            <div className="text-3xl font-black text-primary-foreground/20 group-hover:text-accent/60 transition-colors tabular-nums shrink-0 w-12 leading-none pt-1">
+            <div className="text-stat text-3xl font-black text-primary-foreground/20 group-hover:text-accent/60 transition-colors shrink-0 w-12 leading-none pt-1">
               {num}
             </div>
             <div>

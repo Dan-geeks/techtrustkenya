@@ -22,6 +22,10 @@ const Welcome = () => {
   const [referralCode, setReferralCode] = useState("");
 
   useEffect(() => {
+    document.title = "Welcome to TechTrust";
+  }, []);
+
+  useEffect(() => {
     if (!authLoading && !user) navigate("/auth", { replace: true });
   }, [authLoading, user, navigate]);
 

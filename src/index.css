@@ -1,64 +1,86 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* TechTrust design system — refined navy + electric blue with depth */
+/* TechTrust design system — values taken from the client's Stitch DESIGN.md
+   ("TechTrust Kenya Design System"). Primary Navy #0F3D8C drives key actions,
+   navigation and branding; Float Blue #3B82F6 is reserved for escrow state;
+   Success Green #22C55E for verified/protected. Page base #F8FAFC, cards pure
+   white so they pop. */
 @layer base {
   :root {
-    --background: 210 40% 99%;
-    --foreground: 215 60% 10%;
+    --background: 210 40% 98%;
+    --foreground: 222 42% 13%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 60% 10%;
+    --card-foreground: 222 42% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 60% 10%;
+    --popover-foreground: 222 42% 13%;
 
-    /* Deep navy primary */
-    --primary: 215 70% 11%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary Navy #0F3D8C — hover #0A2D6B */
+    --primary: 218 81% 30%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 218 83% 23%;
+    /* Deepest navy #002766 — display headings only */
+    --primary-deep: 217 100% 20%;
     --primary-glow: 217 91% 60%;
 
-    /* Electric blue accent */
-    --accent: 217 91% 60%;
+    /* Interactive blue #0058be — links and secondary emphasis */
+    --accent: 212 100% 37%;
     --accent-foreground: 0 0% 100%;
-    --accent-soft: 217 91% 95%;
+    /* Highlight Blue #EEF2FF — secondary button fill */
+    --accent-soft: 226 100% 96%;
 
-    --secondary: 215 30% 96%;
-    --secondary-foreground: 215 60% 15%;
+    /* Float Blue #3B82F6 — escrow / money-held indicators ONLY */
+    --float: 217 91% 60%;
+    --float-foreground: 0 0% 100%;
 
-    --muted: 215 25% 95%;
-    --muted-foreground: 215 16% 45%;
+    --secondary: 226 100% 96%;
+    --secondary-foreground: 218 81% 30%;
 
-    --success: 142 71% 38%;
+    --muted: 231 100% 96%;
+    --muted-foreground: 227 9% 32%;
+
+    /* Success Green #22C55E */
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
     --success-soft: 142 60% 94%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 215 60% 10%;
+    /* Deep green #004c1e — the mockup's admin "Approve" action. Distinct from
+       --success so the storefront's blue success buttons stay blue. */
+    --approve: 144 100% 15%;
+    --approve-foreground: 0 0% 100%;
 
-    --destructive: 0 75% 50%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 42% 13%;
+
+    /* Stitch `error` #ba1a1a */
+    --destructive: 0 76% 42%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 25% 90%;
-    --input: 215 25% 90%;
-    --ring: 217 91% 60%;
+    --border: 230 20% 90%;
+    /* Input border #94A3B8, per the DESIGN.md component spec */
+    --input: 213 27% 84%;
+    --ring: 218 81% 30%;
 
+    /* Cards 12px; buttons and inputs step down to 8px for precision. */
     --radius: 0.75rem;
+    --radius-control: 0.5rem;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(215 70% 11%) 0%, hsl(217 80% 20%) 50%, hsl(217 91% 35%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 50%));
-    --gradient-subtle: linear-gradient(180deg, hsl(210 40% 99%), hsl(215 30% 96%));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(215 30% 98%));
+    --gradient-hero: linear-gradient(135deg, hsl(217 100% 20%) 0%, hsl(218 81% 30%) 55%, hsl(212 100% 37%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(212 100% 37%), hsl(218 81% 30%));
+    --gradient-subtle: radial-gradient(ellipse at top right, hsl(226 100% 96%), hsl(210 40% 98%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(226 100% 99%));
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(215 60% 10% / 0.04);
-    --shadow-md: 0 4px 12px -2px hsl(215 60% 10% / 0.08);
-    --shadow-lg: 0 12px 32px -8px hsl(215 60% 10% / 0.15);
-    --shadow-card: 0 2px 8px -2px hsl(215 60% 10% / 0.06);
+    /* Shadows — the two the design system defines, nothing else. */
+    --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.08);
+    --shadow-md: 0 4px 16px rgb(0 0 0 / 0.04);
+    --shadow-lg: 0 4px 16px rgb(0 0 0 / 0.04);
+    --shadow-card: 0 1px 3px rgb(0 0 0 / 0.08);
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -104,7 +126,9 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv11", "ss01", "ss03";
   }
-  h1, h2, h3, h4 { @apply tracking-tight; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; }
+  h1, h2, h3, h4 { @apply tracking-tight; font-family: 'Sora', 'Inter', system-ui, sans-serif; }
+  h1 { letter-spacing: -0.03em; }
+  h2 { letter-spacing: -0.03em; }
 }
 
 @layer utilities {
@@ -118,4 +142,34 @@
   .transition-smooth { transition: var(--transition-smooth); }
   .transition-bounce { transition: var(--transition-bounce); }
   .text-balance { text-wrap: balance; }
+
+  /* Stitch spec: every price, stat and reference id is set in JetBrains Mono. */
+  /* Deliberately no font-weight/size here: these wrap existing prices and must
+     inherit whatever weight the surrounding heading or label already sets. */
+  .text-price {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .text-stat {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .text-data-id {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  /* Table headers and section eyebrows: Inter 600, uppercase, 0.05em tracking
+     — the "ledger" treatment the design system asks for. */
+  .text-eyebrow {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
 }

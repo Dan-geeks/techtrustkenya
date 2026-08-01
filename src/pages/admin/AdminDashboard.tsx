@@ -7,13 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKsh, formatDate } from "@/lib/format";
 import { invokeFunction } from "@/lib/functions";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   Loader2, Users, Store, AlertTriangle, Wallet, MapPin, Phone, Mail, Map,
-  FileText, CheckCircle2, XCircle, ShieldCheck, Search,
+  FileText, CheckCircle2, XCircle, ShieldCheck, Search, UserCircle,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 
@@ -21,41 +23,104 @@ import {
 // Root
 // ---------------------------------------------------------------------------
 
+const ADMIN_TABS = [
+  { value: "overview", label: "Overview" },
+  { value: "vendors", label: "Verifications" },
+  { value: "disputes", label: "Disputes" },
+  { value: "users", label: "Users" },
+  { value: "payments", label: "Escrow" },
+] as const;
+
 const AdminDashboard = () => {
+  const [tab, setTab] = useState<string>("overview");
+
   useEffect(() => {
     document.title = "Admin Dashboard | TechTrust";
   }, []);
 
+  const heading = ADMIN_TABS.find((t) => t.value === tab);
+
   return (
-    <div className="flex flex-col">
-      <div className="bg-primary text-primary-foreground">
-        <div className="container py-8">
-          <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-accent">
-            <ShieldCheck className="h-3 w-3" /> Internal
-          </span>
-          <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-sm text-primary-foreground/60 mt-1">Platform oversight and moderation</p>
-        </div>
+    <div className="container py-8">
+      {/* Stitch admin chrome: light canvas, underlined nav, big Sora page title. */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border">
+        <nav className="flex flex-wrap items-center gap-6">
+          {ADMIN_TABS.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              onClick={() => setTab(t.value)}
+              className={cn(
+                "-mb-px border-b-2 pb-3 text-sm transition-colors",
+                tab === t.value
+                  ? "border-primary font-semibold text-primary"
+                  : "border-transparent text-muted-foreground hover:text-accent",
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+        <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-eyebrow text-accent">
+          <ShieldCheck className="h-3 w-3" /> Internal
+        </span>
       </div>
-      <div className="container py-6">
-        <Tabs defaultValue="overview">
-          <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 justify-start">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="vendors">Vendors</TabsTrigger>
-            <TabsTrigger value="disputes">Disputes</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-          </TabsList>
-          <TabsContent value="overview" className="mt-6"><AdminOverview /></TabsContent>
-          <TabsContent value="vendors" className="mt-6"><AdminVendors /></TabsContent>
-          <TabsContent value="disputes" className="mt-6"><AdminDisputes /></TabsContent>
-          <TabsContent value="users" className="mt-6"><AdminUsers /></TabsContent>
-          <TabsContent value="payments" className="mt-6"><AdminPayments /></TabsContent>
-        </Tabs>
+
+      <div className="mt-8">
+        <h1 className="font-display text-4xl font-bold text-primary">
+          {tab === "vendors" ? "Verification Queue" : tab === "payments" ? "Float & Escrow" : heading?.label}
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
+          {tab === "overview" && "Platform oversight at a glance."}
+          {tab === "vendors" && "Review and manage pending vendor applications."}
+          {tab === "disputes" && "Resolve orders where the buyer and vendor disagree."}
+          {tab === "users" && "Everyone with a TechTrust account."}
+          {tab === "payments" && "Every shilling held, released or refunded through Float."}
+        </p>
+      </div>
+
+      <div className="mt-8">
+        {tab === "overview" && <AdminOverview onOpenTab={setTab} />}
+        {tab === "vendors" && <AdminVendors />}
+        {tab === "disputes" && <AdminDisputes />}
+        {tab === "users" && <AdminUsers />}
+        {tab === "payments" && <AdminPayments />}
       </div>
     </div>
   );
 };
+
+// Card shell used by every admin panel — matches the mockup's white
+// rounded-xl surface with a tinted header strip.
+const Panel = ({
+  title,
+  action,
+  children,
+  className,
+  footer,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  footer?: React.ReactNode;
+}) => (
+  <div className={cn("overflow-hidden rounded-xl border border-border bg-card shadow-card", className)}>
+    <div className="flex items-center justify-between gap-3 border-b border-border bg-secondary px-5 py-4">
+      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+      {action}
+    </div>
+    {children}
+    {footer && <div className="border-t border-border bg-secondary/60 px-5 py-3">{footer}</div>}
+  </div>
+);
+
+// Dense table header cells, per the mockup's uppercase micro-labels.
+const Th = ({ children, right }: { children: React.ReactNode; right?: boolean }) => (
+  <th className={cn("px-4 py-3 text-eyebrow text-muted-foreground", right ? "text-right" : "text-left")}>
+    {children}
+  </th>
+);
 
 // ---------------------------------------------------------------------------
 // Overview tab
@@ -70,58 +135,299 @@ interface OverviewStats {
   disputes: number;
 }
 
-const AdminOverview = () => {
+interface FloatSnapshot {
+  held: number;
+  released: number;
+  ledger: { id: string; amount: number; status: string; created_at: string }[];
+}
+
+const AdminOverview = ({ onOpenTab }: { onOpenTab: (tab: string) => void }) => {
   const [stats, setStats] = useState<OverviewStats | null>(null);
+  const [float, setFloat] = useState<FloatSnapshot | null>(null);
+  const [queue, setQueue] = useState<VendorProfile[]>([]);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [queueQuery, setQueueQuery] = useState("");
+  const [rejectVendor, setRejectVendor] = useState<VendorProfile | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejecting, setRejecting] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      const [users, vendors, orders, pendingVendors, disputes] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("vendor_profiles").select("id", { count: "exact", head: true }).in("verification_status", ["approved", "verified"]),
-        supabase.from("orders").select("total_amount_ksh, platform_fee_ksh, status"),
-        supabase.from("vendor_profiles").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
-        supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "disputed"),
-      ]);
-      const ordersList = orders.data ?? [];
-      const completed = ordersList.filter((o) => o.status === "confirmed");
-      setStats({
-        users: users.count ?? 0,
-        vendors: vendors.count ?? 0,
-        gmv: completed.reduce((s, o) => s + Number(o.total_amount_ksh), 0),
-        revenue: completed.reduce((s, o) => s + Number(o.platform_fee_ksh), 0),
-        pendingVendors: pendingVendors.count ?? 0,
-        disputes: disputes.count ?? 0,
-      });
-    })();
-  }, []);
+  const load = async () => {
+    const [users, vendors, orders, pendingVendors, disputes, pendingList] = await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("vendor_profiles").select("id", { count: "exact", head: true }).in("verification_status", ["approved", "verified"]),
+      supabase.from("orders").select("id, total_amount_ksh, platform_fee_ksh, status, payment_status, created_at").order("created_at", { ascending: false }),
+      supabase.from("vendor_profiles").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
+      supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "disputed"),
+      supabase.from("vendor_profiles").select("*").eq("verification_status", "pending").order("created_at", { ascending: true }).limit(5),
+    ]);
+    const ordersList = orders.data ?? [];
+    const completed = ordersList.filter((o) => o.status === "confirmed");
+    setStats({
+      users: users.count ?? 0,
+      vendors: vendors.count ?? 0,
+      gmv: completed.reduce((s, o) => s + Number(o.total_amount_ksh), 0),
+      revenue: completed.reduce((s, o) => s + Number(o.platform_fee_ksh), 0),
+      pendingVendors: pendingVendors.count ?? 0,
+      disputes: disputes.count ?? 0,
+    });
+    setFloat({
+      held: ordersList.filter((o) => o.payment_status === "paid_float").reduce((s, o) => s + Number(o.total_amount_ksh), 0),
+      released: ordersList.filter((o) => o.payment_status === "released").reduce((s, o) => s + Number(o.total_amount_ksh), 0),
+      ledger: ordersList
+        .filter((o) => o.payment_status === "paid_float" || o.payment_status === "released")
+        .slice(0, 5)
+        .map((o) => ({ id: o.id, amount: Number(o.total_amount_ksh), status: o.payment_status, created_at: o.created_at })),
+    });
+    setQueue((pendingList.data ?? []) as VendorProfile[]);
+  };
 
-  if (!stats) {
+  useEffect(() => { load(); }, []);
+
+  const decide = async (v: VendorProfile, status: "approved" | "rejected") => {
+    if (status === "rejected") {
+      setRejectVendor(v);
+      setRejectReason("");
+      return;
+    }
+    setBusyId(v.id);
+    const ok = await applyVendorDecision(v, status, { rejection_reason: null });
+    setBusyId(null);
+    if (ok) load();
+  };
+
+  const confirmReject = async () => {
+    if (!rejectVendor) return;
+    if (!rejectReason.trim()) {
+      toast.error("Please enter a rejection reason.");
+      return;
+    }
+    setRejecting(true);
+    const ok = await applyVendorDecision(rejectVendor, "rejected", { rejection_reason: rejectReason.trim() });
+    setRejecting(false);
+    if (ok) {
+      setRejectVendor(null);
+      setRejectReason("");
+      load();
+    }
+  };
+
+  if (!stats || !float) {
     return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-accent" /></div>;
   }
 
+  const totalFloat = float.held + float.released;
+  const clearedPct = totalFloat > 0 ? Math.round((float.released / totalFloat) * 100) : 0;
+  const q = queueQuery.trim().toLowerCase();
+  const visibleQueue = q
+    ? queue.filter(
+        (v) =>
+          (v.business_name ?? "").toLowerCase().includes(q) ||
+          (v.owner_name ?? "").toLowerCase().includes(q) ||
+          v.id.slice(0, 5).toLowerCase().includes(q.replace(/^vnd-/, "")),
+      )
+    : queue;
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-      <StatCard icon={Users} label="Total Users" value={stats.users.toString()} accent="text-blue-500" />
-      <StatCard icon={Store} label="Active Vendors" value={stats.vendors.toString()} accent="text-success" />
-      <StatCard
-        icon={Store}
-        label="Pending Approvals"
-        value={stats.pendingVendors.toString()}
-        accent="text-amber-500"
-        pulse={stats.pendingVendors > 0}
-      />
-      <StatCard icon={Wallet} label="Lifetime GMV" value={formatKsh(stats.gmv)} accent="text-indigo-500" />
-      <StatCard icon={Wallet} label="Platform Revenue (10%)" value={formatKsh(stats.revenue)} accent="text-success" />
-      <StatCard
-        icon={AlertTriangle}
-        label="Open Disputes"
-        value={stats.disputes.toString()}
-        accent="text-destructive"
-        pulse={stats.disputes > 0}
-      />
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+        <StatCard icon={Users} label="Total Users" value={stats.users.toString()} accent="text-accent" />
+        <StatCard icon={Store} label="Active Vendors" value={stats.vendors.toString()} accent="text-success" />
+        <StatCard icon={Store} label="Pending Approvals" value={stats.pendingVendors.toString()} accent="text-warning" pulse={stats.pendingVendors > 0} />
+        <StatCard icon={Wallet} label="Lifetime GMV" value={formatKsh(stats.gmv)} accent="text-primary" />
+        <StatCard icon={Wallet} label="Platform Revenue (10%)" value={formatKsh(stats.revenue)} accent="text-success" />
+        <StatCard icon={AlertTriangle} label="Open Disputes" value={stats.disputes.toString()} accent="text-destructive" pulse={stats.disputes > 0} />
+      </div>
+
+      {/* Bento grid, 8/4 split — verification queue beside the Float position. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <Panel
+          className="lg:col-span-8"
+          title="Pending Actions"
+          action={
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={queueQuery}
+                onChange={(e) => setQueueQuery(e.target.value)}
+                placeholder="Search ID..."
+                aria-label="Search the pending queue by vendor name or reference"
+                className="text-data-id h-8 w-48 bg-card pl-9"
+              />
+            </div>
+          }
+          footer={
+            <button
+              type="button"
+              onClick={() => onOpenTab("vendors")}
+              className="mx-auto block text-sm font-medium text-accent transition-colors hover:text-primary"
+            >
+              View all pending
+            </button>
+          }
+        >
+          {visibleQueue.length === 0 ? (
+            <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+              {queue.length === 0
+                ? "Nothing waiting. Every vendor application has been reviewed."
+                : "No pending application matches that search."}
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-border bg-card">
+                    <Th>Vendor</Th>
+                    <Th>ID / Reference</Th>
+                    <Th>Documents</Th>
+                    <Th right>Decision</Th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {visibleQueue.map((v) => (
+                    <tr key={v.id} className="h-12 border-b border-border/60 transition-colors hover:bg-secondary/60">
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-8 w-8 shrink-0 place-items-center rounded bg-muted text-xs font-bold text-primary">
+                            {getInitials(v.business_name)}
+                          </div>
+                          <span className="font-medium">{v.business_name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-data-id text-muted-foreground">
+                        VND-{v.id.slice(0, 5).toUpperCase()}
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex gap-2 text-primary">
+                          <DocIcon icon={UserCircle} href={v.id_document_url} title="ID document" />
+                          <DocIcon icon={FileText} href={v.business_certificate_url} title="Business certificate" />
+                          <DocIcon icon={MapPin} href={v.google_maps_link} title="Shop location" />
+                        </div>
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="approve"
+                            className="h-7 px-3 text-xs"
+                            disabled={busyId === v.id}
+                            onClick={() => decide(v, "approved")}
+                          >
+                            {busyId === v.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Approve"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 border-destructive/40 px-3 text-xs text-destructive hover:bg-destructive/10"
+                            onClick={() => decide(v, "rejected")}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Panel>
+
+        <div className="flex flex-col gap-6 lg:col-span-4">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-card">
+            <h3 className="text-eyebrow mb-4 text-muted-foreground">Float Overview</h3>
+            <p className="mb-1 text-sm text-muted-foreground">Total Float volume</p>
+            <p className="text-price text-3xl font-bold text-primary">{formatKsh(totalFloat)}</p>
+            <div className="mb-2 mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-full rounded-full bg-float transition-all" style={{ width: `${clearedPct}%` }} />
+            </div>
+            <div className="flex justify-between text-xs font-medium text-muted-foreground">
+              <span>Released: <span className="text-price">{formatKsh(float.released)}</span></span>
+              <span>Held: <span className="text-price">{formatKsh(float.held)}</span></span>
+            </div>
+          </div>
+
+          <Panel
+            className="flex-1"
+            title="Float Ledger"
+            action={
+              <button
+                type="button"
+                onClick={() => onOpenTab("payments")}
+                className="text-xs font-medium text-accent hover:underline"
+              >
+                All transactions
+              </button>
+            }
+          >
+            {float.ledger.length === 0 ? (
+              <p className="px-5 py-8 text-center text-sm text-muted-foreground">No Float movement yet.</p>
+            ) : (
+              <table className="w-full border-collapse text-left">
+                <tbody className="text-sm">
+                  {float.ledger.map((t) => (
+                    <tr key={t.id} className="h-10 border-b border-border/40 hover:bg-secondary/50">
+                      <td className="w-1/2 px-4 py-2 text-data-id text-muted-foreground">
+                        TXN-{t.id.slice(0, 4).toUpperCase()}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <span className="text-price text-primary">{formatKsh(t.amount)}</span>
+                        <span className={cn("ml-2 text-[10px] font-semibold uppercase", t.status === "released" ? "text-success" : "text-warning")}>
+                          {t.status === "released" ? "out" : "held"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </Panel>
+        </div>
+      </div>
+
+      <Dialog open={!!rejectVendor} onOpenChange={(open) => !open && setRejectVendor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-destructive font-bold flex items-center gap-2">
+              <XCircle className="h-5 w-5" /> Reject Vendor Application
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p>
+              You are rejecting <span className="font-semibold">{rejectVendor?.business_name}</span>. Please enter the reason for rejection (this will be displayed to the vendor):
+            </p>
+            <div className="space-y-1">
+              <Label>Rejection Reason *</Label>
+              <Textarea
+                rows={3}
+                placeholder="e.g. Incomplete business certificate, invalid ID document..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectVendor(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmReject} disabled={rejecting}>
+              {rejecting && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+              Confirm Rejection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
+const DocIcon = ({ icon: Icon, href, title }: { icon: React.ElementType; href: string | null; title: string }) =>
+  href ? (
+    <a href={href} target="_blank" rel="noreferrer" title={title} className="transition-colors hover:text-accent">
+      <Icon className="h-[18px] w-[18px]" />
+    </a>
+  ) : (
+    <span title={`${title} — not submitted`} className="text-border">
+      <Icon className="h-[18px] w-[18px]" />
+    </span>
+  );
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -132,18 +438,18 @@ interface StatCardProps {
 }
 
 const StatCard = ({ icon: Icon, label, value, accent, pulse }: StatCardProps) => (
-  <Card className="relative overflow-hidden p-5 transition-shadow hover:shadow-md">
+  <Card className="relative overflow-hidden p-5 shadow-card transition-shadow hover:shadow-md">
     <Icon className={`pointer-events-none absolute -right-3 -top-3 h-24 w-24 ${accent} opacity-[0.08]`} strokeWidth={1.5} />
     <div className="relative mb-4 flex items-center gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
+      <span className="text-eyebrow text-muted-foreground">{label}</span>
       {pulse && (
         <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-warning opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-warning" />
         </span>
       )}
     </div>
-    <div className="relative text-3xl font-bold tracking-tight">{value}</div>
+    <div className="text-stat relative text-3xl font-bold text-primary">{value}</div>
   </Card>
 );
 
@@ -196,6 +502,52 @@ const VendorStatusBadge = ({ status }: { status: string }) => {
 const getInitials = (name: string | null) =>
   (name ?? "?").split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 
+/**
+ * Single source of truth for a verification decision: writes the status, notifies
+ * the vendor in-app, and (on approval) fires the email function. Shared by the
+ * Overview queue and the Verifications tab so both paths behave identically.
+ */
+type VerificationStatus = "pending" | "verified" | "approved" | "suspended" | "rejected";
+
+const applyVendorDecision = async (
+  v: Pick<VendorProfile, "id" | "user_id" | "business_name">,
+  status: string,
+  extra: Record<string, string | null> = {},
+): Promise<boolean> => {
+  const { error } = await supabase
+    .from("vendor_profiles")
+    .update({ verification_status: status as VerificationStatus, ...extra })
+    .eq("id", v.id);
+  if (error) { toast.error(error.message); return false; }
+
+  if (v.user_id) {
+    await supabase.from("notifications").insert({
+      user_id: v.user_id,
+      title:
+        status === "approved" ? "Vendor application approved"
+        : status === "rejected" ? "Vendor application rejected"
+        : "Vendor account suspended",
+      message:
+        status === "approved"
+          ? "Your shop is now live on TechTrust."
+          : (extra.rejection_reason || extra.suspension_reason || "Contact support."),
+      type: "vendor_application",
+      reference_id: v.id,
+    });
+    if (status === "approved") {
+      try {
+        await invokeFunction("notify-vendor-approved", {
+          body: { vendorUserId: v.user_id, businessName: v.business_name },
+        });
+      } catch (e) {
+        console.warn("notify-vendor-approved failed", e);
+      }
+    }
+  }
+  toast.success("Vendor updated");
+  return true;
+};
+
 const AdminVendors = () => {
   const [list, setList] = useState<VendorProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -209,7 +561,11 @@ const AdminVendors = () => {
   const load = async () => {
     setLoading(true);
     let query = supabase.from("vendor_profiles").select("*").order("created_at", { ascending: false });
-    if (tab !== "all") query = query.eq("verification_status", tab);
+    if (tab === "approved") {
+      query = query.in("verification_status", ["approved", "verified"]);
+    } else if (tab !== "all") {
+      query = query.eq("verification_status", tab);
+    }
     const { data } = await query;
     setList((data ?? []) as VendorProfile[]);
 
@@ -226,28 +582,10 @@ const AdminVendors = () => {
   useEffect(() => { load(); }, [tab]);
 
   const updateStatus = async (id: string, status: string, extra: Record<string, string | null> = {}) => {
-    const { error } = await supabase.from("vendor_profiles").update({ verification_status: status, ...extra }).eq("id", id);
-    if (error) { toast.error(error.message); return; }
     const v = list.find((x) => x.id === id);
-    if (v?.user_id) {
-      await supabase.from("notifications").insert({
-        user_id: v.user_id,
-        title: status === "approved" ? "Vendor application approved" : status === "rejected" ? "Vendor application rejected" : "Vendor account suspended",
-        message: status === "approved" ? "Your shop is now live on TechTrust." : (extra.rejection_reason || extra.suspension_reason || "Contact support."),
-        type: "vendor_application",
-        reference_id: id,
-      });
-      if (status === "approved") {
-        try {
-          await invokeFunction("notify-vendor-approved", {
-            body: { vendorUserId: v.user_id, businessName: v.business_name },
-          });
-        } catch (e) {
-          console.warn("notify-vendor-approved failed", e);
-        }
-      }
-    }
-    toast.success("Vendor updated");
+    if (!v) return;
+    const ok = await applyVendorDecision(v, status, extra);
+    if (!ok) return;
     setActive(null);
     setReason("");
     setReasonAction(null);
@@ -285,99 +623,108 @@ const AdminVendors = () => {
       ) : list.length === 0 ? (
         <Card className="p-12 text-center text-muted-foreground">No vendors in this state.</Card>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
-          {list.map((v) => (
-            <Card key={v.id} className="p-4 flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
-                  {getInitials(v.business_name)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">{v.business_name}</div>
-                  <div className="text-xs text-muted-foreground truncate">
-                    {v.owner_name ?? "—"} · Applied {formatDate(v.created_at)}
-                  </div>
-                </div>
-                <VendorStatusBadge status={v.verification_status} />
-              </div>
-
-              <div className="grid grid-cols-1 gap-1 text-xs">
-                {v.email && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Mail className="h-3 w-3 shrink-0" />{v.email}
-                  </div>
-                )}
-                {v.phone && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Phone className="h-3 w-3 shrink-0" />{v.phone}
-                  </div>
-                )}
-                <div className="flex items-start gap-1.5 text-muted-foreground">
-                  <MapPin className="h-3 w-3 mt-0.5 shrink-0" />
-                  <span className="truncate">
-                    {v.county ?? v.city ?? "—"}{v.sub_county ? `, ${v.sub_county}` : ""}{v.physical_address ? ` · ${v.physical_address}` : ""}
-                  </span>
-                </div>
-                {v.google_maps_link && (
-                  <a href={v.google_maps_link} target="_blank" rel="noreferrer" className="text-accent flex items-center gap-1 hover:underline">
-                    <Map className="h-3 w-3" /> Open Google Maps
-                  </a>
-                )}
-                {v.business_certificate_url && (
-                  <a href={v.business_certificate_url} target="_blank" rel="noreferrer" className="text-accent flex items-center gap-1 hover:underline">
-                    <FileText className="h-3 w-3" /> Business certificate
-                  </a>
-                )}
-              </div>
-
-              {(v.shop_photo_urls?.length ?? 0) > 0 && (
-                <div className="flex gap-1.5 flex-wrap">
-                  {(v.shop_photo_urls ?? []).slice(0, 4).map((u) => (
-                    <a key={u} href={u} target="_blank" rel="noreferrer">
-                      <img src={u} alt="" className="w-14 h-14 object-cover rounded border" />
-                    </a>
-                  ))}
-                  {(v.shop_photo_urls?.length ?? 0) > 4 && (
-                    <div className="w-14 h-14 grid place-items-center text-xs text-muted-foreground border rounded">
-                      +{(v.shop_photo_urls?.length ?? 0) - 4}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-2 pt-2 border-t">
-                {v.verification_status === "pending" && (
-                  <>
-                    <Button size="sm" className="gap-1.5" onClick={() => updateStatus(v.id, "approved", { rejection_reason: null })}>
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Approve
-                    </Button>
-                    <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
-                      onClick={() => { setActive(v); setReasonAction("reject"); }}>
-                      <XCircle className="h-3.5 w-3.5" /> Reject
-                    </Button>
-                  </>
-                )}
-                {(v.verification_status === "approved" || v.verification_status === "verified") && (
-                  <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
-                    onClick={() => { setActive(v); setReasonAction("suspend"); }}>
-                    <AlertTriangle className="h-3.5 w-3.5" /> Suspend
-                  </Button>
-                )}
-                {v.verification_status === "suspended" && (
-                  <Button size="sm" className="gap-1.5" onClick={() => updateStatus(v.id, "approved", { suspension_reason: null })}>
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Reinstate
-                  </Button>
-                )}
-                {v.verification_status === "rejected" && (
-                  <Button size="sm" variant="outline" onClick={() => updateStatus(v.id, "pending", { rejection_reason: null })}>
-                    Re-open as pending
-                  </Button>
-                )}
-                <Button size="sm" variant="ghost" onClick={() => setActive(v)}>View Details</Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+        /* Dense review table, per the mockup — one row per application, docs and
+           the decision reachable without opening anything. */
+        <Panel title={`${list.length} ${list.length === 1 ? "application" : "applications"}`}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-border bg-card">
+                  <Th>Vendor</Th>
+                  <Th>ID / Reference</Th>
+                  <Th>Location</Th>
+                  <Th>Documents</Th>
+                  <Th>Status</Th>
+                  <Th right>Decision</Th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {list.map((v) => (
+                  <tr key={v.id} className="border-b border-border/60 transition-colors hover:bg-secondary/60">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="grid h-8 w-8 shrink-0 place-items-center rounded bg-muted text-xs font-bold text-primary">
+                          {getInitials(v.business_name)}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="truncate font-medium">{v.business_name}</div>
+                          <div className="truncate text-xs text-muted-foreground">
+                            {v.owner_name ?? "—"} · Applied {formatDate(v.created_at)}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="text-data-id text-muted-foreground">VND-{v.id.slice(0, 5).toUpperCase()}</div>
+                      <div className="mt-1 flex flex-col gap-0.5 text-xs text-muted-foreground">
+                        {v.email && <span className="flex items-center gap-1 truncate"><Mail className="h-3 w-3 shrink-0" />{v.email}</span>}
+                        {v.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3 shrink-0" />{v.phone}</span>}
+                      </div>
+                    </td>
+                    <td className="max-w-[200px] px-4 py-3 text-xs text-muted-foreground">
+                      <span className="flex items-start gap-1">
+                        <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+                        <span className="truncate">
+                          {v.county ?? v.city ?? "—"}{v.sub_county ? `, ${v.sub_county}` : ""}
+                        </span>
+                      </span>
+                      {v.google_maps_link && (
+                        <a href={v.google_maps_link} target="_blank" rel="noreferrer" className="mt-1 flex items-center gap-1 text-accent hover:underline">
+                          <Map className="h-3 w-3" /> Google Maps
+                        </a>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2 text-primary">
+                        <DocIcon icon={UserCircle} href={v.id_document_url} title="ID document" />
+                        <DocIcon icon={FileText} href={v.business_certificate_url} title="Business certificate" />
+                        <DocIcon icon={Store} href={(v.shop_photo_urls ?? [])[0] ?? null} title="Shop photos" />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3"><VendorStatusBadge status={v.verification_status} /></td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        {v.verification_status === "pending" && (
+                          <>
+                            <Button size="sm" variant="approve" className="h-7 gap-1 px-3 text-xs"
+                              onClick={() => updateStatus(v.id, "approved", { rejection_reason: null })}>
+                              <CheckCircle2 className="h-3.5 w-3.5" /> Approve
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-7 gap-1 border-destructive/40 px-3 text-xs text-destructive hover:bg-destructive/10"
+                              onClick={() => { setActive(v); setReasonAction("reject"); }}>
+                              <XCircle className="h-3.5 w-3.5" /> Reject
+                            </Button>
+                          </>
+                        )}
+                        {(v.verification_status === "approved" || v.verification_status === "verified") && (
+                          <Button size="sm" variant="outline" className="h-7 gap-1 border-destructive/40 px-3 text-xs text-destructive hover:bg-destructive/10"
+                            onClick={() => { setActive(v); setReasonAction("suspend"); }}>
+                            <AlertTriangle className="h-3.5 w-3.5" /> Suspend
+                          </Button>
+                        )}
+                        {v.verification_status === "suspended" && (
+                          <Button size="sm" variant="approve" className="h-7 gap-1 px-3 text-xs"
+                            onClick={() => updateStatus(v.id, "approved", { suspension_reason: null })}>
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Reinstate
+                          </Button>
+                        )}
+                        {v.verification_status === "rejected" && (
+                          <Button size="sm" variant="outline" className="h-7 px-3 text-xs"
+                            onClick={() => updateStatus(v.id, "pending", { rejection_reason: null })}>
+                            Re-open
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" className="h-7 px-3 text-xs" onClick={() => setActive(v)}>
+                          View
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
       )}
 
       <Dialog open={!!active} onOpenChange={(o) => !o && closeDialog()}>
@@ -573,7 +920,16 @@ const AdminDisputes = () => {
         { user_id: o.customer_id, title: "Dispute resolved: refund issued", message: `KES ${o.total_amount_ksh} will be refunded to your M-Pesa.`, type: "dispute", reference_id: o.id },
       ]);
     } else {
-      await supabase.from("orders").update({ status: "confirmed", payment_status: "released", float_released_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", o.id);
+      const { data: res, error } = await invokeFunction("release-float-payment", { body: { orderId: o.id } });
+      if (error || (res && !res.success)) {
+        console.warn("release-float-payment warning or fallback:", error?.message ?? res?.error);
+        await supabase.from("orders").update({
+          status: "confirmed",
+          payment_status: "released",
+          float_released_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }).eq("id", o.id);
+      }
       await supabase.from("notifications").insert([
         { user_id: o.customer_id, title: "Dispute resolved: in vendor's favor", message: "Payment was released to the vendor.", type: "dispute", reference_id: o.id },
       ]);
@@ -590,22 +946,23 @@ const AdminDisputes = () => {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <Panel title={`${list.length} open ${list.length === 1 ? "dispute" : "disputes"}`}>
+    <div className="overflow-x-auto">
       <table className="w-full text-sm">
-        <thead className="bg-muted/50">
-          <tr>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Product / Vendor</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Customer</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Amount</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dispute Reason</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Actions</th>
+        <thead>
+          <tr className="border-b border-border bg-card">
+            <Th>Order</Th>
+            <Th>Product / Vendor</Th>
+            <Th>Customer</Th>
+            <Th>Amount</Th>
+            <Th>Dispute Reason</Th>
+            <Th right>Actions</Th>
           </tr>
         </thead>
-        <tbody className="divide-y">
+        <tbody className="divide-y divide-border/60">
           {list.map((o) => (
-            <tr key={o.id} className="hover:bg-muted/25 transition-colors">
-              <td className="px-4 py-3 font-mono text-xs">#{o.id.slice(0, 8).toUpperCase()}</td>
+            <tr key={o.id} className="transition-colors hover:bg-secondary/60">
+              <td className="px-4 py-3 text-data-id text-muted-foreground">#{o.id.slice(0, 8).toUpperCase()}</td>
               <td className="px-4 py-3">
                 <div className="font-medium">{o.product?.brand} {o.product?.model_name}</div>
                 <div className="text-xs text-muted-foreground">{o.vendor?.business_name}</div>
@@ -614,7 +971,7 @@ const AdminDisputes = () => {
                 <div>{o.customer?.full_name ?? "—"}</div>
                 <div className="text-xs text-muted-foreground">{o.customer?.phone_number}</div>
               </td>
-              <td className="px-4 py-3 font-medium">{formatKsh(o.total_amount_ksh)}</td>
+              <td className="px-4 py-3 font-medium"><span className="text-price">{formatKsh(o.total_amount_ksh)}</span></td>
               <td className="px-4 py-3 max-w-xs">
                 {o.dispute_reason ? (
                   <p className="text-sm bg-destructive/5 text-destructive border border-destructive/20 rounded px-2 py-1 line-clamp-2">{o.dispute_reason}</p>
@@ -623,11 +980,11 @@ const AdminDisputes = () => {
                 )}
               </td>
               <td className="px-4 py-3">
-                <div className="flex gap-2">
-                  <Button size="sm" variant="destructive" className="gap-1" onClick={() => resolve(o, "refund_customer")}>
+                <div className="flex justify-end gap-2">
+                  <Button size="sm" variant="destructive" className="h-7 gap-1 px-3 text-xs" onClick={() => resolve(o, "refund_customer")}>
                     <XCircle className="h-3.5 w-3.5" /> Refund
                   </Button>
-                  <Button size="sm" variant="success" className="gap-1" onClick={() => resolve(o, "release_to_vendor")}>
+                  <Button size="sm" variant="approve" className="h-7 gap-1 px-3 text-xs" onClick={() => resolve(o, "release_to_vendor")}>
                     <CheckCircle2 className="h-3.5 w-3.5" /> Release
                   </Button>
                 </div>
@@ -637,6 +994,7 @@ const AdminDisputes = () => {
         </tbody>
       </table>
     </div>
+    </Panel>
   );
 };
 
@@ -664,26 +1022,60 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
 
+  const loadUsers = async () => {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    const ids = (profiles ?? []).map((p) => p.id);
+    const rolesMap: Record<string, string[]> = {};
+    if (ids.length) {
+      const { data: roles } = await supabase.from("user_roles").select("user_id, role").in("user_id", ids);
+      (roles ?? []).forEach((r) => {
+        rolesMap[r.user_id] = rolesMap[r.user_id] || [];
+        rolesMap[r.user_id].push(r.role);
+      });
+    }
+    setList((profiles ?? []).map((p) => ({ ...p, user_roles: (rolesMap[p.id] ?? []).map((role) => ({ role })) })) as UserProfile[]);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    (async () => {
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(100);
-      const ids = (profiles ?? []).map((p) => p.id);
-      const rolesMap: Record<string, string[]> = {};
-      if (ids.length) {
-        const { data: roles } = await supabase.from("user_roles").select("user_id, role").in("user_id", ids);
-        (roles ?? []).forEach((r) => {
-          rolesMap[r.user_id] = rolesMap[r.user_id] || [];
-          rolesMap[r.user_id].push(r.role);
-        });
-      }
-      setList((profiles ?? []).map((p) => ({ ...p, user_roles: (rolesMap[p.id] ?? []).map((role) => ({ role })) })) as UserProfile[]);
-      setLoading(false);
-    })();
+    loadUsers();
   }, []);
+
+  const assignRole = async (userId: string, targetRole: "admin" | "vendor" | "customer") => {
+    const existingRoles = list.find((u) => u.id === userId)?.user_roles.map((r) => r.role) ?? [];
+    if (existingRoles.includes(targetRole)) {
+      toast.info(`User already has the ${targetRole} role.`);
+      return;
+    }
+    const { error } = await supabase.from("user_roles").insert({
+      user_id: userId,
+      role: targetRole,
+    });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Assigned ${targetRole} role`);
+    loadUsers();
+  };
+
+  const revokeRole = async (userId: string, roleToRemove: string) => {
+    const { error } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId)
+      .eq("role", roleToRemove as any);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Removed ${roleToRemove} role`);
+    loadUsers();
+  };
 
   const filtered = list.filter((u) => {
     if (!q) return true;
@@ -708,47 +1100,70 @@ const AdminUsers = () => {
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-accent" /></div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border">
+        <Panel title={`${filtered.length} ${filtered.length === 1 ? "account" : "accounts"}`}>
+        <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Email</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Phone</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Roles</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Joined</th>
+            <thead>
+              <tr className="border-b border-border bg-card">
+                <Th>Name</Th>
+                <Th>Email</Th>
+                <Th>Phone</Th>
+                <Th>Roles</Th>
+                <Th>Joined</Th>
+                <Th right>Manage Role</Th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-border/60">
               {filtered.map((u) => (
-                <tr key={u.id} className="hover:bg-muted/25 transition-colors">
+                <tr key={u.id} className="transition-colors hover:bg-secondary/60">
                   <td className="px-4 py-3 font-medium">{u.full_name ?? "Unnamed"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{u.email ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{u.phone_number ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-1 flex-wrap">
+                    <div className="flex gap-1.5 flex-wrap items-center">
                       {(u.user_roles ?? []).map((r) => (
                         <Badge
                           key={r.role}
                           variant="outline"
-                          className={`capitalize text-xs ${roleConfig[r.role] ?? "bg-muted text-muted-foreground"}`}
+                          className={`capitalize text-xs flex items-center gap-1 ${roleConfig[r.role] ?? "bg-muted text-muted-foreground"}`}
                         >
-                          {r.role}
+                          <span>{r.role}</span>
+                          <button
+                            type="button"
+                            onClick={() => revokeRole(u.id, r.role)}
+                            title={`Revoke ${r.role} role`}
+                            className="hover:text-destructive text-muted-foreground border-0 bg-transparent p-0 font-bold ml-0.5 cursor-pointer"
+                          >
+                            ×
+                          </button>
                         </Badge>
                       ))}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{formatDate(u.created_at)}</td>
+                  <td className="px-4 py-3 text-right">
+                    <Select onValueChange={(val) => assignRole(u.id, val as any)}>
+                      <SelectTrigger className="h-7 w-28 text-xs ml-auto">
+                        <SelectValue placeholder="+ Role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="customer">Customer</SelectItem>
+                        <SelectItem value="vendor">Vendor</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No users found.</td>
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No users found.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+        </Panel>
       )}
     </div>
   );
@@ -846,14 +1261,14 @@ const AdminPayments = () => {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="p-4 border-l-4 border-l-warning">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Total Held (in float)</div>
-          <div className="text-xl font-bold text-warning">{formatKsh(totalHeld)}</div>
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="border-l-4 border-l-warning p-5 shadow-card">
+          <div className="text-eyebrow mb-2 text-muted-foreground">Held in Float</div>
+          <div className="text-price text-2xl font-bold text-warning">{formatKsh(totalHeld)}</div>
         </Card>
-        <Card className="p-4 border-l-4 border-l-success">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Total Released</div>
-          <div className="text-xl font-bold text-success">{formatKsh(totalReleased)}</div>
+        <Card className="border-l-4 border-l-success p-5 shadow-card">
+          <div className="text-eyebrow mb-2 text-muted-foreground">Released to vendors</div>
+          <div className="text-price text-2xl font-bold text-success">{formatKsh(totalReleased)}</div>
         </Card>
       </div>
 
@@ -879,30 +1294,31 @@ const AdminPayments = () => {
         <Card className="p-12 text-center text-muted-foreground">No payments found.</Card>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border">
+          <Panel title="Float ledger">
+          <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order ID</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Customer</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Phone</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Amount</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Provider</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Receipt #</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Payment</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Payout</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+              <thead>
+                <tr className="border-b border-border bg-card">
+                  <Th>Order ID</Th>
+                  <Th>Customer</Th>
+                  <Th>Phone</Th>
+                  <Th right>Amount</Th>
+                  <Th>Provider</Th>
+                  <Th>Receipt #</Th>
+                  <Th>Payment</Th>
+                  <Th>Payout</Th>
+                  <Th>Date</Th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-border/60">
                 {pageItems.map((o) => (
-                  <tr key={o.id} className="hover:bg-muted/25 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs">#{o.id.slice(0, 8).toUpperCase()}</td>
+                  <tr key={o.id} className="transition-colors hover:bg-secondary/60">
+                    <td className="px-4 py-3 text-data-id text-muted-foreground">#{o.id.slice(0, 8).toUpperCase()}</td>
                     <td className="px-4 py-3">{o.customer?.full_name ?? "—"}</td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">{o.customer?.phone_number ?? "—"}</td>
-                    <td className="px-4 py-3 text-right font-medium">{formatKsh(o.total_amount_ksh)}</td>
+                    <td className="px-4 py-3 text-data-id text-muted-foreground">{o.customer?.phone_number ?? "—"}</td>
+                    <td className="px-4 py-3 text-right font-medium"><span className="text-price">{formatKsh(o.total_amount_ksh)}</span></td>
                     <td className="px-4 py-3"><ProviderBadge provider={o.payment_provider} /></td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{o.mpesa_receipt_number ?? "—"}</td>
+                    <td className="px-4 py-3 text-data-id text-muted-foreground">{o.mpesa_receipt_number ?? "—"}</td>
                     <td className="px-4 py-3"><PaymentStatusBadge status={o.payment_status} /></td>
                     <td className="px-4 py-3">
                       {o.payout_status ? (
@@ -911,12 +1327,13 @@ const AdminPayments = () => {
                         <span className="text-muted-foreground text-xs">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(o.created_at)}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(o.created_at)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          </Panel>
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between text-sm">

@@ -68,14 +68,14 @@ const ShopPage = () => {
                 {Number(vendor.average_rating) > 0 && (
                   <span className="flex items-center gap-1">
                     <Star className="h-4 w-4 fill-warning text-warning" />
-                    <span className="font-medium text-foreground">{Number(vendor.average_rating).toFixed(1)}</span>
+                    <span className="text-stat font-medium text-foreground">{Number(vendor.average_rating).toFixed(1)}</span>
                     <span>rating</span>
                   </span>
                 )}
                 {vendor.total_completed_transactions > 0 && (
                   <>
                     <span className="text-border">·</span>
-                    <span><strong className="text-foreground">{vendor.total_completed_transactions}</strong> sales</span>
+                    <span><strong className="text-stat text-foreground">{vendor.total_completed_transactions}</strong> sales</span>
                   </>
                 )}
               </div>
@@ -133,12 +133,12 @@ const ShopPage = () => {
                         <p className="text-sm text-muted-foreground mt-2">{s.description}</p>
                         <div className="mt-3 flex flex-wrap gap-3 text-xs">
                           <Badge variant="outline" className="capitalize">{s.device_type}</Badge>
-                          <Badge variant="outline">{s.estimated_turnaround_days} days</Badge>
+                          <Badge variant="outline"><span className="text-stat">{s.estimated_turnaround_days}</span> days</Badge>
                         </div>
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-sm text-muted-foreground">From</div>
-                        <div className="font-bold text-primary">{formatKsh(s.price_min_ksh)}</div>
+                        <div className="font-bold text-primary"><span className="text-price">{formatKsh(s.price_min_ksh)}</span></div>
                       </div>
                     </div>
                   </div>

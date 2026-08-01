@@ -11,7 +11,11 @@ const sections = [
   },
   {
     title: "3. Referral program",
-    body: "Users may share a personal referral code. When a referred user completes their first confirmed order, both the referred user and the referrer receive a KES 500 credit to their TechTrust wallet. TechTrust may change or end the referral program at any time; credits already granted are not affected retroactively.",
+    body: (
+      <>
+        Users may share a personal referral code. When a referred user completes their first confirmed order, both the referred user and the referrer receive a <span className="text-price">KES 500</span> credit to their TechTrust wallet. TechTrust may change or end the referral program at any time; credits already granted are not affected retroactively.
+      </>
+    ),
   },
   {
     title: "4. Vendor verification",
@@ -39,7 +43,7 @@ const Terms = () => {
   return (
     <div className="container py-12 max-w-2xl">
       <h1 className="text-3xl font-bold tracking-tight mb-2">Terms &amp; Conditions</h1>
-      <p className="text-sm text-muted-foreground mb-10">Last updated 29 July 2026.</p>
+      <p className="text-sm text-muted-foreground mb-10">Last updated <span className="text-data-id text-foreground">29 July 2026</span>.</p>
 
       <div className="space-y-8">
         {sections.map((s) => (

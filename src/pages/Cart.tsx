@@ -120,7 +120,7 @@ const Cart = () => {
       <h1 className="text-3xl font-bold mb-8">
         Your cart{" "}
         <span className="text-muted-foreground font-normal text-xl">
-          ({itemLabel})
+          (<span className="text-stat">{count}</span> {count === 1 ? "item" : "items"})
         </span>
       </h1>
 
@@ -172,7 +172,7 @@ const Cart = () => {
                     </Badge>
 
                     <div className="text-sm font-medium mt-2">
-                      {formatKsh(p?.price_ksh ?? 0)} each
+                      <span className="text-price">{formatKsh(p?.price_ksh ?? 0)}</span> each
                     </div>
 
                     <div className="flex items-center gap-1 mt-3">
@@ -188,7 +188,7 @@ const Cart = () => {
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="w-9 text-center text-sm font-medium select-none">
+                      <span className="w-9 text-center text-sm font-medium select-none text-stat">
                         {it.quantity}
                       </span>
                       <Button
@@ -204,13 +204,13 @@ const Cart = () => {
                         <Plus className="h-3 w-3" />
                       </Button>
                       <span className="text-xs text-muted-foreground ml-2">
-                        {max} in stock
+                        <span className="text-stat">{max}</span> in stock
                       </span>
                     </div>
                   </div>
 
                   <span className="shrink-0 self-center font-semibold text-base">
-                    {formatKsh(lineTotal)}
+                    <span className="text-price">{formatKsh(lineTotal)}</span>
                   </span>
                 </div>
               </Card>
@@ -235,19 +235,19 @@ const Cart = () => {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-primary-foreground/60">
-                  Subtotal ({itemLabel})
+                  Subtotal (<span className="text-stat">{count}</span> {count === 1 ? "item" : "items"})
                 </span>
-                <span>{formatKsh(subtotal)}</span>
+                <span><span className="text-price">{formatKsh(subtotal)}</span></span>
               </div>
               <div className="flex justify-between">
                 <span className="text-primary-foreground/60">Platform fee (10%)</span>
-                <span>{formatKsh(platformFee)}</span>
+                <span><span className="text-price">{formatKsh(platformFee)}</span></span>
               </div>
             </div>
 
             <div className="flex justify-between items-center mt-5 pt-4 border-t border-primary-foreground/10">
               <span className="font-semibold text-base">Total</span>
-              <span className="text-2xl font-bold">{formatKsh(total)}</span>
+              <span className="text-2xl font-bold"><span className="text-price">{formatKsh(total)}</span></span>
             </div>
 
             <Button

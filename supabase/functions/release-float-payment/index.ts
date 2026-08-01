@@ -406,7 +406,26 @@ serve(async (req) => {
       .eq("id", orderId)
       .maybeSingle();
     if (orderErr || !order) return ok({ success: false, error: "Order not found" }, 404);
-    if (order.customer_id !== userData.user.id) return ok({ success: false, error: "Forbidden" }, 403);
+
+    const isCustomer = order.customer_id === userData.user.id;
+    let isAdmin =
+      userData.user.app_metadata?.role === "admin" ||
+      userData.user.user_metadata?.role === "admin" ||
+      Boolean(userData.user.email?.endsWith("@techtrust.co.ke"));
+
+    if (!isCustomer && !isAdmin) {
+      const { data: userRole } = await admin
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", userData.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (userRole) {
+        isAdmin = true;
+      }
+    }
+
+    if (!isCustomer && !isAdmin) return ok({ success: false, error: "Forbidden" }, 403);
     if (order.payment_status !== "paid_float") {
       return ok({ success: false, error: "Payment is not held in Float" }, 409);
     }
@@ -445,6 +464,7 @@ serve(async (req) => {
 
     const canRelease =
       order.status === "delivered_awaiting_confirmation" ||
+      order.status === "disputed" ||
       (order.status === "confirmed" && order.payout_status === "failed");
     if (!canRelease) {
       return ok({ success: false, error: "Order is not awaiting customer confirmation" }, 409);

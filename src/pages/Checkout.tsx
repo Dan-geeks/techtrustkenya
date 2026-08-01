@@ -265,26 +265,26 @@ const Checkout = () => {
                 <Badge variant={conditionVariant[condition] ?? "outline"}>{condition}</Badge>
               )}
               <span className="text-sm text-primary-foreground/60">
-                &times;&nbsp;{order.quantity}
+                &times;&nbsp;<span className="text-stat">{order.quantity}</span>
               </span>
             </div>
 
             <div className="border-t border-primary-foreground/10 pt-4 space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-primary-foreground/60">Subtotal</span>
-                <span>{formatKsh(subtotal)}</span>
+                <span><span className="text-price">{formatKsh(subtotal)}</span></span>
               </div>
               <div className="flex justify-between">
                 <span className="text-primary-foreground/60">
                   TechTrust service fee (10%)
                 </span>
                 <span className="text-primary-foreground/60">
-                  {formatKsh(Number(order.platform_fee_ksh))}
+                  <span className="text-price">{formatKsh(Number(order.platform_fee_ksh))}</span>
                 </span>
               </div>
               <div className="border-t border-primary-foreground/10 pt-2 flex justify-between font-bold text-base">
                 <span>Total</span>
-                <span>{formatKsh(Number(order.total_amount_ksh))}</span>
+                <span><span className="text-price">{formatKsh(Number(order.total_amount_ksh))}</span></span>
               </div>
             </div>
 
@@ -339,7 +339,7 @@ const Checkout = () => {
                 size="lg"
                 className="w-full"
               >
-                Pay {formatKsh(Number(order.total_amount_ksh))}
+                Pay <span className="text-price">{formatKsh(Number(order.total_amount_ksh))}</span>
               </Button>
             )}
 
@@ -385,7 +385,7 @@ const Checkout = () => {
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
-                  We did not hear back from M-Pesa within {TIMEOUT_SECONDS}{" "}
+                  We did not hear back from M-Pesa within <span className="text-stat">{TIMEOUT_SECONDS}</span>{" "}
                   seconds. If you were charged, the order will update on its own
                   — check your orders before paying again.
                 </p>

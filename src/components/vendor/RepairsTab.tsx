@@ -93,7 +93,10 @@ export const RepairsTab = ({ vendor }: { vendor: any }) => {
             <Card key={r.id} className="p-4">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div>
-                  <div className="font-medium">{r.device_description}</div>
+                  <div className="font-medium flex items-center gap-2">
+                    <span>{r.device_description}</span>
+                    <span className="text-data-id text-xs text-muted-foreground">#{r.id.slice(0, 8).toUpperCase()}</span>
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     {r.customer?.full_name} · {r.customer?.phone_number} · {formatDate(r.created_at)}
                   </div>
@@ -103,7 +106,7 @@ export const RepairsTab = ({ vendor }: { vendor: any }) => {
               <p className="text-sm">{r.problem_description}</p>
               {r.quoted_price_ksh && (
                 <div className="text-sm mt-2">
-                  Quote: <span className="font-semibold">{formatKsh(r.quoted_price_ksh)}</span>{" "}
+                  Quote: <span className="font-semibold"><span className="text-price">{formatKsh(r.quoted_price_ksh)}</span></span>{" "}
                   {r.customer_approved_quote ? <Badge className="bg-success/10 text-success">Approved</Badge> : <Badge variant="outline">Pending approval</Badge>}
                 </div>
               )}
@@ -130,7 +133,7 @@ export const RepairsTab = ({ vendor }: { vendor: any }) => {
           <div className="space-y-3">
             <div className="space-y-1">
               <Label>Quote (KSH)</Label>
-              <Input type="number" value={quote} onChange={(e) => setQuote(e.target.value)} />
+              <Input type="number" min="1" step="1" value={quote} onChange={(e) => setQuote(e.target.value)} />
             </div>
             <div className="space-y-1">
               <Label>Technician notes (optional)</Label>

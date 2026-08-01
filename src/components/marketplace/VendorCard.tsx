@@ -55,11 +55,11 @@ export const VendorCard = ({
           {average_rating > 0 && (
             <span className="flex items-center gap-1">
               <Star className="h-3 w-3 fill-warning text-warning" />
-              {Number(average_rating).toFixed(1)}
+              <span className="text-stat">{Number(average_rating).toFixed(1)}</span>
             </span>
           )}
           {total_completed_transactions > 0 && (
-            <span>{total_completed_transactions} completed</span>
+            <span><span className="text-stat">{total_completed_transactions}</span> completed</span>
           )}
         </div>
       </div>

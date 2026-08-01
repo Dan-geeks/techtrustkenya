@@ -85,15 +85,15 @@ export const OrdersTab = ({ vendor }: { vendor: any }) => {
                     <div className="min-w-0">
                       <div className="font-medium truncate">{o.product?.brand} {o.product?.model_name}</div>
                       <div className="text-xs text-muted-foreground">
-                        #{o.id.slice(0, 8).toUpperCase()} · Qty {o.quantity} · {formatDate(o.created_at)}
+                        <span className="text-data-id">#{o.id.slice(0, 8).toUpperCase()}</span> · Qty <span className="text-stat">{o.quantity}</span> · {formatDate(o.created_at)}
                       </div>
                       <div className="text-xs mt-1">
                         Customer: {o.customer?.full_name ?? "—"} · {o.customer?.phone_number ?? "—"}
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="font-semibold">{formatKsh(Number(o.total_amount_ksh))}</div>
-                      <div className="text-xs text-muted-foreground">Payout {formatKsh(Number(o.vendor_payout_ksh))}</div>
+                      <div className="font-semibold"><span className="text-price">{formatKsh(Number(o.total_amount_ksh))}</span></div>
+                      <div className="text-xs text-muted-foreground">Payout <span className="text-price">{formatKsh(Number(o.vendor_payout_ksh))}</span></div>
                       <Badge variant="outline" className="mt-1 capitalize text-xs">{o.status.replace(/_/g, " ")}</Badge>
                     </div>
                   </div>

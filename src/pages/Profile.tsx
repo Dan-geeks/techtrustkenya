@@ -245,13 +245,13 @@ const Profile = () => {
       <Card className="p-6 mt-6">
         <div className="flex items-center gap-2 mb-4">
           <Gift className="h-4 w-4 text-accent" />
-          <h2 className="font-semibold">Refer friends, earn KES 500</h2>
+          <h2 className="font-semibold">Refer friends, earn <span className="text-price">KES 500</span></h2>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
-          Share your code. You both get KES 500 credited to your wallet once they complete their first order.
+          Share your code. You both get <span className="text-price">KES 500</span> credited to your wallet once they complete their first order.
         </p>
         <div className="flex items-center gap-2">
-          <Input value={referralCode ?? "…"} readOnly className="font-mono tracking-wider bg-muted" />
+          <Input value={referralCode ?? "…"} readOnly className="text-data-id font-mono tracking-wider bg-muted" />
           <Button variant="outline" size="icon" onClick={copyReferralCode} disabled={!referralCode} aria-label="Copy referral code">
             <Copy className="h-4 w-4" />
           </Button>
@@ -260,7 +260,7 @@ const Profile = () => {
           <Wallet className="h-4 w-4 text-success shrink-0" />
           <p className="text-sm">
             Wallet balance:{" "}
-            <span className="font-semibold text-foreground">KES {walletBalance.toLocaleString()}</span>
+            <span className="text-price font-semibold text-foreground">KES {walletBalance.toLocaleString()}</span>
           </p>
         </div>
       </Card>

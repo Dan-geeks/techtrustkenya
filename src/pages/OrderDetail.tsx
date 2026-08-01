@@ -33,16 +33,15 @@ import { toast } from "sonner";
 type TimelineStep = {
   key: string;
   label: string;
-  icon: React.ReactNode;
 };
 
+/** Steps shown in the horizontal tracker. Labels match the client's mockup. */
 const TIMELINE: TimelineStep[] = [
-  { key: "pending_payment", label: "Order Placed", icon: <Package className="h-4 w-4" /> },
-  { key: "payment_held", label: "Payment Received", icon: <Shield className="h-4 w-4" /> },
-  { key: "vendor_preparing", label: "Vendor Preparing", icon: <Clock className="h-4 w-4" /> },
-  { key: "out_for_delivery", label: "Out for Delivery", icon: <Truck className="h-4 w-4" /> },
-  { key: "delivered_awaiting_confirmation", label: "Delivered", icon: <CheckCircle className="h-4 w-4" /> },
-  { key: "confirmed", label: "Confirmed", icon: <Star className="h-4 w-4" /> },
+  { key: "payment_held", label: "Payment Held" },
+  { key: "vendor_preparing", label: "Being Prepared" },
+  { key: "out_for_delivery", label: "In Transit" },
+  { key: "delivered_awaiting_confirmation", label: "Delivered" },
+  { key: "confirmed", label: "Complete" },
 ];
 
 type OrderDetailRecord = {
@@ -81,6 +80,22 @@ const STATUS_ORDER = [
 ];
 
 const reachedIndex = (status: string): number => STATUS_ORDER.indexOf(status);
+
+const STATUS_LABELS: Record<string, string> = {
+  pending_payment: "Awaiting payment",
+  payment_held: "Payment held",
+  vendor_preparing: "Being prepared",
+  out_for_delivery: "In transit",
+  ready_for_pickup: "Ready for pickup",
+  delivered_awaiting_confirmation: "Delivered",
+  confirmed: "Complete",
+  disputed: "Disputed",
+  cancelled: "Cancelled",
+  refunded: "Refunded",
+};
+
+const statusLabel = (status: string): string =>
+  STATUS_LABELS[status] ?? status.replace(/_/g, " ");
 
 const floatStatusText = (order: OrderDetailRecord): string => {
   if (order.payout_status === "pending") return "Delivery confirmed. Vendor payout is processing.";
@@ -187,6 +202,12 @@ const OrderDetail = () => {
     !["pending", "sent"].includes(payoutStatus);
 
   const shortId = order.id.slice(0, 8).toUpperCase();
+  // TIMELINE is a 5-step summary of the 7-value STATUS_ORDER, so map the order's
+  // position back onto the visible steps rather than indexing them directly.
+  const activeStep = TIMELINE.reduce(
+    (acc, step, i) => (reachedIndex(step.key) <= reached ? i : acc),
+    -1,
+  );
   const psBadge = paymentStatusBadge(order.payment_status);
   const isFloatProtected = order.payment_status === "paid_float";
   const isReleased = order.payment_status === "released";
@@ -202,8 +223,79 @@ const OrderDetail = () => {
           Back
         </button>
         <span className="text-muted-foreground">/</span>
-        <h1 className="text-xl font-bold">Order #{shortId}</h1>
+        <h1 className="text-xl font-bold">Order <span className="text-data-id align-middle">#{shortId}</span></h1>
       </div>
+
+      {/* Status banner — headline state on the left, the Float position as a
+          pill on the right, exactly as in the order-tracker mockup. */}
+      <Card className="mb-5 p-6">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <h2 className="mb-1 font-semibold">Status: {statusLabel(order.status)}</h2>
+            <p className="text-sm text-muted-foreground">{floatStatusText(order)}</p>
+          </div>
+          <div
+            className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-primary-foreground shadow-card ${
+              isReleased ? "bg-success" : isFloatProtected ? "bg-float" : "bg-muted-foreground"
+            }`}
+          >
+            <Shield className="h-5 w-5 shrink-0" />
+            <span className="text-price font-semibold">
+              {isReleased ? "Float: Released " : isFloatProtected ? "Float: Holding " : "Float: Pending "}
+              {formatKsh(Number(order.total_amount_ksh))}
+            </span>
+          </div>
+        </div>
+      </Card>
+
+      {/* Horizontal stepper, per the mockup — scrolls sideways rather than
+          wrapping, so the sequence always reads left to right. */}
+      <Card className="mb-5 overflow-x-auto p-8">
+        <div className="relative min-w-[600px]">
+          <div className="absolute left-0 top-4 h-1 w-full -translate-y-1/2 rounded-full bg-muted" aria-hidden="true" />
+          <div
+            className="absolute left-0 top-4 h-1 -translate-y-1/2 rounded-full bg-accent transition-all duration-500"
+            style={{ width: `${(Math.max(0, activeStep) / (TIMELINE.length - 1)) * 100}%` }}
+            aria-hidden="true"
+          />
+          <ol className="relative flex items-start justify-between">
+            {TIMELINE.map((step, i) => {
+              // The final step counts as done once the order is confirmed —
+              // otherwise "Complete" would sit in the pulsing "current" state.
+              const done = i < activeStep || (i === activeStep && order.status === "confirmed");
+              const isCurrent = i === activeStep && !done;
+              return (
+                <li key={step.key} className="relative z-10 flex w-24 flex-col items-center">
+                  <div
+                    className={`mb-2 grid h-8 w-8 place-items-center rounded-full shadow-card transition-colors ${
+                      done
+                        ? "bg-success text-success-foreground"
+                        : isCurrent
+                          ? "bg-accent text-accent-foreground"
+                          : "border-2 border-muted bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {done ? (
+                      <CheckCircle className="h-4 w-4" />
+                    ) : isCurrent ? (
+                      <span className="h-3 w-3 rounded-full bg-current opacity-90" />
+                    ) : (
+                      <Circle className="h-3 w-3" />
+                    )}
+                  </div>
+                  <span
+                    className={`text-center text-xs leading-tight ${
+                      isCurrent ? "font-semibold text-primary" : done ? "text-foreground" : "text-muted-foreground"
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </Card>
 
       <Card className="p-5 mb-5">
         <div className="flex gap-4 items-center">
@@ -218,12 +310,12 @@ const OrderDetail = () => {
             </div>
             <div className="text-sm text-muted-foreground">{order.vendor?.business_name}</div>
             <div className="text-xs text-muted-foreground mt-0.5">
-              Qty {order.quantity} · {formatDate(order.created_at)}
+              Qty <span className="text-stat">{order.quantity}</span> · {formatDate(order.created_at)}
             </div>
           </div>
           <div className="text-right shrink-0">
             <div className="text-xs text-muted-foreground mb-0.5">Total paid</div>
-            <div className="font-bold text-lg">{formatKsh(Number(order.total_amount_ksh))}</div>
+            <div className="font-bold text-lg"><span className="text-price">{formatKsh(Number(order.total_amount_ksh))}</span></div>
           </div>
         </div>
       </Card>
@@ -245,54 +337,6 @@ const OrderDetail = () => {
             <span className="font-medium capitalize">{String(payoutStatus).replace(/_/g, " ")}</span>
           </div>
         )}
-      </Card>
-
-      <Card className="p-5 mb-5">
-        <h2 className="font-semibold text-sm mb-4">Tracking</h2>
-        <ol className="relative">
-          {TIMELINE.map((step, idx) => {
-            const stepIdx = reachedIndex(step.key);
-            const done = stepIdx !== -1 && reached >= stepIdx;
-            const isCurrent = stepIdx === reached;
-            const isLast = idx === TIMELINE.length - 1;
-
-            return (
-              <li key={step.key} className="flex gap-4 items-start">
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`relative flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors shrink-0 ${
-                      done
-                        ? "bg-success border-success text-success-foreground"
-                        : "bg-background border-border text-muted-foreground"
-                    } ${isCurrent && order.status !== "confirmed" ? "ring-2 ring-success/40 ring-offset-1" : ""}`}
-                  >
-                    {done ? (
-                      step.icon
-                    ) : (
-                      <Circle className="h-3 w-3" />
-                    )}
-                    {isCurrent && !done && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full animate-pulse" />
-                    )}
-                  </div>
-                  {!isLast && (
-                    <div
-                      className={`w-0.5 h-6 mt-1 mb-1 transition-colors ${
-                        done && reached > stepIdx ? "bg-success/60" : "bg-border"
-                      }`}
-                    />
-                  )}
-                </div>
-
-                <div className={`pt-1 ${isLast ? "" : "pb-5"} ${done ? "" : "text-muted-foreground"}`}>
-                  <div className={`text-sm font-medium ${isCurrent ? "text-foreground" : ""}`}>
-                    {step.label}
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
       </Card>
 
       {(isFloatProtected || isReleased) && (
@@ -320,8 +364,8 @@ const OrderDetail = () => {
               <div className="rounded-lg border border-warning/30 bg-background/60 p-3 text-sm mb-4">
                 <p className="text-foreground">
                   When you confirm receipt, TechTrust will release{" "}
-                  <strong>{formatKsh(Number(order.vendor_payout_ksh))}</strong> to the vendor. TechTrust
-                  retains <strong>{formatKsh(Number(order.platform_fee_ksh))}</strong> as the service fee.
+                  <strong><span className="text-price">{formatKsh(Number(order.vendor_payout_ksh))}</span></strong> to the vendor. TechTrust
+                  retains <strong><span className="text-price">{formatKsh(Number(order.platform_fee_ksh))}</span></strong> as the service fee.
                 </p>
               </div>
               <h3 className="font-semibold mb-3">

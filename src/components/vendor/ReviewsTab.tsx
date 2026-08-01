@@ -45,11 +45,15 @@ export const ReviewsTab = ({ vendor }: { vendor: any }) => {
           <div className="grid grid-cols-2 gap-3">
             <Card className="p-4">
               <div className="text-sm text-muted-foreground">Avg product rating</div>
-              <div className="text-2xl font-bold flex items-center gap-1">{avgProduct.toFixed(1)} <Star className="h-5 w-5 fill-warning text-warning" /></div>
+              <div className="text-2xl font-bold flex items-center gap-1">
+                <span className="text-stat">{avgProduct.toFixed(1)}</span> <Star className="h-5 w-5 fill-warning text-warning" />
+              </div>
             </Card>
             <Card className="p-4">
               <div className="text-sm text-muted-foreground">Avg service rating</div>
-              <div className="text-2xl font-bold flex items-center gap-1">{avgService.toFixed(1)} <Star className="h-5 w-5 fill-warning text-warning" /></div>
+              <div className="text-2xl font-bold flex items-center gap-1">
+                <span className="text-stat">{avgService.toFixed(1)}</span> <Star className="h-5 w-5 fill-warning text-warning" />
+              </div>
             </Card>
           </div>
           <div className="space-y-3">
