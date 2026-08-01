@@ -1,14 +1,245 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-const pageHtml = "\n<!-- Main Content Area -->\n<main class=\"flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-gutter flex flex-col md:flex-row gap-gutter\">\n<!-- Filter Sidebar -->\n<aside class=\"w-full md:w-64 flex-shrink-0 flex flex-col gap-6\">\n<!-- Mobile Search & Filter Toggle (Visible only on mobile) -->\n<div class=\"md:hidden flex flex-col gap-4 mb-4\">\n<div class=\"relative w-full\">\n<span class=\"material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline\">search</span>\n<input class=\"w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md\" placeholder=\"Search...\" type=\"text\"/>\n</div>\n<button class=\"flex items-center justify-center gap-2 bg-surface-container-low py-2 rounded-lg border border-outline-variant font-ui-label text-ui-label\">\n<span class=\"material-symbols-outlined\">tune</span> Filters\n                </button>\n</div>\n<!-- Desktop Filters Wrapper -->\n<div class=\"hidden md:flex flex-col gap-8 sticky top-28\">\n<div class=\"flex items-center justify-between\">\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Filters</h2>\n<button class=\"font-ui-label text-ui-label text-secondary hover:underline\">Clear all</button>\n</div>\n<!-- Category -->\n<div class=\"flex flex-col gap-3\">\n<h3 class=\"font-ui-label text-ui-label text-on-surface-variant uppercase tracking-wider\">Category</h3>\n<div class=\"flex flex-col gap-2\">\n<label class=\"flex items-center gap-2 cursor-pointer\">\n<input checked=\"\" class=\"rounded border-outline-variant text-primary-container focus:ring-primary-container\" type=\"checkbox\"/>\n<span class=\"font-body-md text-body-md\">Laptops</span>\n<span class=\"ml-auto font-data-id text-data-id text-outline\">124</span>\n</label>\n<label class=\"flex items-center gap-2 cursor-pointer\">\n<input class=\"rounded border-outline-variant text-primary-container focus:ring-primary-container\" type=\"checkbox\"/>\n<span class=\"font-body-md text-body-md\">Smartphones</span>\n<span class=\"ml-auto font-data-id text-data-id text-outline\">89</span>\n</label>\n<label class=\"flex items-center gap-2 cursor-pointer\">\n<input class=\"rounded border-outline-variant text-primary-container focus:ring-primary-container\" type=\"checkbox\"/>\n<span class=\"font-body-md text-body-md\">Tablets</span>\n<span class=\"ml-auto font-data-id text-data-id text-outline\">45</span>\n</label>\n<label class=\"flex items-center gap-2 cursor-pointer\">\n<input class=\"rounded border-outline-variant text-primary-container focus:ring-primary-container\" type=\"checkbox\"/>\n<span class=\"font-body-md text-body-md\">Components</span>\n<span class=\"ml-auto font-data-id text-data-id text-outline\">210</span>\n</label>\n</div>\n</div>\n<!-- Condition -->\n<div class=\"flex flex-col gap-3\">\n<h3 class=\"font-ui-label text-ui-label text-on-surface-variant uppercase tracking-wider\">Condition</h3>\n<div class=\"flex flex-col gap-2\">\n<label class=\"flex items-center gap-2 cursor-pointer\">\n<input class=\"rounded border-outline-variant text-primary-container focus:ring-primary-container\" type=\"checkbox\"/>\n<span class=\"font-body-md text-body-md\">Brand New</span>\n</label>\n<label class=\"flex items-center gap-2 cursor-pointer\">\n<input checked=\"\" class=\"rounded border-outline-variant text-primary-container focus:ring-primary-container\" type=\"checkbox\"/>\n<span class=\"font-body-md text-body-md\">Refurbished - Grade A</span>\n</label>\n<label class=\"flex items-center gap-2 cursor-pointer\">\n<input class=\"rounded border-outline-variant text-primary-container focus:ring-primary-container\" type=\"checkbox\"/>\n<span class=\"font-body-md text-body-md\">Used - Good</span>\n</label>\n</div>\n</div>\n<!-- Price Range -->\n<div class=\"flex flex-col gap-3\">\n<h3 class=\"font-ui-label text-ui-label text-on-surface-variant uppercase tracking-wider\">Price Range (KES)</h3>\n<div class=\"flex items-center gap-2\">\n<input class=\"w-full px-2 py-1 bg-surface-container-lowest border border-outline-variant rounded font-data-id text-data-id focus:border-primary-container focus:ring-0\" placeholder=\"Min\" type=\"number\"/>\n<span class=\"text-outline\">-</span>\n<input class=\"w-full px-2 py-1 bg-surface-container-lowest border border-outline-variant rounded font-data-id text-data-id focus:border-primary-container focus:ring-0\" placeholder=\"Max\" type=\"number\"/>\n</div>\n</div>\n<!-- Location -->\n<div class=\"flex flex-col gap-3\">\n<h3 class=\"font-ui-label text-ui-label text-on-surface-variant uppercase tracking-wider\">Location</h3>\n<div class=\"relative\">\n<select class=\"w-full appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg py-2 pl-3 pr-8 font-body-md text-body-md focus:border-primary-container focus:ring-0\">\n<option>All Locations</option>\n<option>Nairobi</option>\n<option>Mombasa</option>\n<option>Kisumu</option>\n</select>\n<span class=\"material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-outline\">expand_more</span>\n</div>\n</div>\n</div>\n</aside>\n<!-- Main Product Grid Area -->\n<div class=\"flex-grow flex flex-col gap-6\">\n<!-- Active Filters & Sorting -->\n<div class=\"flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4\">\n<!-- Active Chips -->\n<div class=\"flex flex-wrap gap-2\">\n<div class=\"flex items-center gap-1 px-3 py-1 bg-[#EEF2FF] rounded-full font-ui-label text-ui-label text-primary-container border border-[#adc6ff]\">\n                        Laptops\n                        <button class=\"material-symbols-outlined text-[16px] hover:text-primary transition-colors\">close</button>\n</div>\n<div class=\"flex items-center gap-1 px-3 py-1 bg-[#EEF2FF] rounded-full font-ui-label text-ui-label text-primary-container border border-[#adc6ff]\">\n                        Refurbished - Grade A\n                        <button class=\"material-symbols-outlined text-[16px] hover:text-primary transition-colors\">close</button>\n</div>\n</div>\n<!-- Sorting -->\n<div class=\"flex items-center gap-2 ml-auto\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant\">Sort by:</span>\n<select class=\"bg-transparent border-none font-ui-label text-ui-label text-primary-container font-semibold focus:ring-0 cursor-pointer pr-6 py-1\">\n<option>Recommended</option>\n<option>Price: Low to High</option>\n<option>Price: High to Low</option>\n<option>Newest Arrivals</option>\n</select>\n</div>\n</div>\n<!-- Product Grid -->\n<div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6\">\n<!-- Product Card 1 -->\n<div class=\"product-card bg-surface-container-lowest rounded-lg shadow-default flex flex-col overflow-hidden relative\">\n<!-- Image -->\n<div class=\"h-[200px] w-full bg-surface-container-low relative group\">\n<img alt=\"ThinkPad T14\" class=\"w-full h-full object-contain p-4\" data-alt=\"A sleek, refurbished silver business laptop photographed on a clean white studio background. Professional corporate lighting, sharp details on the keyboard and screen. High-end product photography style.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuAdleXUwqWkylQCOowAj-deG4t_yt5eqlkSDpOfJTsUE_TEzXc2uwMThZ5SiHnN4rGaXPLltFx2e2bvBMXlmt7h23D9JDcAwrgBWnk25yrtWV9Y65uWX4j_tb8tGMGlMBZ3kDnVCqv3GmuFs0CVE5VSET-436nAbEtiAsCJ217dw8VPw0BH0P8ziSkZ7oaop3Rb6RvJGLRvpEGYLwt07Ki1eXqe8a8R7OUlStgnkRU_I1_zwX-pEuifwg\"/>\n<div class=\"absolute top-2 right-2 flex gap-1\">\n<span class=\"px-2 py-0.5 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-data-id rounded shadow-sm border border-outline-variant/30\">Refurbished</span>\n</div>\n</div>\n<!-- Content -->\n<div class=\"p-4 flex flex-col gap-3 flex-grow\">\n<div class=\"flex items-center gap-1\">\n<span class=\"font-data-id text-data-id text-on-surface-variant\">TechHub Nairobi</span>\n<span class=\"material-symbols-outlined fill text-on-tertiary-container text-[14px]\">verified</span>\n</div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface line-clamp-2\">Lenovo ThinkPad T14 Gen 2 - 16GB RAM, 512GB SSD</h3>\n<div class=\"mt-auto flex flex-col gap-1\">\n<div class=\"font-data-price text-data-price text-primary-container\">KES 85,000</div>\n<div class=\"flex items-center gap-1 text-on-tertiary-container font-data-id text-data-id\">\n<span class=\"material-symbols-outlined text-[14px]\">shield</span>\n                                Protected by Float\n                            </div>\n</div>\n<!-- Action -->\n<button class=\"mt-2 w-full py-2 bg-[#EEF2FF] hover:bg-surface-container-highest text-primary-container font-ui-label text-ui-label rounded-lg transition-colors border border-transparent hover:border-primary-fixed-dim\">\n                            Buy with Float\n                        </button>\n</div>\n</div>\n<!-- Product Card 2 -->\n<div class=\"product-card bg-surface-container-lowest rounded-lg shadow-default flex flex-col overflow-hidden relative\">\n<!-- Image -->\n<div class=\"h-[200px] w-full bg-surface-container-low relative group\">\n<img alt=\"iPhone 13\" class=\"w-full h-full object-contain p-4\" data-alt=\"A pristine, brand new smartphone in its open retail box, placed on a crisp white surface. Bright, even lighting highlighting the glass screen and metallic edges. Premium electronics visual style.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuBrAVOO-8QraKP-C9Q1BT_ANbGgN4ma4AkBUSrEtjap_A16QmSssQFV6XKp67QkcCAAvrUgH4-sXXvkHUt8OGZKKjMTQjzyZctoJPCq78q5or9dZlgqa4sbDpW5sqmQYBqRC4olTWpCZ0kkycV-jep1JAn9PzVOEhSwblYg_a0oUwfDVo7uHsaH7A6nACPKsyobb53asm6bwkPz-JRXBLQv8x3E5aPOvJa_w6KqhwVlzf671kYr-XIvTg\"/>\n<div class=\"absolute top-2 right-2 flex gap-1\">\n<span class=\"px-2 py-0.5 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-data-id rounded shadow-sm border border-outline-variant/30\">New</span>\n</div>\n</div>\n<!-- Content -->\n<div class=\"p-4 flex flex-col gap-3 flex-grow\">\n<div class=\"flex items-center gap-1\">\n<span class=\"font-data-id text-data-id text-on-surface-variant\">Gadget Haven CBD</span>\n<span class=\"material-symbols-outlined fill text-on-tertiary-container text-[14px]\">verified</span>\n</div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface line-clamp-2\">iPhone 13 Pro Max - 256GB - Sierra Blue</h3>\n<div class=\"mt-auto flex flex-col gap-1\">\n<div class=\"font-data-price text-data-price text-primary-container\">KES 120,000</div>\n<div class=\"flex items-center gap-1 text-on-tertiary-container font-data-id text-data-id\">\n<span class=\"material-symbols-outlined text-[14px]\">shield</span>\n                                Protected by Float\n                            </div>\n</div>\n<!-- Action -->\n<button class=\"mt-2 w-full py-2 bg-[#EEF2FF] hover:bg-surface-container-highest text-primary-container font-ui-label text-ui-label rounded-lg transition-colors border border-transparent hover:border-primary-fixed-dim\">\n                            Buy with Float\n                        </button>\n</div>\n</div>\n<!-- Product Card 3 -->\n<div class=\"product-card bg-surface-container-lowest rounded-lg shadow-default flex flex-col overflow-hidden relative\">\n<!-- Image -->\n<div class=\"h-[200px] w-full bg-surface-container-low relative group\">\n<img alt=\"Dell Monitor\" class=\"w-full h-full object-contain p-4\" data-alt=\"A professional studio shot of an external computer monitor displaying a clean graphic. The monitor has thin bezels and a metallic stand, resting on a stark white background. Corporate modern aesthetic.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuBeDkgSjm_9dl_5_plv-StG9dwpsWMvmlKWoa02qBgjtpCluwvyQaumFyFOV8vvS7giHdOgpIBd_zTOfJ4Lu7cbSzj7852i3uxlo3Uc4NnoIrVmLgarTxvxa77QgwDtsmmioCZZ69Q608DxacnzKLMfZa79I0dLmXL3s7lZ6OgjhHZu_2rCF315CuISy3iONbZat4pml9413pA1Pvvm8x7PTd10YzHwdz5P3GrIGajEqCDC92l1Jj129A\"/>\n<div class=\"absolute top-2 right-2 flex gap-1\">\n<span class=\"px-2 py-0.5 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-data-id rounded shadow-sm border border-outline-variant/30\">Refurbished</span>\n</div>\n</div>\n<!-- Content -->\n<div class=\"p-4 flex flex-col gap-3 flex-grow\">\n<div class=\"flex items-center gap-1\">\n<span class=\"font-data-id text-data-id text-on-surface-variant\">Electro World</span>\n<span class=\"material-symbols-outlined fill text-on-tertiary-container text-[14px]\">verified</span>\n</div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface line-clamp-2\">Dell UltraSharp 27 4K USB-C Hub Monitor - U2723QE</h3>\n<div class=\"mt-auto flex flex-col gap-1\">\n<div class=\"font-data-price text-data-price text-primary-container\">KES 65,500</div>\n<div class=\"flex items-center gap-1 text-on-tertiary-container font-data-id text-data-id\">\n<span class=\"material-symbols-outlined text-[14px]\">shield</span>\n                                Protected by Float\n                            </div>\n</div>\n<!-- Action -->\n<button class=\"mt-2 w-full py-2 bg-[#EEF2FF] hover:bg-surface-container-highest text-primary-container font-ui-label text-ui-label rounded-lg transition-colors border border-transparent hover:border-primary-fixed-dim\">\n                            Buy with Float\n                        </button>\n</div>\n</div>\n<!-- Product Card 4 -->\n<div class=\"product-card bg-surface-container-lowest rounded-lg shadow-default flex flex-col overflow-hidden relative\">\n<!-- Image -->\n<div class=\"h-[200px] w-full bg-surface-container-low relative group\">\n<img alt=\"Keyboard Mouse Set\" class=\"w-full h-full object-contain p-4\" data-alt=\"A top-down view of a mechanical keyboard with subtle white backlighting, next to a wireless productivity mouse, arranged neatly on a pure white surface. High contrast, precise focus.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuBqANbHL20MXVBfYupuA9u3hX7k6AVJrETY_8veXUoUpYwu8lp9wddpAmxTAtnr6tJeCaF1A5Qglk5oV68ihr0XzNRxsgdS3_zlc-hrKS_ccVF-cxrBLs_zPuS7ckD40Jwq3urhQBzSBoVmZ4PjurtEgmf6H9g3Y-VyoRxjpzB5sUzCZR_2EjUlJggxXSioIW2ttEC9fMKUZ0foRa-3y-lwHlhmJ9wNGX2EqUOvntn37G4sQRBXzFu6fQ\"/>\n<div class=\"absolute top-2 right-2 flex gap-1\">\n<span class=\"px-2 py-0.5 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-data-id rounded shadow-sm border border-outline-variant/30\">New</span>\n</div>\n</div>\n<!-- Content -->\n<div class=\"p-4 flex flex-col gap-3 flex-grow\">\n<div class=\"flex items-center gap-1\">\n<span class=\"font-data-id text-data-id text-on-surface-variant\">TechHub Nairobi</span>\n<span class=\"material-symbols-outlined fill text-on-tertiary-container text-[14px]\">verified</span>\n</div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface line-clamp-2\">Logitech MX Master 3S &amp; MX Keys Advanced Set</h3>\n<div class=\"mt-auto flex flex-col gap-1\">\n<div class=\"font-data-price text-data-price text-primary-container\">KES 22,000</div>\n<div class=\"flex items-center gap-1 text-on-tertiary-container font-data-id text-data-id\">\n<span class=\"material-symbols-outlined text-[14px]\">shield</span>\n                                Protected by Float\n                            </div>\n</div>\n<!-- Action -->\n<button class=\"mt-2 w-full py-2 bg-[#EEF2FF] hover:bg-surface-container-highest text-primary-container font-ui-label text-ui-label rounded-lg transition-colors border border-transparent hover:border-primary-fixed-dim\">\n                            Buy with Float\n                        </button>\n</div>\n</div>\n</div>\n<!-- Pagination -->\n<div class=\"mt-8 flex justify-center items-center gap-2\">\n<button class=\"p-2 rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50\" disabled=\"\">\n<span class=\"material-symbols-outlined\">chevron_left</span>\n</button>\n<button class=\"w-8 h-8 rounded bg-primary-container text-on-primary font-data-id text-data-id flex items-center justify-center\">1</button>\n<button class=\"w-8 h-8 rounded hover:bg-surface-container-low text-on-surface font-data-id text-data-id flex items-center justify-center transition-colors\">2</button>\n<button class=\"w-8 h-8 rounded hover:bg-surface-container-low text-on-surface font-data-id text-data-id flex items-center justify-center transition-colors\">3</button>\n<span class=\"text-outline\">...</span>\n<button class=\"w-8 h-8 rounded hover:bg-surface-container-low text-on-surface font-data-id text-data-id flex items-center justify-center transition-colors\">12</button>\n<button class=\"p-2 rounded border border-outline-variant text-on-surface hover:bg-surface-container-low transition-colors\">\n<span class=\"material-symbols-outlined\">chevron_right</span>\n</button>\n</div>\n</div>\n</main>\n";
+const pageHtml = `
+<main class="flex-grow w-full max-w-container-max mx-auto px-6 md:px-12 pt-8 md:pt-12 pb-16 md:pb-24 flex flex-col md:flex-row gap-8 md:gap-12">
+  <!-- Filter Sidebar -->
+  <aside class="w-full md:w-64 flex-shrink-0 flex flex-col gap-6">
+    <!-- Mobile Search & Filter Toggle (Visible only on mobile) -->
+    <div class="md:hidden flex flex-col gap-4 mb-4">
+      <div class="relative w-full">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+        <input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl font-body-md text-body-md" placeholder="Search electronics..." type="text"/>
+      </div>
+      <button class="flex items-center justify-center gap-2 bg-surface-container-low py-2.5 rounded-xl border border-outline-variant font-ui-label text-ui-label">
+        <span class="material-symbols-outlined">tune</span> Filters
+      </button>
+    </div>
+
+    <!-- Desktop Filters Wrapper -->
+    <div class="hidden md:flex flex-col gap-8 sticky top-24">
+      <div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
+        <h2 class="font-body-md-bold text-lg text-on-surface font-bold">Filters</h2>
+        <button class="font-ui-label text-xs text-secondary hover:underline font-semibold">Clear all</button>
+      </div>
+
+      <!-- Category -->
+      <div class="flex flex-col gap-3">
+        <h3 class="font-ui-label text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Category</h3>
+        <div class="flex flex-col gap-2.5">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input checked="" class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
+            <span class="font-body-md text-sm text-on-surface">Laptops</span>
+            <span class="ml-auto font-data-id text-xs text-outline">124</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
+            <span class="font-body-md text-sm text-on-surface">Smartphones</span>
+            <span class="ml-auto font-data-id text-xs text-outline">89</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
+            <span class="font-body-md text-sm text-on-surface">Tablets</span>
+            <span class="ml-auto font-data-id text-xs text-outline">45</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
+            <span class="font-body-md text-sm text-on-surface">Components &amp; Accessories</span>
+            <span class="ml-auto font-data-id text-xs text-outline">210</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Condition -->
+      <div class="flex flex-col gap-3">
+        <h3 class="font-ui-label text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Condition</h3>
+        <div class="flex flex-col gap-2.5">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
+            <span class="font-body-md text-sm text-on-surface">Brand New</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input checked="" class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
+            <span class="font-body-md text-sm text-on-surface">Refurbished - Grade A</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
+            <span class="font-body-md text-sm text-on-surface">Used - Good</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Price Range -->
+      <div class="flex flex-col gap-3">
+        <h3 class="font-ui-label text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Price Range (KES)</h3>
+        <div class="flex items-center gap-2">
+          <input class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg font-data-id text-xs focus:border-primary-container focus:ring-0" placeholder="Min" type="number"/>
+          <span class="text-outline">-</span>
+          <input class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg font-data-id text-xs focus:border-primary-container focus:ring-0" placeholder="Max" type="number"/>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="flex flex-col gap-3">
+        <h3 class="font-ui-label text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Location</h3>
+        <div class="relative">
+          <select class="w-full appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg py-2.5 pl-3 pr-8 font-body-md text-sm focus:border-primary-container focus:ring-0 cursor-pointer">
+            <option>All Locations</option>
+            <option>Nairobi</option>
+            <option>Mombasa</option>
+            <option>Kisumu</option>
+            <option>Nakuru</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Product Grid Area -->
+  <div class="flex-grow flex flex-col gap-8">
+    <!-- Page Header & Active Filters -->
+    <div class="flex flex-col gap-4">
+      <div>
+        <h1 class="font-display-h2 text-3xl font-bold text-on-surface mb-1">Browse Verified Marketplace</h1>
+        <p class="text-sm text-on-surface-variant">Every purchase is protected by Float escrow until delivery confirmation.</p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2">
+        <!-- Active Chips -->
+        <div class="flex flex-wrap gap-2">
+          <div class="flex items-center gap-1.5 px-3 py-1 bg-[#EEF2FF] rounded-full font-ui-label text-xs text-primary-container border border-[#adc6ff]">
+            Laptops
+            <button class="material-symbols-outlined text-[14px] hover:text-primary transition-colors">close</button>
+          </div>
+          <div class="flex items-center gap-1.5 px-3 py-1 bg-[#EEF2FF] rounded-full font-ui-label text-xs text-primary-container border border-[#adc6ff]">
+            Refurbished - Grade A
+            <button class="material-symbols-outlined text-[14px] hover:text-primary transition-colors">close</button>
+          </div>
+        </div>
+
+        <!-- Sorting -->
+        <div class="flex items-center gap-2 ml-auto">
+          <span class="font-ui-label text-xs text-on-surface-variant">Sort by:</span>
+          <select class="bg-transparent border border-outline-variant/40 rounded-lg px-3 py-1.5 font-ui-label text-xs text-primary-container font-semibold focus:ring-0 cursor-pointer">
+            <option>Recommended</option>
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+            <option>Newest Arrivals</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Product Card 1 -->
+      <div class="product-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300">
+        <div class="h-[220px] w-full bg-surface-container-low relative group">
+          <img alt="ThinkPad T14" class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdleXUwqWkylQCOowAj-deG4t_yt5eqlkSDpOfJTsUE_TEzXc2uwMThZ5SiHnN4rGaXPLltFx2e2bvBMXlmt7h23D9JDcAwrgBWnk25yrtWV9Y65uWX4j_tb8tGMGlMBZ3kDnVCqv3GmuFs0CVE5VSET-436nAbEtiAsCJ217dw8VPw0BH0P8ziSkZ7oaop3Rb6RvJGLRvpEGYLwt07Ki1eXqe8a8R7OUlStgnkRU_I1_zwX-pEuifwg"/>
+          <div class="absolute top-3 right-3 flex gap-1">
+            <span class="px-2.5 py-1 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-xs rounded-md shadow-sm border border-outline-variant/30">Refurbished</span>
+          </div>
+        </div>
+        <div class="p-6 flex flex-col gap-3 flex-grow">
+          <div class="flex items-center gap-1.5">
+            <span class="font-data-id text-xs text-on-surface-variant font-medium">TechHub Nairobi</span>
+            <span class="material-symbols-outlined fill text-on-tertiary-container text-[14px]">verified</span>
+          </div>
+          <h3 class="font-body-md-bold text-base text-on-surface line-clamp-2">Lenovo ThinkPad T14 Gen 2 - 16GB RAM, 512GB SSD</h3>
+          <div class="mt-auto pt-4 border-t border-outline-variant/20 flex flex-col gap-2">
+            <div class="font-data-price text-xl font-bold text-primary-container">KES 85,000</div>
+            <div class="flex items-center gap-1 text-on-tertiary-container font-data-id text-xs">
+              <span class="material-symbols-outlined text-[14px]">shield</span>
+              Protected by Float
+            </div>
+            <a href="/cart" class="mt-2 w-full text-center py-2.5 bg-[#EEF2FF] hover:bg-primary-container hover:text-on-primary text-primary-container font-ui-label text-sm rounded-xl transition-all border border-primary-container/20 block font-semibold">
+              Buy with Float
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Card 2 -->
+      <div class="product-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300">
+        <div class="h-[220px] w-full bg-surface-container-low relative group">
+          <img alt="iPhone 13" class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrAVOO-8QraKP-C9Q1BT_ANbGgN4ma4AkBUSrEtjap_A16QmSssQFV6XKp67QkcCAAvrUgH4-sXXvkHUt8OGZKKjMTQjzyZctoJPCq78q5or9dZlgqa4sbDpW5sqmQYBqRC4olTWpCZ0kkycV-jep1JAn9PzVOEhSwblYg_a0oUwfDVo7uHsaH7A6nACPKsyobb53asm6bwkPz-JRXBLQv8x3E5aPOvJa_w6KqhwVlzf671kYr-XIvTg"/>
+          <div class="absolute top-3 right-3 flex gap-1">
+            <span class="px-2.5 py-1 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-xs rounded-md shadow-sm border border-outline-variant/30">New</span>
+          </div>
+        </div>
+        <div class="p-6 flex flex-col gap-3 flex-grow">
+          <div class="flex items-center gap-1.5">
+            <span class="font-data-id text-xs text-on-surface-variant font-medium">Gadget Haven CBD</span>
+            <span class="material-symbols-outlined fill text-on-tertiary-container text-[14px]">verified</span>
+          </div>
+          <h3 class="font-body-md-bold text-base text-on-surface line-clamp-2">iPhone 13 Pro Max - 256GB - Sierra Blue</h3>
+          <div class="mt-auto pt-4 border-t border-outline-variant/20 flex flex-col gap-2">
+            <div class="font-data-price text-xl font-bold text-primary-container">KES 120,000</div>
+            <div class="flex items-center gap-1 text-on-tertiary-container font-data-id text-xs">
+              <span class="material-symbols-outlined text-[14px]">shield</span>
+              Protected by Float
+            </div>
+            <a href="/cart" class="mt-2 w-full text-center py-2.5 bg-[#EEF2FF] hover:bg-primary-container hover:text-on-primary text-primary-container font-ui-label text-sm rounded-xl transition-all border border-primary-container/20 block font-semibold">
+              Buy with Float
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Card 3 -->
+      <div class="product-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300">
+        <div class="h-[220px] w-full bg-surface-container-low relative group">
+          <img alt="Dell Monitor" class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeDkgSjm_9dl_5_plv-StG9dwpsWMvmlKWoa02qBgjtpCluwvyQaumFyFOV8vvS7giHdOgpIBd_zTOfJ4Lu7cbSzj7852i3uxlo3Uc4NnoIrVmLgarTxvxa77QgwDtsmmioCZZ69Q608DxacnzKLMfZa79I0dLmXL3s7lZ6OgjhHZu_2rCF315CuISy3iONbZat4pml9413pA1Pvvm8x7PTd10YzHwdz5P3GrIGajEqCDC92l1Jj129A"/>
+          <div class="absolute top-3 right-3 flex gap-1">
+            <span class="px-2.5 py-1 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-xs rounded-md shadow-sm border border-outline-variant/30">Refurbished</span>
+          </div>
+        </div>
+        <div class="p-6 flex flex-col gap-3 flex-grow">
+          <div class="flex items-center gap-1.5">
+            <span class="font-data-id text-xs text-on-surface-variant font-medium">Electro World</span>
+            <span class="material-symbols-outlined fill text-on-tertiary-container text-[14px]">verified</span>
+          </div>
+          <h3 class="font-body-md-bold text-base text-on-surface line-clamp-2">Dell UltraSharp 27 4K USB-C Hub Monitor - U2723QE</h3>
+          <div class="mt-auto pt-4 border-t border-outline-variant/20 flex flex-col gap-2">
+            <div class="font-data-price text-xl font-bold text-primary-container">KES 65,500</div>
+            <div class="flex items-center gap-1 text-on-tertiary-container font-data-id text-xs">
+              <span class="material-symbols-outlined text-[14px]">shield</span>
+              Protected by Float
+            </div>
+            <a href="/cart" class="mt-2 w-full text-center py-2.5 bg-[#EEF2FF] hover:bg-primary-container hover:text-on-primary text-primary-container font-ui-label text-sm rounded-xl transition-all border border-primary-container/20 block font-semibold">
+              Buy with Float
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-12 flex justify-center items-center gap-2">
+      <button class="p-2.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50" disabled="">
+        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+      </button>
+      <button class="w-9 h-9 rounded-lg bg-primary-container text-on-primary font-data-id text-sm flex items-center justify-center font-bold">1</button>
+      <button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface font-data-id text-sm flex items-center justify-center transition-colors">2</button>
+      <button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface font-data-id text-sm flex items-center justify-center transition-colors">3</button>
+      <span class="text-outline px-1">...</span>
+      <button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface font-data-id text-sm flex items-center justify-center transition-colors">12</button>
+      <button class="p-2.5 rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+      </button>
+    </div>
+  </div>
+</main>
+`;
 
 const Browse = () => {
   useEffect(() => {
-    document.title = "TechTrust Marketplace - Browse";
+    document.title = "Browse Verified Marketplace | TechTrust Kenya";
 
     const ensureStylesheet = (href: string) => {
       const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
+        (link) => link.getAttribute("href") === href
       );
       if (exists) return;
       const el = document.createElement("link");
