@@ -1,14 +1,13 @@
 import { useEffect } from "react";
-
-const pageHtml = "\n</div>\n<div class=\"flex items-center gap-4\">\n<button class=\"font-ui-label text-ui-label text-on-surface-variant hover:text-secondary transition-colors duration-200\">List Your Shop</button>\n<button class=\"font-ui-label text-ui-label text-on-surface-variant hover:text-secondary transition-colors duration-200\">Sign In</button>\n<button class=\"text-on-surface-variant hover:text-secondary transition-colors duration-200 flex items-center justify-center p-2\">\n<span class=\"material-symbols-outlined\" data-icon=\"shopping_cart\">shopping_cart</span>\n</button>\n<img alt=\"User profile\" class=\"w-10 h-10 rounded-full object-cover shadow-sm bg-surface-container\" data-alt=\"A small circular user profile placeholder image with a clean, professional grey background.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuCvjf2xW7XTGIMOhvf6KHmpGf9VyzgJFV3CqfWOlg5lok45klTKhVu3oc0sLHKPjbwD5ehRcrdGs7M9wp9dpZ-a2djzUrSKPCZGnuDKYkJdAi-96YxPKrA-BAiFbYftm7CJg996pb9h59D1t3IyPEcUreZMfJe3OFsB2ggwOz4m_ROauhShFz1U_PjIZF5pcJVOePqvHlS1p_P8I67f5Km1BBh3NVRsTtvrvIBTJoBqhugnYit5PSGVng\"/>\n</div>\n</header>\n<main class=\"flex-grow pt-20\">\n<!-- Hero Section -->\n<section class=\"hero-pattern py-24 px-margin-mobile md:px-margin-desktop border-b border-outline-variant/30\">\n<div class=\"max-w-container-max mx-auto flex flex-col md:flex-row gap-gutter items-center\">\n<div class=\"flex-1 text-left space-y-6\">\n<h1 class=\"font-display-h1-mobile md:font-display-h1 text-display-h1-mobile md:text-display-h1 text-on-surface\">Certified Tech Repairs</h1>\n<p class=\"font-body-lg text-body-lg text-on-surface-variant max-w-2xl\">Connect with rigorously vetted technicians. Your funds are secured in financial-grade escrow until you confirm the repair is successful.</p>\n<div class=\"pt-4 flex gap-4\">\n<button class=\"bg-primary-container text-on-primary font-ui-label text-ui-label px-6 py-3 rounded-lg hover:bg-[#0A2D6B] active:scale-95 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.08)]\">Find a Repair Shop</button>\n<div class=\"flex items-center gap-2 px-4 py-3 bg-[#EEF2FF] rounded-lg text-primary font-ui-label text-ui-label\">\n<span class=\"material-symbols-outlined text-[20px]\" data-icon=\"shield\">shield</span>\n<span>Float Protected Escrow</span>\n</div>\n</div>\n</div>\n<div class=\"flex-1 w-full relative h-[400px]\">\n<div class=\"absolute inset-0 bg-cover bg-center rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-outline-variant/20\" data-alt=\"A high-quality, professional photograph of a pristine, well-lit electronics repair workspace. The setting is modern and clinical, featuring a disassembled smartphone on a white antistatic mat. Precise tools like micro-screwdrivers and tweezers are arranged neatly. The lighting is bright and cool, reflecting a sterile, premium tech environment.\" style=\"background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC2TUz52lHXtE5HuMmxUxTM9wAGitz7ARgCTKhnpn_XPap05bITnDuSpgZFZsWsU81AqKwPLwm2vgjQD9LpPFPie9PXyuF0Pjwr_RmCG9f4ODkyIBlIbzbvCTpRQpP_-95yUZbTptuJi8R5pE9uHFvZD5ptVjKQUoqzhYH8qGlvXzf1iSjxWhnp96JHQe5ZtzrE3FLnWhNu6Jh1a2c5Ookzizc2GdXXrEUJLEUgCQPz5PZO2ilpevEICw')\"></div>\n</div>\n</div>\n</section>\n<!-- Process Section -->\n<section class=\"py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto\">\n<h2 class=\"font-display-h2 text-display-h2 text-on-surface mb-12 text-center md:text-left\">The Secure Process</h2>\n<div class=\"grid grid-cols-1 md:grid-cols-5 gap-4 relative\">\n<div class=\"hidden md:block absolute top-[28px] left-[10%] right-[10%] h-0.5 bg-surface-container-high -z-10\"></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-surface-container-lowest border-2 border-primary flex items-center justify-center text-primary z-10 shadow-sm\"><span class=\"material-symbols-outlined\" data-icon=\"build\">build</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Diagnosis</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Shop inspects device</p></div></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-surface-container-lowest border-2 border-primary flex items-center justify-center text-primary z-10 shadow-sm\"><span class=\"material-symbols-outlined\" data-icon=\"request_quote\">request_quote</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Quote</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Receive exact price</p></div></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-primary-container text-on-primary flex items-center justify-center z-10 shadow-[0_4px_16px_rgba(0,0,0,0.04)]\"><span class=\"material-symbols-outlined\" data-icon=\"lock\">lock</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-primary\">Float Hold</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Funds secured</p></div></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-surface-container-lowest border-2 border-primary flex items-center justify-center text-primary z-10 shadow-sm\"><span class=\"material-symbols-outlined\" data-icon=\"hardware\">hardware</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Repair</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Work performed</p></div></div>\n<div class=\"flex flex-col items-center md:items-start space-y-4\"><div class=\"w-14 h-14 rounded-full bg-surface-container-lowest border-2 border-[#22C55E] flex items-center justify-center text-[#22C55E] z-10 shadow-sm\"><span class=\"material-symbols-outlined\" data-icon=\"task_alt\">task_alt</span></div><div class=\"text-center md:text-left\"><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Release</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">You approve payout</p></div></div>\n</div>\n</section>\n<!-- Services Cards -->\n<section class=\"bg-surface-container-low py-24 px-margin-mobile md:px-margin-desktop\">\n<div class=\"max-w-container-max mx-auto\">\n<div class=\"flex justify-between items-end mb-12\"><h2 class=\"font-display-h2 text-display-h2 text-on-surface\">Standard Services</h2><span class=\"hidden md:inline-flex items-center gap-1 bg-[#22C55E] text-white px-3 py-1 rounded font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"verified_user\">verified_user</span> Physical inspection badges for all shops</span></div>\n<div class=\"grid grid-cols-1 md:grid-cols-3 gap-gutter\">\n<div class=\"bg-surface-container-lowest rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200 group flex flex-col h-full\"><div class=\"flex items-start justify-between mb-4\"><div class=\"w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-[#EEF2FF] transition-colors\"><span class=\"material-symbols-outlined text-2xl\" data-icon=\"smartphone\">smartphone</span></div><span class=\"font-data-price text-data-price text-on-surface-variant\">$80 - $250</span></div><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-2\">Screen Replacement</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mb-6 flex-grow\">OEM and premium aftermarket OLED/LCD options available.</p><div class=\"space-y-2 pt-4 border-t border-outline-variant/30\"><div class=\"flex items-center gap-2 text-primary font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"engineering\">engineering</span> Certified Technicians Only</div><div class=\"flex items-center gap-2 text-[#22C55E] font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"gpp_good\">gpp_good</span> Float Protected Escrow</div></div></div>\n<div class=\"bg-surface-container-lowest rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200 group flex flex-col h-full\"><div class=\"flex items-start justify-between mb-4\"><div class=\"w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-[#EEF2FF] transition-colors\"><span class=\"material-symbols-outlined text-2xl\" data-icon=\"battery_charging_full\">battery_charging_full</span></div><span class=\"font-data-price text-data-price text-on-surface-variant\">$45 - $90</span></div><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-2\">Battery Replacement</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mb-6 flex-grow\">Diagnostic check included. Restore your device's original capacity.</p><div class=\"space-y-2 pt-4 border-t border-outline-variant/30\"><div class=\"flex items-center gap-2 text-primary font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"engineering\">engineering</span> Certified Technicians Only</div><div class=\"flex items-center gap-2 text-[#22C55E] font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"gpp_good\">gpp_good</span> Float Protected Escrow</div></div></div>\n<div class=\"bg-surface-container-lowest rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200 group flex flex-col h-full\"><div class=\"flex items-start justify-between mb-4\"><div class=\"w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-[#EEF2FF] transition-colors\"><span class=\"material-symbols-outlined text-2xl\" data-icon=\"memory\">memory</span></div><span class=\"font-data-price text-data-price text-on-surface-variant\">$150 - $400</span></div><h3 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-2\">Logic Board</h3><p class=\"font-ui-label text-ui-label text-on-surface-variant mb-6 flex-grow\">Micro-soldering, water damage recovery, and complex board-level repairs.</p><div class=\"space-y-2 pt-4 border-t border-outline-variant/30\"><div class=\"flex items-center gap-2 text-primary font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"engineering\">engineering</span> Certified Technicians Only</div><div class=\"flex items-center gap-2 text-[#22C55E] font-ui-label text-ui-label\"><span class=\"material-symbols-outlined text-[16px]\" data-icon=\"gpp_good\">gpp_good</span> Float Protected Escrow</div></div></div>\n</div>\n</div>\n</section>\n</main>\n";
+import { Link } from "react-router-dom";
 
 const Repairs = () => {
   useEffect(() => {
-    document.title = "Certified Tech Repairs - TechTrust";
+    document.title = "Certified Tech Repairs | TechTrust Kenya";
 
     const ensureStylesheet = (href: string) => {
       const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
+        (link) => link.getAttribute("href") === href
       );
       if (exists) return;
       const el = document.createElement("link");
@@ -20,7 +19,201 @@ const Repairs = () => {
     ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
   }, []);
 
-  return <div dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+  return (
+    <div className="bg-background text-on-background font-body-md antialiased overflow-x-hidden">
+      <main className="flex flex-col gap-12 md:gap-20">
+        {/* Hero Section */}
+        <section className="relative w-full overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-surface-container-low to-background pt-12 md:pt-20 pb-20 md:pb-28 border-b border-outline-variant/20">
+          <div className="max-w-container-max mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center relative z-10">
+            {/* Left Content */}
+            <div className="flex flex-col gap-6 md:gap-8">
+              <div className="flex items-center gap-2 text-[#0F3D8C] font-ui-label text-xs md:text-sm uppercase tracking-wider font-bold">
+                <span className="material-symbols-outlined text-[20px]">build</span>
+                <span>Verified Repair Network</span>
+              </div>
+              <h1 className="font-display-h1-mobile md:font-display-h1 text-4xl md:text-5xl font-bold text-[#0F172A] leading-tight">
+                Certified Tech Repairs You Can Rely On
+              </h1>
+              <p className="font-body-lg text-base md:text-lg text-[#64748B] max-w-lg leading-relaxed">
+                Connect with physically inspected technicians in Nairobi, Mombasa & Kisumu. Your money is secured in Float escrow until you test and approve the repair.
+              </p>
+              <div className="flex flex-wrap gap-4 pt-2">
+                <Link
+                  to="/browse"
+                  className="bg-[#0F3D8C] text-white px-8 py-3.5 rounded-lg font-body-md-bold text-base hover:bg-[#0A2D6B] transition-all duration-200 shadow-md inline-block font-semibold"
+                >
+                  Book a Repair
+                </Link>
+                <div className="flex items-center gap-2 px-5 py-3.5 bg-[#EEF2FF] rounded-lg text-[#0F3D8C] font-ui-label text-sm border border-[#0F3D8C]/20 font-semibold">
+                  <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    shield
+                  </span>
+                  <span>Float Protected Escrow</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Visual Image */}
+            <div className="relative flex justify-center md:justify-end">
+              <div className="relative w-full max-w-md h-[340px] md:h-[380px] rounded-2xl overflow-hidden shadow-xl border border-slate-200">
+                <div
+                  className="w-full h-full bg-cover bg-center"
+                  style={{
+                    backgroundImage:
+                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC2TUz52lHXtE5HuMmxUxTM9wAGitz7ARgCTKhnpn_XPap05bITnDuSpgZFZsWsU81AqKwPLwm2vgjQD9LpPFPie9PXyuF0Pjwr_RmCG9f4ODkyIBlIbzbvCTpRQpP_-95yUZbTptuJi8R5pE9uHFvZD5ptVjKQUoqzhYH8qGlvXzf1iSjxWhnp96JHQe5ZtzrE3FLnWhNu6Jh1a2c5Ookzizc2GdXXrEUJLEUgCQPz5PZO2ilpevEICw')",
+                  }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5-Step Process Section */}
+        <section className="py-20 md:py-28 bg-white border-b border-[#E2E8F0]">
+          <div className="max-w-container-max mx-auto px-6 md:px-12">
+            <div className="text-center mb-16">
+              <h2 className="font-display-h2 text-3xl md:text-4xl text-[#0F172A] font-bold mb-4">The Secure 5-Step Repair Process</h2>
+              <p className="text-base md:text-lg text-[#64748B] max-w-2xl mx-auto">
+                No hidden costs, no unauthorized part swaps. Full transparency from diagnosis to payout release.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 relative">
+              {/* Step 1 */}
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-slate-50 border border-[#E2E8F0] shadow-sm">
+                <div className="w-14 h-14 rounded-full bg-[#0F3D8C] text-white flex items-center justify-center mb-4 font-bold shadow-sm">
+                  <span className="material-symbols-outlined">build</span>
+                </div>
+                <h3 className="font-body-md-bold text-base text-[#0F172A] font-bold mb-1">1. Diagnosis</h3>
+                <p className="text-xs text-[#64748B]">Shop inspects device hardware</p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-slate-50 border border-[#E2E8F0] shadow-sm">
+                <div className="w-14 h-14 rounded-full bg-[#0F3D8C] text-white flex items-center justify-center mb-4 font-bold shadow-sm">
+                  <span className="material-symbols-outlined">request_quote</span>
+                </div>
+                <h3 className="font-body-md-bold text-base text-[#0F172A] font-bold mb-1">2. Quote</h3>
+                <p className="text-xs text-[#64748B]">Receive exact upfront quote</p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-[#EEF2FF] border border-[#0F3D8C]/30 shadow-md">
+                <div className="w-14 h-14 rounded-full bg-[#0F3D8C] text-white flex items-center justify-center mb-4 font-bold shadow-sm">
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    lock
+                  </span>
+                </div>
+                <h3 className="font-body-md-bold text-base text-[#0F3D8C] font-bold mb-1">3. Float Hold</h3>
+                <p className="text-xs text-[#0F3D8C] font-medium">Funds locked in escrow</p>
+              </div>
+
+              {/* Step 4 */}
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-slate-50 border border-[#E2E8F0] shadow-sm">
+                <div className="w-14 h-14 rounded-full bg-[#0F3D8C] text-white flex items-center justify-center mb-4 font-bold shadow-sm">
+                  <span className="material-symbols-outlined">hardware</span>
+                </div>
+                <h3 className="font-body-md-bold text-base text-[#0F172A] font-bold mb-1">4. Repair</h3>
+                <p className="text-xs text-[#64748B]">Certified repair performed</p>
+              </div>
+
+              {/* Step 5 */}
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-sm">
+                <div className="w-14 h-14 rounded-full bg-[#10B981] text-white flex items-center justify-center mb-4 font-bold shadow-sm">
+                  <span className="material-symbols-outlined">task_alt</span>
+                </div>
+                <h3 className="font-body-md-bold text-base text-emerald-900 font-bold mb-1">5. Payout Release</h3>
+                <p className="text-xs text-emerald-700 font-medium">You approve payout</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Standard Services */}
+        <section className="py-20 md:py-28 bg-background">
+          <div className="max-w-container-max mx-auto px-6 md:px-12">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+              <div>
+                <h2 className="font-display-h2 text-3xl md:text-4xl text-[#0F172A] font-bold mb-2">Standard Repair Services</h2>
+                <p className="text-base text-[#64748B]">All repairs include 90-day warranty &amp; genuine replacement parts.</p>
+              </div>
+              <span className="inline-flex items-center gap-2 bg-[#10B981] text-white px-4 py-2 rounded-lg font-ui-label text-xs font-semibold">
+                <span className="material-symbols-outlined text-[18px]">verified_user</span>
+                Physical inspection badges for all technician shops
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Service 1 */}
+              <div className="bg-white rounded-2xl p-8 border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all flex flex-col h-full">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-[#0F3D8C]">
+                    <span className="material-symbols-outlined text-3xl">smartphone</span>
+                  </div>
+                  <span className="font-mono text-xl font-bold text-[#0F3D8C]">KES 8,000 - 25,000</span>
+                </div>
+                <h3 className="font-body-md-bold text-xl text-[#0F172A] font-bold mb-2">Screen &amp; Display Replacement</h3>
+                <p className="text-sm text-[#64748B] mb-6 flex-grow leading-relaxed">
+                  OEM and premium aftermarket OLED/LCD options for iPhone, Samsung, Google Pixel &amp; MacBooks.
+                </p>
+                <div className="space-y-2.5 pt-4 border-t border-[#E2E8F0]">
+                  <div className="flex items-center gap-2 text-[#0F3D8C] text-xs font-semibold">
+                    <span className="material-symbols-outlined text-[18px]">engineering</span> Certified Technicians Only
+                  </div>
+                  <div className="flex items-center gap-2 text-[#10B981] text-xs font-semibold">
+                    <span className="material-symbols-outlined text-[18px]">gpp_good</span> Float Protected Escrow
+                  </div>
+                </div>
+              </div>
+
+              {/* Service 2 */}
+              <div className="bg-white rounded-2xl p-8 border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all flex flex-col h-full">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-[#0F3D8C]">
+                    <span className="material-symbols-outlined text-3xl">battery_charging_full</span>
+                  </div>
+                  <span className="font-mono text-xl font-bold text-[#0F3D8C]">KES 4,500 - 9,000</span>
+                </div>
+                <h3 className="font-body-md-bold text-xl text-[#0F172A] font-bold mb-2">Battery Replacement</h3>
+                <p className="text-sm text-[#64748B] mb-6 flex-grow leading-relaxed">
+                  Full battery health diagnostic check included. Restore your device's original daily battery capacity.
+                </p>
+                <div className="space-y-2.5 pt-4 border-t border-[#E2E8F0]">
+                  <div className="flex items-center gap-2 text-[#0F3D8C] text-xs font-semibold">
+                    <span className="material-symbols-outlined text-[18px]">engineering</span> Certified Technicians Only
+                  </div>
+                  <div className="flex items-center gap-2 text-[#10B981] text-xs font-semibold">
+                    <span className="material-symbols-outlined text-[18px]">gpp_good</span> Float Protected Escrow
+                  </div>
+                </div>
+              </div>
+
+              {/* Service 3 */}
+              <div className="bg-white rounded-2xl p-8 border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all flex flex-col h-full">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-[#0F3D8C]">
+                    <span className="material-symbols-outlined text-3xl">memory</span>
+                  </div>
+                  <span className="font-mono text-xl font-bold text-[#0F3D8C]">KES 15,000 - 40,000</span>
+                </div>
+                <h3 className="font-body-md-bold text-xl text-[#0F172A] font-bold mb-2">Logic Board Micro-soldering</h3>
+                <p className="text-sm text-[#64748B] mb-6 flex-grow leading-relaxed">
+                  Advanced micro-soldering, liquid damage recovery, power IC chip replacement, and board-level repairs.
+                </p>
+                <div className="space-y-2.5 pt-4 border-t border-[#E2E8F0]">
+                  <div className="flex items-center gap-2 text-[#0F3D8C] text-xs font-semibold">
+                    <span className="material-symbols-outlined text-[18px]">engineering</span> Certified Technicians Only
+                  </div>
+                  <div className="flex items-center gap-2 text-[#10B981] text-xs font-semibold">
+                    <span className="material-symbols-outlined text-[18px]">gpp_good</span> Float Protected Escrow
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
 };
 
 export default Repairs;

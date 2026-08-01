@@ -215,13 +215,13 @@ const VendorRegister = () => {
 
                 <div className="space-y-2">
                   <label className="font-ui-label text-ui-label text-on-surface block font-semibold">
-                    KRA PIN / Registration Number
+                    KRA PIN / Registration Number (Optional)
                   </label>
                   <input
                     value={formData.kra_pin}
                     onChange={(e) => setFormData({ ...formData, kra_pin: e.target.value.toUpperCase() })}
                     className="w-full bg-surface border border-outline-variant rounded-lg px-4 py-3 font-data-id focus:border-primary focus:ring-0 uppercase"
-                    placeholder="P000000000A"
+                    placeholder="P000000000A (Optional)"
                     type="text"
                   />
                 </div>
