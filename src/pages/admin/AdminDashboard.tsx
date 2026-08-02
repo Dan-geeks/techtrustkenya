@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, Bell, Search, User, FileText, MapPin, MoreHorizontal, Check, X, LogOut, LayoutDashboard, Users, FileCheck, AlertTriangle, Shield, Settings } from "lucide-react";
+import { ShieldCheck, Bell, Search, User, FileText, MapPin, MoreHorizontal, Check, X, LogOut, LayoutDashboard, Users, FileCheck, AlertTriangle, Shield, Settings, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -361,6 +361,9 @@ const AdminDashboard = () => {
               <span>TechTrust<span className="text-accent text-xs align-top ml-1 uppercase tracking-wider">Admin</span></span>
             </Link>
             <nav className="hidden md:flex gap-6 items-center">
+              <Link to="/" className="transition-colors text-sm font-medium flex items-center gap-2 text-slate-500 hover:text-primary">
+                <Home className="h-4 w-4" /> Home
+              </Link>
               <button onClick={() => setActiveTab("users")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'users' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
                 <Users className="h-4 w-4" /> Users
               </button>

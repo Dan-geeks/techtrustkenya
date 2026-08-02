@@ -48,6 +48,7 @@ export const TopNav = () => {
 
         {/* Navigation Links (Desktop) */}
         <nav className="hidden md:flex gap-8 items-center mx-8">
+          <NavLink to="/" className={navLinkClass}>Home</NavLink>
           <NavLink to="/browse" className={navLinkClass}>Browse</NavLink>
           <NavLink to="/repairs" className={navLinkClass}>Repairs</NavLink>
           <NavLink to="/how-it-works" className={navLinkClass}>How It Works</NavLink>
