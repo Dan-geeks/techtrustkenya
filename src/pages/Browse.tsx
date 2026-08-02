@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Search, Tune, X, Shield, Verified, ArrowRight, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 
 interface Product {
@@ -23,6 +23,7 @@ const CONDITIONS = ["Brand New", "Refurbished - Grade A", "Used - Good"];
 const ITEMS_PER_PAGE = 6;
 
 const Browse = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
 
@@ -449,7 +450,8 @@ const Browse = () => {
               {paginatedProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="group bg-white rounded-xl shadow-sm border border-[#E2E8F0] flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300"
+                  onClick={() => navigate(`/product/${product.id}`)}
+                  className="group bg-white rounded-xl shadow-sm border border-[#E2E8F0] flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300 cursor-pointer"
                 >
                   <div className="h-[200px] w-full bg-[#f2f3ff]/60 relative overflow-hidden flex items-center justify-center px-8 py-4 rounded-t-xl">
                     <img
@@ -494,12 +496,14 @@ const Browse = () => {
                       <div className="flex gap-2 mt-2 w-full">
                         <Link
                           to={`/product/${product.id}`}
+                          onClick={(e) => e.stopPropagation()}
                           className="flex-1 text-center py-2.5 bg-white hover:bg-slate-50 text-[#0F172A] font-bold text-sm rounded-xl transition-all border border-[#E2E8F0] block shadow-sm"
                         >
-                          View Description
+                          View
                         </Link>
                         <Link
                           to={`/checkout?product=${product.id}`}
+                          onClick={(e) => e.stopPropagation()}
                           className="flex-1 text-center py-2.5 bg-[#EEF2FF] hover:bg-[#0F3D8C] hover:text-white text-[#0F3D8C] font-bold text-sm rounded-xl transition-all border border-[#0F3D8C]/20 block"
                         >
                           Buy with Float
