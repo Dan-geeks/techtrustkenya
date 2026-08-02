@@ -11,6 +11,7 @@ import { CookieConsent } from "@/components/layout/CookieConsent";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import Browse from "./pages/Browse.tsx";
+import Vendors from "./pages/Vendors.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
 import ShopPage from "./pages/ShopPage.tsx";
 import Auth from "./pages/Auth.tsx";
@@ -91,6 +92,7 @@ const App = () => (
                 <Route element={<AppLayout />}>
                   <Route path="/" element={<Index />} />
                   <Route path="/browse" element={<Browse />} />
+                  <Route path="/vendors" element={<Vendors />} />
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/shop/:vendorId" element={<ShopPage />} />
                   <Route path="/repairs" element={<Repairs />} />

@@ -1,97 +1,114 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ShieldCheck, MapPin, Star, Store, CheckCircle, ArrowRight, Phone, Mail } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-interface VendorDetails {
+interface VendorProfile {
   id: string;
   business_name: string;
-  is_verified: boolean;
-  rating: number;
-  sales_count: number;
-  location: string;
-  joined_date: string;
-  bio: string;
-  products: Array<{
-    id: string;
-    title: string;
-    price_ksh: number;
-    condition: string;
-    sku: string;
-    image_url: string;
-  }>;
+  city: string;
+  physical_address: string;
+  average_rating: number;
+  total_completed_transactions: number;
+  verification_status: string;
+  created_at: string;
+  shop_photo_urls: string[] | null;
 }
 
-const mockVendors: Record<string, VendorDetails> = {
-  v100: {
-    id: "v100",
-    business_name: "TechHub Nairobi",
-    is_verified: true,
-    rating: 4.9,
-    sales_count: 128,
-    location: "CBD, Nairobi",
-    joined_date: "March 2022",
-    bio: "Premium electronics retailer specializing in high-end laptops, smartphones, and professional gear. All devices pass strict 40-point Float inspection before listing.",
-    products: [
-      {
-        id: "p1",
-        title: "MacBook Pro 16\" M3 Max",
-        price_ksh: 350000,
-        condition: "Refurbished - Excellent",
-        sku: "APL-M3M-16",
-        image_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuBNjSZv8rfoQvukUej12m1vF83ptirN4QMeHorHtscl3L07Er0-KcND24gMF9_fFNGsGJq0GhM3iiOq1_S0BbPRm_c-P28tHiGDXgbpV_eY_VKGvmyY8-h4PQCL5PN2myW6x8BXgRoC9Sg8EoltFCaHvQqYV5EsehQYlGYRb-g81rFfhC1tPC1owYBcdKAD0Kvc2x_h8VghauixHoM2ENr0M5zH7xqVLl9VJh7sTP97VGfvlK_IDvX_KA"
-      },
-      {
-        id: "p2",
-        title: "ThinkPad X1 Carbon Gen 10",
-        price_ksh: 185000,
-        condition: "Used - Like New",
-        sku: "LNV-X1-8492",
-        image_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuCokv45mRVrSIXOWebAFT4UoYazAFFcUbgCGEbnmD9yGyNV54x7N43L91196famiDQcKRBVxbcpDt2X4sEIkqlbHZYWIDsXksFw49njdx5TJb8PLi75aaZAXYAfs7-3sxTCNLBO7OYOPqEquk_48fNbyYChnf2_w9YLaoxr4MXfqm0oWPd7x4sYs05pH9KAgelZoOvLMbksbYq9D99zvRU4PTIp6icBuvUj7K_LLbFHW4-k_oiQwwCUFg"
-      }
-    ]
-  }
-};
+interface Product {
+  id: string;
+  title: string;
+  price_ksh: number;
+  condition: string;
+  image_url: string;
+}
 
 const ShopPage = () => {
   const { vendorId } = useParams<{ vendorId: string }>();
-  const vendor = mockVendors[vendorId || "v100"] || {
-    id: vendorId || "v100",
-    business_name: "TechHub Nairobi",
-    is_verified: true,
-    rating: 4.9,
-    sales_count: 128,
-    location: "Nairobi, Kenya",
-    joined_date: "March 2022",
-    bio: "Verified merchant operating under Float Escrow protection.",
-    products: [
-      {
-        id: "p1",
-        title: "MacBook Pro 16\" M3 Max",
-        price_ksh: 350000,
-        condition: "Refurbished",
-        sku: "APL-M3M-16",
-        image_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuBNjSZv8rfoQvukUej12m1vF83ptirN4QMeHorHtscl3L07Er0-KcND24gMF9_fFNGsGJq0GhM3iiOq1_S0BbPRm_c-P28tHiGDXgbpV_eY_VKGvmyY8-h4PQCL5PN2myW6x8BXgRoC9Sg8EoltFCaHvQqYV5EsehQYlGYRb-g81rFfhC1tPC1owYBcdKAD0Kvc2x_h8VghauixHoM2ENr0M5zH7xqVLl9VJh7sTP97VGfvlK_IDvX_KA"
-      }
-    ]
-  };
+  const [vendor, setVendor] = useState<VendorProfile | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    document.title = `${vendor.business_name} | TechTrust Storefront`;
-  }, [vendor.business_name]);
+    const fetchVendorAndProducts = async () => {
+      setIsLoading(true);
+      if (!vendorId) return;
+
+      const { data: vendorData, error: vendorError } = await supabase
+        .from("vendor_profiles")
+        .select("*")
+        .eq("id", vendorId)
+        .single();
+
+      if (vendorData) {
+        setVendor(vendorData);
+        document.title = `${vendorData.business_name} | TechTrust Storefront`;
+      }
+
+      const { data: productsData } = await supabase
+        .from("products")
+        .select("*")
+        .eq("vendor_id", vendorId)
+        .eq("is_active", true);
+
+      if (productsData) {
+        const mappedProducts = productsData.map((p) => ({
+          id: p.id,
+          title: p.model_name ? `${p.brand} ${p.model_name}` : p.brand,
+          price_ksh: p.price_ksh,
+          condition: p.condition || "Used",
+          image_url: p.image_urls && p.image_urls.length > 0 ? p.image_urls[0] : "/placeholder.svg",
+        }));
+        setProducts(mappedProducts);
+      }
+      setIsLoading(false);
+    };
+
+    fetchVendorAndProducts();
+  }, [vendorId]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-background min-h-screen py-32 flex items-center justify-center">
+        <p className="text-muted-foreground text-lg">Loading vendor profile...</p>
+      </div>
+    );
+  }
+
+  if (!vendor) {
+    return (
+      <div className="bg-background min-h-screen py-32 flex flex-col items-center justify-center space-y-4">
+        <h2 className="text-2xl font-bold text-foreground">Vendor Not Found</h2>
+        <p className="text-muted-foreground">The vendor you are looking for does not exist or has been removed.</p>
+        <Link to="/vendors" className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-bold">
+          Browse Vendors
+        </Link>
+      </div>
+    );
+  }
+
+  const isVerified = vendor.verification_status === "verified";
+  const joinedDate = new Date(vendor.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   return (
-    <div className="bg-background text-foreground font-body antialiased min-h-screen py-8">
+    <div className="bg-background text-foreground font-body antialiased min-h-screen pt-32 pb-8">
       <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Sidebar Vendor Info */}
         <aside className="lg:col-span-4 space-y-6">
           <div className="bg-card border border-border rounded-xl p-6 shadow-xs text-center">
-            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary font-bold text-2xl">
-              {vendor.business_name.substring(0, 2)}
-            </div>
+            {vendor.shop_photo_urls && vendor.shop_photo_urls.length > 0 ? (
+              <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-2 border-primary/20">
+                <img src={vendor.shop_photo_urls[0]} alt={vendor.business_name} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary font-bold text-2xl">
+                {vendor.business_name.substring(0, 2).toUpperCase()}
+              </div>
+            )}
             <h1 className="text-2xl font-bold text-foreground mb-1">{vendor.business_name}</h1>
             
-            {vendor.is_verified && (
+            {isVerified && (
               <div className="inline-flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold mb-4">
                 <ShieldCheck className="w-4 h-4" />
                 Physically Verified Merchant
@@ -100,16 +117,16 @@ const ShopPage = () => {
 
             <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mb-4">
               <MapPin className="w-4 h-4 text-primary" />
-              <span>{vendor.location}</span>
+              <span>{vendor.city ? `${vendor.physical_address || ""}, ${vendor.city}` : "Nairobi"}</span>
             </div>
 
             <div className="grid grid-cols-3 gap-2 bg-muted p-3 rounded-lg text-xs mb-6">
               <div>
-                <span className="font-bold text-foreground block">{vendor.rating} ★</span>
+                <span className="font-bold text-foreground block">{vendor.average_rating || 4.8} &starf;</span>
                 <span className="text-muted-foreground">Rating</span>
               </div>
               <div>
-                <span className="font-bold text-foreground block">{vendor.sales_count}</span>
+                <span className="font-bold text-foreground block">{vendor.total_completed_transactions || 0}</span>
                 <span className="text-muted-foreground">Sales</span>
               </div>
               <div>
@@ -119,7 +136,7 @@ const ShopPage = () => {
             </div>
 
             <p className="text-xs text-muted-foreground leading-relaxed text-left">
-              {vendor.bio}
+              Joined {joinedDate}. Trusted electronics merchant offering quality devices.
             </p>
           </div>
 
@@ -146,49 +163,55 @@ const ShopPage = () => {
         <section className="lg:col-span-8 space-y-6">
           <div className="flex justify-between items-center bg-card border border-border p-4 rounded-xl shadow-xs">
             <h2 className="text-lg font-bold text-foreground">
-              Store Listings ({vendor.products.length})
+              Store Listings ({products.length})
             </h2>
-            <Link to="/browse" className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
-              Back to Browse <ArrowRight className="w-3 h-3" />
+            <Link to="/vendors" className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
+              Back to Vendors <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {vendor.products.map((item) => (
-              <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group flex flex-col">
-                <div className="aspect-video bg-muted relative overflow-hidden">
-                  <img
-                    src={item.image_url}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <span className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-xs">
-                    Float Escrow Protected
-                  </span>
-                </div>
-                <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                  <div>
-                    <h3 className="font-bold text-foreground text-base leading-snug">{item.title}</h3>
-                    <span className="text-xs text-muted-foreground">{item.condition} · SKU: {item.sku}</span>
+          {products.length === 0 ? (
+            <div className="bg-card border border-border rounded-xl p-12 text-center text-muted-foreground">
+              This vendor hasn't listed any products yet.
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {products.map((item) => (
+                <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group flex flex-col">
+                  <div className="aspect-video bg-muted relative overflow-hidden">
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <span className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-xs">
+                      Float Escrow Protected
+                    </span>
                   </div>
-                  <div className="flex justify-between items-end pt-2 border-t border-border">
+                  <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
                     <div>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Price (KSH)</span>
-                      <span className="font-data-price text-price text-lg font-bold text-primary">
-                        KSH {item.price_ksh.toLocaleString()}
-                      </span>
+                      <h3 className="font-bold text-foreground text-base leading-snug">{item.title}</h3>
+                      <span className="text-xs text-muted-foreground capitalize">{item.condition}</span>
                     </div>
-                    <Link
-                      to={`/product/${item.id}`}
-                      className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors"
-                    >
-                      View Details
-                    </Link>
+                    <div className="flex justify-between items-end pt-2 border-t border-border">
+                      <div>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Price (KSH)</span>
+                        <span className="font-data-price text-price text-lg font-bold text-primary">
+                          KSH {item.price_ksh.toLocaleString()}
+                        </span>
+                      </div>
+                      <Link
+                        to={`/product/${item.id}`}
+                        className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors"
+                      >
+                        View Details
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
       </div>

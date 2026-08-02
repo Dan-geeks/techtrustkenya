@@ -1,12 +1,14 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CountUp } from "@/components/ui/count-up";
 import { SAMPLE_PRODUCTS } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [dbProducts, setDbProducts] = useState<any[]>([]);
+  const [topVendors, setTopVendors] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -23,20 +25,17 @@ const Index = () => {
       if (data) {
         const mappedDb = data.map((p) => {
           let cat = "Laptops";
-          if (p.category === "smartphone") cat = "Smartphones";
-          else if (p.category === "accessory" || p.category === "spare_part") cat = "Components & Accessories";
-          
-          let cond = "Brand New";
-          if (p.condition === "refurbished") cond = "Refurbished - Grade A";
-          else if (p.condition === "used") cond = "Used - Good";
-
+          if (p.category === "smartphones") cat = "Smartphones";
+          if (p.category === "tablets") cat = "Tablets";
+          if (p.category === "accessories") cat = "Components & Accessories";
+          if (p.category === "wearables") cat = "Wearables";
           return {
             id: p.id,
-            title: `${p.brand} ${p.model_name}`,
+            title: p.model_name || p.brand || "Product",
             category: cat,
-            condition: cond,
-            price: p.price_ksh,
-            image: p.image_urls?.[0] || "/placeholder.svg",
+            condition: p.condition || "Used",
+            price: p.price_ksh || 0,
+            image: (p.image_urls && p.image_urls.length > 0) ? p.image_urls[0] : "/placeholder.svg",
             vendor: p.vendor_profiles?.business_name || "Unknown Vendor",
             vendorVerified: p.vendor_profiles?.verification_status === "verified",
             location: "Nairobi",
@@ -45,7 +44,17 @@ const Index = () => {
         setDbProducts(mappedDb);
       }
     };
+    const fetchVendors = async () => {
+      const { data } = await supabase
+        .from("vendor_profiles")
+        .select("*")
+        .order("average_rating", { ascending: false })
+        .limit(3);
+      if (data) setTopVendors(data);
+    };
+
     fetchProducts();
+    fetchVendors();
   }, []);
 
   useEffect(() => {
@@ -323,94 +332,77 @@ const Index = () => {
         {/* Top Verified Vendors */}
         <section className="py-16 md:py-20 bg-[#faf8ff]">
           <div className="max-w-[1280px] mx-auto px-6 md:px-12">
-            <div className="mb-10">
-              <h2 className="font-display-h2 text-3xl md:text-4xl text-[#131b2e] font-bold mb-2">Top Verified Vendors</h2>
-              <p className="font-body-lg text-base md:text-lg text-[#475569]">Trusted shops with proven track records.</p>
+            <div className="flex justify-between items-end mb-10">
+              <div>
+                <h2 className="font-display-h2 text-3xl md:text-4xl text-[#131b2e] font-bold mb-2">Top Verified Vendors</h2>
+                <p className="font-body-lg text-base md:text-lg text-[#475569]">Trusted shops with proven track records.</p>
+              </div>
+              <Link
+                to="/vendors"
+                className="font-body-md-bold text-[#0f3d8c] hover:text-[#002766] hidden md:inline-flex items-center gap-1 text-sm font-semibold"
+              >
+                View All <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+              </Link>
             </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Vendor 1 */}
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 shadow-sm hover:shadow-md transition-all duration-300">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-xl bg-[#0f3d8c] text-white flex items-center justify-center font-display-h2 text-[24px] font-bold">
-                    N
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <h3 className="font-body-md-bold text-base md:text-lg text-[#131b2e] font-bold">Nairobi Tech Hub</h3>
-                      <span className="material-symbols-outlined text-[16px] text-[#25c65f]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        verified
-                      </span>
+              {topVendors.length > 0 ? (
+                topVendors.map((vendor) => (
+                  <div
+                    key={vendor.id}
+                    onClick={() => navigate(`/shop/${vendor.id}`)}
+                    className="bg-white rounded-xl border border-[#E2E8F0] p-6 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-4 mb-6">
+                      {vendor.shop_photo_urls && vendor.shop_photo_urls.length > 0 ? (
+                        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
+                          <img src={vendor.shop_photo_urls[0]} alt={vendor.business_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-xl bg-[#0f3d8c] text-white flex items-center justify-center font-display-h2 text-[24px] font-bold shrink-0">
+                          {vendor.business_name?.charAt(0) || "V"}
+                        </div>
+                      )}
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <h3 className="font-body-md-bold text-base md:text-lg text-[#131b2e] font-bold line-clamp-1">{vendor.business_name}</h3>
+                          <span className="material-symbols-outlined text-[16px] text-[#25c65f]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            verified
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[#434651] font-ui-label text-sm">
+                          <span className="material-symbols-outlined text-[16px]">location_on</span>
+                          <span>{vendor.city || "Nairobi"}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-[#434651] font-ui-label text-sm">
-                      <span className="material-symbols-outlined text-[16px]">location_on</span>
-                      <span>CBD, Nairobi</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="h-px bg-[#E2E8F0] w-full mb-4"></div>
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-amber-400 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    star
-                  </span>
-                  <span className="font-mono text-sm font-medium text-[#131b2e]">4.9 (312 reviews)</span>
-                </div>
-              </div>
-
-              {/* Vendor 2 */}
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 shadow-sm hover:shadow-md transition-all duration-300">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-xl bg-[#0f3d8c] text-white flex items-center justify-center font-display-h2 text-[24px] font-bold">
-                    E
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <h3 className="font-body-md-bold text-base md:text-lg text-[#131b2e] font-bold">Elite Gadgets</h3>
-                      <span className="material-symbols-outlined text-[16px] text-[#25c65f]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        verified
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 text-[#434651] font-ui-label text-sm">
-                      <span className="material-symbols-outlined text-[16px]">location_on</span>
-                      <span>Westlands, Nairobi</span>
+                    <div className="h-px bg-[#E2E8F0] w-full mb-4"></div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-amber-400 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                          star
+                        </span>
+                        <span className="font-mono text-sm font-medium text-[#131b2e]">{vendor.average_rating || "4.8"}</span>
+                      </div>
+                      <div className="text-sm font-medium text-[#434651]">
+                        {vendor.total_completed_transactions || 0} sales
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="col-span-1 md:col-span-3 text-center text-slate-500 py-12">
+                  No vendors available at the moment.
                 </div>
-                <div className="h-px bg-[#E2E8F0] w-full mb-4"></div>
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-amber-400 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    star
-                  </span>
-                  <span className="font-mono text-sm font-medium text-[#131b2e]">4.8 (189 reviews)</span>
-                </div>
-              </div>
-
-              {/* Vendor 3 */}
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 shadow-sm hover:shadow-md transition-all duration-300">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-xl bg-[#0f3d8c] text-white flex items-center justify-center font-display-h2 text-[24px] font-bold">
-                    M
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <h3 className="font-body-md-bold text-base md:text-lg text-[#131b2e] font-bold">Mombasa iStore</h3>
-                      <span className="material-symbols-outlined text-[16px] text-[#25c65f]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        verified
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 text-[#434651] font-ui-label text-sm">
-                      <span className="material-symbols-outlined text-[16px]">location_on</span>
-                      <span>Nyali, Mombasa</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="h-px bg-[#E2E8F0] w-full mb-4"></div>
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-amber-400 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    star
-                  </span>
-                  <span className="font-mono text-sm font-medium text-[#131b2e]">4.9 (245 reviews)</span>
-                </div>
-              </div>
+              )}
+            </div>
+            <div className="mt-8 text-center md:hidden">
+              <Link
+                to="/vendors"
+                className="font-body-md-bold text-[#0f3d8c] inline-block border border-[#0f3d8c] px-6 py-2 rounded-lg text-sm font-semibold"
+              >
+                View All Vendors
+              </Link>
             </div>
           </div>
         </section>
