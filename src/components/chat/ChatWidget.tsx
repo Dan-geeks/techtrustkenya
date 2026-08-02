@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send, CheckCheck, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -77,7 +77,7 @@ export const ChatWidget = () => {
 
     // Realtime subscription
     const channel = supabase
-      .channel("messages_channel")
+      .channel(`messages_channel_${user.id}_${activePartnerId}_${Math.random().toString(36).substring(7)}`)
       .on(
         "postgres_changes",
         {

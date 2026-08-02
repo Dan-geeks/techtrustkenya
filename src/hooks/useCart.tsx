@@ -1,4 +1,4 @@
-﻿import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -89,7 +89,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!cartId) return;
     const channel = supabase
-      .channel(`cart-items-${cartId}`)
+      .channel(`cart-items-${cartId}-${Math.random().toString(36).substring(7)}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "cart_items", filter: `cart_id=eq.${cartId}` },

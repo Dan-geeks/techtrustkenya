@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -78,7 +78,7 @@ export const NotificationsBell = () => {
     fetchItems();
 
     const notificationsChannel = supabase
-      .channel(`notifications:${user.id}`)
+      .channel(`notifications:${user.id}:${Math.random().toString(36).substring(7)}`)
       .on(
         "postgres_changes",
         {
@@ -92,7 +92,7 @@ export const NotificationsBell = () => {
       .subscribe();
 
     const messagesChannel = supabase
-      .channel(`unread_messages:${user.id}`)
+      .channel(`unread_messages:${user.id}:${Math.random().toString(36).substring(7)}`)
       .on(
         "postgres_changes",
         {

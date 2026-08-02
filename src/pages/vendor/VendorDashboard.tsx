@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Store, Package, ShoppingBag, Settings as SettingsIcon, ShieldCheck, Loader2 } from "lucide-react";
 import { SettingsTab } from "@/components/vendor/SettingsTab";
 import { ProductsTab } from "@/components/vendor/ProductsTab";
@@ -6,7 +6,6 @@ import { OverviewTab } from "@/components/vendor/OverviewTab";
 import { OrdersTab } from "@/components/vendor/OrdersTab";
 import { MessagesTab } from "@/components/vendor/MessagesTab";
 import { useAuth } from "@/hooks/useAuth";
-import { NotificationsBell } from "@/components/notifications/NotificationsBell";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -73,7 +72,6 @@ const VendorDashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             <Link to="/" className="text-sm font-medium hover:underline text-muted-foreground">Marketplace</Link>
-            <NotificationsBell />
           </div>
         </div>
 
