@@ -33,8 +33,8 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src="/logo.jpg" alt="TechTrust" className="h-7 w-auto object-contain rounded-md" />
               <span className="font-display-h2 text-2xl font-bold text-primary">TechTrust</span>
+              <img src="/logo.jpg" alt="TechTrust Logo" className="h-7 w-auto object-contain rounded-md" />
             </Link>
             <p className="font-ui-label text-xs md:text-sm text-on-surface-variant max-w-xs leading-relaxed">
               Kenya's premier verified tech marketplace with Float escrow protection.
