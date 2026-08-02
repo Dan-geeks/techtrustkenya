@@ -402,7 +402,7 @@ const Browse = () => {
                   key={product.id}
                   className="group bg-white rounded-xl shadow-sm border border-[#E2E8F0] flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300"
                 >
-                  <div className="h-[200px] w-full bg-[#f2f3ff]/60 relative overflow-hidden flex items-center justify-center p-4 rounded-t-xl">
+                  <div className="h-[200px] w-full bg-[#f2f3ff]/60 relative overflow-hidden flex items-center justify-center px-8 py-4 rounded-t-xl">
                     <img
                       alt={product.title}
                       className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"

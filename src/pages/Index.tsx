@@ -234,7 +234,7 @@ const Index = () => {
                     key={p.id}
                     className="group bg-white rounded-xl border border-[#c4c6d3]/30 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
                   >
-                    <div className="aspect-square bg-slate-50/80 relative overflow-hidden p-3 flex items-center justify-center">
+                    <div className="aspect-square bg-slate-50/80 relative overflow-hidden px-8 py-4 flex items-center justify-center">
                       <img
                         src={imgUrl}
                         alt={p.title}
