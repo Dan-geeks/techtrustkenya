@@ -27,12 +27,10 @@ const AdminDashboard = () => {
   };
 
   const loadVendors = async () => {
-    // We cannot join profiles directly because the foreign key is to auth.users, not profiles.
-    // Fetch pending vendors
     const { data: vendorData, error: vendorError } = await supabase
       .from("vendor_profiles")
       .select("*")
-      .eq("verification_status", "pending");
+      .order("created_at", { ascending: false });
     
     if (vendorError) {
       console.error(vendorError);
@@ -131,14 +129,14 @@ const AdminDashboard = () => {
           
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("verifications")}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Pending Vendors</h3>
+              <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Vendors</h3>
               <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
                 <FileCheck className="w-5 h-5" />
               </div>
             </div>
             <div>
               <p className="text-3xl font-bold text-slate-900">{vendors.length}</p>
-              <p className="text-xs text-slate-500 mt-1">Awaiting verification</p>
+              <p className="text-xs text-slate-500 mt-1">Pending and verified</p>
             </div>
           </div>
 
@@ -159,72 +157,144 @@ const AdminDashboard = () => {
     }
 
     if (activeTab === "verifications") {
+      const pendingVendors = vendors.filter(v => v.verification_status === 'pending');
+      const approvedVendors = vendors.filter(v => v.verification_status === 'approved');
+
       return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-            <h2 className="font-semibold text-slate-900">Pending Actions ({vendors.length})</h2>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input className="pl-9 h-9 w-64 bg-white" placeholder="Search vendors..." />
+        <div className="space-y-8">
+          {/* Pending Actions Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+              <h2 className="font-semibold text-slate-900">Pending Actions ({pendingVendors.length})</h2>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input className="pl-9 h-9 w-64 bg-white" placeholder="Search pending vendors..." />
+              </div>
             </div>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
-                  <th className="px-6 py-4">Vendor</th>
-                  <th className="px-6 py-4">Details</th>
-                  <th className="px-6 py-4">Documents</th>
-                  <th className="px-6 py-4 text-right">Decision</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {vendors.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
-                      No pending vendor verifications.
-                    </td>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                    <th className="px-6 py-4">Vendor</th>
+                    <th className="px-6 py-4">Details</th>
+                    <th className="px-6 py-4">Documents</th>
+                    <th className="px-6 py-4 text-right">Decision</th>
                   </tr>
-                ) : (
-                  vendors.map((vendor) => (
-                    <tr key={vendor.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
-                            {vendor.business_name?.substring(0, 2).toUpperCase() || "??"}
-                          </div>
-                          <div>
-                            <p className="font-medium text-slate-900">{vendor.business_name}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-slate-600">{vendor.physical_address || "No location"}</p>
-                        <p className="text-xs text-slate-400 font-mono mt-1">{vendor.id.substring(0, 8)}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-3 text-slate-400">
-                          <User className="h-5 w-5 hover:text-blue-600 cursor-pointer" title="ID Document" />
-                          <FileText className="h-5 w-5 hover:text-blue-600 cursor-pointer" title="Business Registration" />
-                          {vendor.physical_address && <MapPin className="h-5 w-5 hover:text-blue-600 cursor-pointer" title="Location Proof" />}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button size="sm" onClick={() => updateStatus(vendor.id, 'approved')} className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 px-3 text-xs">
-                            <Check className="h-3 w-3 mr-1" /> Approve
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => updateStatus(vendor.id, 'rejected')} className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 h-8 px-3 text-xs">
-                            <X className="h-3 w-3 mr-1" /> Reject
-                          </Button>
-                        </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm">
+                  {pendingVendors.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                        No pending vendor verifications.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    pendingVendors.map((vendor) => (
+                      <tr key={vendor.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded bg-amber-100 flex items-center justify-center text-amber-700 font-bold">
+                              {vendor.business_name?.substring(0, 2).toUpperCase() || "??"}
+                            </div>
+                            <div>
+                              <p className="font-medium text-slate-900">{vendor.business_name}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-slate-600">{vendor.physical_address || "No location"}</p>
+                          <p className="text-xs text-slate-400 font-mono mt-1">{vendor.id.substring(0, 8)}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-3 text-slate-400">
+                            <User className="h-5 w-5 hover:text-blue-600 cursor-pointer" title="ID Document" />
+                            <FileText className="h-5 w-5 hover:text-blue-600 cursor-pointer" title="Business Registration" />
+                            {vendor.physical_address && <MapPin className="h-5 w-5 hover:text-blue-600 cursor-pointer" title="Location Proof" />}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button size="sm" onClick={() => updateStatus(vendor.id, 'approved')} className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 px-3 text-xs">
+                              <Check className="h-3 w-3 mr-1" /> Approve
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => updateStatus(vendor.id, 'rejected')} className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 h-8 px-3 text-xs">
+                              <X className="h-3 w-3 mr-1" /> Reject
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Approved Vendors Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-emerald-50/50">
+              <h2 className="font-semibold text-emerald-900">Verified Vendors ({approvedVendors.length})</h2>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400" />
+                <Input className="pl-9 h-9 w-64 bg-white border-emerald-200 focus-visible:ring-emerald-500" placeholder="Search verified vendors..." />
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                    <th className="px-6 py-4">Vendor</th>
+                    <th className="px-6 py-4">Details</th>
+                    <th className="px-6 py-4 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm">
+                  {approvedVendors.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-8 text-center text-slate-500">
+                        No verified vendors yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    approvedVendors.map((vendor) => (
+                      <tr key={vendor.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold relative">
+                              {vendor.business_name?.substring(0, 2).toUpperCase() || "??"}
+                              <div className="absolute -bottom-1 -right-1 bg-white rounded-full">
+                                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                              </div>
+                            </div>
+                            <div>
+                              <p className="font-medium text-slate-900 flex items-center gap-1">
+                                {vendor.business_name}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-slate-600">{vendor.physical_address || "No location"}</p>
+                          <p className="text-xs text-slate-400 font-mono mt-1">{vendor.id.substring(0, 8)}</p>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                            <Check className="h-3 w-3" /> Approved
+                          </span>
+                          <div className="mt-2">
+                            <Button size="sm" variant="outline" onClick={() => updateStatus(vendor.id, 'suspended')} className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200 h-7 px-2 text-xs">
+                              Suspend
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       );
