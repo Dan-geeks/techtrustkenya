@@ -22,15 +22,22 @@ const AdminLogin = () => {
     document.title = "Admin sign in | TechTrust";
   }, []);
 
-  // Landing here already signed in (not right after this form's own submit,
-  // which routes itself below) — e.g. a direct visit while a session exists.
   useEffect(() => {
     if (!authLoading && user) {
-      void getPostLoginPath(user.id).then((path) => {
-        if (path.startsWith("/admin")) {
-          navigate(path, { replace: true });
+      // Check if user has admin role
+      const checkAdminAndRedirect = async () => {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id);
+        
+        const roleSet = new Set((roles ?? []).map((r) => r.role));
+        if (roleSet.has("admin")) {
+          navigate("/admin/dashboard", { replace: true });
         }
-      });
+      };
+      
+      checkAdminAndRedirect();
     }
   }, [authLoading, user, navigate]);
 
@@ -49,10 +56,16 @@ const AdminLogin = () => {
     // which updates asynchronously after `user` and can still read stale
     // (empty) for a render or two right after sign-in.
     if (data.user) {
-      const path = await getPostLoginPath(data.user.id);
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id);
+        
+      const roleSet = new Set((roles ?? []).map((r) => r.role));
       setLoading(false);
-      if (path.startsWith("/admin")) {
-        navigate(path, { replace: true });
+      
+      if (roleSet.has("admin")) {
+        navigate("/admin/dashboard", { replace: true });
       } else {
         toast.error("This account doesn't have admin access.");
         await supabase.auth.signOut();
