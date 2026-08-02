@@ -1,28 +1,25 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, Bell, Search, User, FileText, MapPin, MoreHorizontal, Check, X, LogOut, LayoutDashboard, Users, FileCheck, AlertTriangle, Shield, Settings, Home } from "lucide-react";
+import { ShieldCheck, Bell, Search, User, FileText, MapPin, MoreHorizontal, Check, X, LogOut, LayoutDashboard, Users, FileCheck, AlertTriangle, Shield, Settings, Home, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TopNav } from "@/components/layout/TopNav";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("verifications");
+  const [activeTab, setActiveTab] = useState("overview");
   const [vendors, setVendors] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [escrowStats, setEscrowStats] = useState({ totalFloat: 0, cleared: 0, pending: 0, ledger: [] as any[] });
 
   useEffect(() => {
     document.title = "Admin Dashboard | TechTrust";
-    if (activeTab === "verifications") {
-      loadVendors();
-    } else if (activeTab === "escrow") {
-      loadEscrowStats();
-    } else if (activeTab === "users") {
-      loadUsers();
-    }
-  }, [activeTab]);
+    loadVendors();
+    loadEscrowStats();
+    loadUsers();
+  }, []);
 
   const loadUsers = async () => {
     const { data } = await supabase.from("profiles").select("*").limit(50).order("id", { ascending: false });
@@ -116,6 +113,51 @@ const AdminDashboard = () => {
   };
 
   const renderTabContent = () => {
+    if (activeTab === "overview") {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("users")}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Users</h3>
+              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                <Users className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-slate-900">{users.length}</p>
+              <p className="text-xs text-slate-500 mt-1">Platform members</p>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("verifications")}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Pending Vendors</h3>
+              <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                <FileCheck className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-slate-900">{vendors.length}</p>
+              <p className="text-xs text-slate-500 mt-1">Awaiting verification</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between cursor-pointer hover:border-primary transition-colors" onClick={() => setActiveTab("escrow")}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Float Escrow</h3>
+              <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <Shield className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-slate-900">KES {(escrowStats.totalFloat || 0).toLocaleString()}</p>
+              <p className="text-xs text-slate-500 mt-1">Total protected volume</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (activeTab === "verifications") {
       return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -353,47 +395,36 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top Navigation */}
-      <header className="bg-white border-b border-slate-200 fixed top-0 w-full z-50 h-16 shadow-sm">
-        <div className="h-full px-6 max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-8">
-            <Link to="/admin/dashboard" className="flex items-center gap-2 text-primary font-bold text-xl tracking-tight">
-              <img src="/logo.jpg" alt="TechTrust" className="h-8 w-auto object-contain mix-blend-multiply" />
-              <span>TechTrust<span className="text-accent text-xs align-top ml-1 uppercase tracking-wider">Admin</span></span>
-            </Link>
-            <nav className="hidden md:flex gap-6 items-center">
-              <Link to="/" className="transition-colors text-sm font-medium flex items-center gap-2 text-slate-500 hover:text-primary">
-                <Home className="h-4 w-4" /> Home
-              </Link>
-              <button onClick={() => setActiveTab("users")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'users' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
-                <Users className="h-4 w-4" /> Users
-              </button>
-              <button onClick={() => setActiveTab("verifications")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'verifications' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
-                <FileCheck className="h-4 w-4" /> Verifications
-              </button>
-              <button onClick={() => setActiveTab("disputes")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'disputes' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
-                <AlertTriangle className="h-4 w-4" /> Disputes
-              </button>
-              <button onClick={() => setActiveTab("escrow")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'escrow' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
-                <Shield className="h-4 w-4" /> Escrow
-              </button>
-              <button onClick={() => setActiveTab("settings")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'settings' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
-                <Settings className="h-4 w-4" /> Settings
-              </button>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
-              <Bell className="h-5 w-5" />
+      <TopNav />
+      
+      {/* Admin Sub-navigation */}
+      <div className="bg-white border-b border-slate-200 mt-20 sticky top-20 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 overflow-x-auto">
+          <nav className="flex gap-2">
+            <button onClick={() => setActiveTab("overview")} className={`transition-all text-sm font-bold flex items-center gap-2 px-4 py-4 border-b-2 whitespace-nowrap ${activeTab === 'overview' ? 'text-primary border-primary bg-primary/5' : 'text-slate-500 border-transparent hover:text-primary hover:bg-slate-50'}`}>
+              <Activity className="h-4 w-4" /> Overview
             </button>
-            <button onClick={handleLogout} className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 hover:bg-red-100 transition-colors" title="Sign out">
-              <LogOut className="h-5 w-5" />
+            <button onClick={() => setActiveTab("users")} className={`transition-all text-sm font-bold flex items-center gap-2 px-4 py-4 border-b-2 whitespace-nowrap ${activeTab === 'users' ? 'text-primary border-primary bg-primary/5' : 'text-slate-500 border-transparent hover:text-primary hover:bg-slate-50'}`}>
+              <Users className="h-4 w-4" /> Users
             </button>
-          </div>
+            <button onClick={() => setActiveTab("verifications")} className={`transition-all text-sm font-bold flex items-center gap-2 px-4 py-4 border-b-2 whitespace-nowrap ${activeTab === 'verifications' ? 'text-primary border-primary bg-primary/5' : 'text-slate-500 border-transparent hover:text-primary hover:bg-slate-50'}`}>
+              <FileCheck className="h-4 w-4" /> Verifications
+            </button>
+            <button onClick={() => setActiveTab("disputes")} className={`transition-all text-sm font-bold flex items-center gap-2 px-4 py-4 border-b-2 whitespace-nowrap ${activeTab === 'disputes' ? 'text-primary border-primary bg-primary/5' : 'text-slate-500 border-transparent hover:text-primary hover:bg-slate-50'}`}>
+              <AlertTriangle className="h-4 w-4" /> Disputes
+            </button>
+            <button onClick={() => setActiveTab("escrow")} className={`transition-all text-sm font-bold flex items-center gap-2 px-4 py-4 border-b-2 whitespace-nowrap ${activeTab === 'escrow' ? 'text-primary border-primary bg-primary/5' : 'text-slate-500 border-transparent hover:text-primary hover:bg-slate-50'}`}>
+              <Shield className="h-4 w-4" /> Escrow
+            </button>
+            <button onClick={() => setActiveTab("settings")} className={`transition-all text-sm font-bold flex items-center gap-2 px-4 py-4 border-b-2 whitespace-nowrap ${activeTab === 'settings' ? 'text-primary border-primary bg-primary/5' : 'text-slate-500 border-transparent hover:text-primary hover:bg-slate-50'}`}>
+              <Settings className="h-4 w-4" /> Settings
+            </button>
+          </nav>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
-      <main className="pt-24 pb-12 px-6 max-w-7xl mx-auto w-full flex-1 space-y-8">
+      <main className="pt-8 pb-12 px-6 max-w-7xl mx-auto w-full flex-1 space-y-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 capitalize">{activeTab}</h1>
           <p className="text-slate-500 mt-2">Manage the TechTrust {activeTab} operations.</p>
