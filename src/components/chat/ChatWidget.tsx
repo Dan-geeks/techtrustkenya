@@ -131,7 +131,8 @@ export const ChatWidget = () => {
       setMessages((prev) => [...prev, data]);
       scrollToBottom();
     } else {
-      toast.error("Failed to send message");
+      toast.error("Failed to send message: " + (error?.message || "Unknown error"));
+      console.error("Chat send error:", error);
     }
   };
 
