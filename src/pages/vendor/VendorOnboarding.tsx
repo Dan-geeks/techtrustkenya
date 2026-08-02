@@ -249,7 +249,7 @@ const VendorOnboarding = () => {
             Back
           </Button>
           <Link to="/" className="flex items-center gap-2.5">
-            <img src="/logo.jpg" alt="TechTrust" className="h-12 w-auto object-contain mix-blend-multiply" />
+            <img src="/logo.png" alt="TechTrust" className="h-12 w-auto object-contain " />
             <span className="font-display-h2 font-bold text-2xl text-white">TechTrust</span>
           </Link>
           <div className="w-[72px]" /> {/* Spacer for centering */}

@@ -28,6 +28,7 @@ interface Notification {
   reference_id: string | null;
   is_read: boolean;
   created_at: string;
+  _partnerName?: string;
 }
 
 const typeIcon = (type: NotifType) => {
@@ -71,6 +72,16 @@ const NotificationItem = ({
 
   const handleClick = () => {
     if (!notif.is_read) onRead(notif.id);
+    
+    if (notif.type === "new_message") {
+      window.dispatchEvent(
+        new CustomEvent("open-chat", {
+          detail: { partnerId: notif.reference_id, partnerName: notif._partnerName || "User" },
+        })
+      );
+      return;
+    }
+    
     const route = routeForNotification(notif);
     if (route) {
       navigate(route);
@@ -121,22 +132,50 @@ const Notifications = () => {
     if (!user) return;
 
     (async () => {
-      const { data } = await supabase
+      const { data: notificationsData } = await supabase
         .from("notifications")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(50);
-      setNotifs((data as Notification[]) ?? []);
+
+      const { data: messagesData } = await supabase
+        .from("messages")
+        .select("*, sender:sender_id(full_name)")
+        .eq("receiver_id", user.id)
+        .eq("is_read", false)
+        .order("created_at", { ascending: false });
+
+      const messageNotifications = (messagesData || []).map((msg: any) => ({
+        id: msg.id,
+        title: "New Message",
+        message: `${msg.sender?.full_name || "Someone"}: ${msg.content}`,
+        type: "new_message",
+        is_read: false,
+        reference_id: msg.sender_id,
+        created_at: msg.created_at,
+        _partnerName: msg.sender?.full_name || "User"
+      }));
+
+      const merged = [...((notificationsData as Notification[]) ?? []), ...messageNotifications].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      setNotifs(merged);
       setLoading(false);
     })();
   }, [user]);
 
   const markRead = async (id: string) => {
+    const notif = notifs.find(n => n.id === id);
     setNotifs((prev) =>
       prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
     );
-    await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+    if (notif?.type === "new_message") {
+      await supabase.from("messages").update({ is_read: true }).eq("id", id);
+    } else {
+      await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+    }
   };
 
   const markAllRead = async () => {
