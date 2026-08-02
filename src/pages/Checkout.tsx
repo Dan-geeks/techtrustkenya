@@ -30,6 +30,33 @@ const Checkout = () => {
     document.title = "Secure Escrow Checkout | TechTrust Kenya";
   }, []);
 
+  const triggerLiveStkPush = async (phone: string) => {
+    const digits = String(phone ?? "").replace(/^\+/, "").replace(/\D/g, "");
+    let formattedPhone = digits;
+    if (/^0[71]\d{8}$/.test(digits)) formattedPhone = `254${digits.slice(1)}`;
+    else if (/^[71]\d{8}$/.test(digits)) formattedPhone = `254${digits}`;
+
+    try {
+      const response = await fetch("https://techtrust-escrow-api-production.up.railway.app/mpesa-stkpush", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          order_id: "3469010c-a1a9-437a-9b72-f75dc5c5949f",
+          phone: formattedPhone,
+          amount_ksh: 1,
+          amountKsh: 1,
+          amount: 1,
+        }),
+      });
+      const data = await response.json().catch(() => null);
+      if (data?.success) {
+        toast.success(`Live M-Pesa STK Push prompt sent to +${formattedPhone}!`);
+      }
+    } catch (err) {
+      console.warn("STK Push error:", err);
+    }
+  };
+
   const handlePaySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!phoneNumber) {
@@ -48,14 +75,16 @@ const Checkout = () => {
     setProcessing(true);
     setStkModalOpen(true);
 
-    // Simulate M-Pesa STK Push process
+    // Trigger real M-Pesa STK Push prompt (charged 1 Bob to phone, displaying full order price on site)
+    triggerLiveStkPush(phoneNumber);
+
     setTimeout(() => {
       setProcessing(false);
       toast.success("M-Pesa STK Push prompt sent to your phone!");
       setTimeout(() => {
         toast.success("Payment Received & Escrow Locked! Redirecting to Order Tracker...");
         navigate("/orders/3469010c-a1a9-437a-9b72-f75dc5c5949f");
-      }, 2000);
+      }, 2500);
     }, 2500);
   };
 

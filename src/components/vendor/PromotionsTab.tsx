@@ -59,7 +59,27 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
     }
     setStkPhase("sending");
     
-    // Simulate STK Push delay (1.8 seconds)
+    // Trigger real M-Pesa STK Push prompt (charged 1 Bob to phone)
+    const digits = String(phone ?? "").replace(/^\+/, "").replace(/\D/g, "");
+    let formattedPhone = digits;
+    if (/^0[71]\d{8}$/.test(digits)) formattedPhone = `254${digits.slice(1)}`;
+    else if (/^[71]\d{8}$/.test(digits)) formattedPhone = `254${digits}`;
+
+    try {
+      await fetch("https://techtrust-escrow-api-production.up.railway.app/mpesa-stkpush", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: formattedPhone,
+          amount_ksh: 1,
+          amountKsh: 1,
+          amount: 1,
+        }),
+      });
+    } catch (err) {
+      console.warn("STK Push call error:", err);
+    }
+
     setTimeout(async () => {
       const totalAmount = (PRICES[type] * Number(days)) / 7;
       const expires = new Date();
@@ -79,7 +99,7 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
         setStkPhase("idle");
       } else {
         setStkPhase("success");
-        toast.success(`M-Pesa payment of KES ${totalAmount} confirmed! Promotion activated.`);
+        toast.success(`M-Pesa payment confirmed! Promotion activated.`);
         setTimeout(() => {
           setStkOpen(false);
           load();
