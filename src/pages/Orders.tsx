@@ -46,7 +46,7 @@ const Orders = () => {
     if (status === "out_for_delivery") return "Out for Delivery";
     if (status === "ready_for_pickup") return "Ready for Pickup";
     if (status === "delivered_awaiting_confirmation") return "Awaiting Your Confirmation";
-    if (status === "completed") return "Completed";
+    if (status === "confirmed" || status === "completed") return "Completed";
     return status.replace(/_/g, " ");
   };
 
@@ -78,7 +78,7 @@ const Orders = () => {
             </div>
           ) : (
             orders.map((order) => {
-              const isCompleted = order.status === "completed";
+              const isCompleted = order.status === "confirmed" || order.status === "completed";
               
               return (
                 <div key={order.id} className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden flex flex-col hover:border-primary/50 transition-colors">

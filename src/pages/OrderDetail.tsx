@@ -48,7 +48,7 @@ export const OrderDetail = () => {
     if (!order) return;
     const { error } = await supabase
       .from("orders")
-      .update({ status: "completed" })
+      .update({ status: "confirmed" })
       .eq("id", order.id);
 
     if (error) {
@@ -81,10 +81,10 @@ export const OrderDetail = () => {
   // Determine progress state based on order status
   const statuses = [
     { key: "payment_held", label: "Payment Held", icon: Shield },
-    { key: "vendor_preparing", label: "Preparing", icon: Package },
+    { key: "vendor_preparing", label: "Order Confirmed", icon: Package },
     { key: "in_transit", label: "In Transit", icon: Truck },
     { key: "awaiting_confirmation", label: "Awaiting Confirmation", icon: Hourglass },
-    { key: "completed", label: "Complete", icon: CheckCircle2 }
+    { key: "confirmed", label: "Complete", icon: CheckCircle2 }
   ];
 
   const getStatusIndex = (status: string) => {
@@ -92,7 +92,7 @@ export const OrderDetail = () => {
     if (status === "vendor_preparing") return 1;
     if (status === "out_for_delivery" || status === "ready_for_pickup") return 2;
     if (status === "delivered_awaiting_confirmation") return 3;
-    if (status === "completed" || status === "discharged") return 4;
+    if (status === "confirmed" || status === "completed" || status === "discharged") return 4;
     return -1; // cancelled/refunded/disputed
   };
 

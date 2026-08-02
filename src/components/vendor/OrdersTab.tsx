@@ -100,7 +100,7 @@ export const OrdersTab = ({ vendor }: { vendor: any }) => {
                   {STATUSES.includes(o.status) && o.status !== "delivered_awaiting_confirmation" && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {o.status === "payment_held" && (
-                        <Button size="sm" onClick={() => updateStatus(o.id, "vendor_preparing")}>Mark preparing</Button>
+                        <Button size="sm" onClick={() => updateStatus(o.id, "vendor_preparing")}>Confirm Order</Button>
                       )}
                       {o.status === "vendor_preparing" && (
                         <>
