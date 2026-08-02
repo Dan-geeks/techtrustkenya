@@ -14,12 +14,48 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [escrowStats, setEscrowStats] = useState({ totalFloat: 0, cleared: 0, pending: 0, ledger: [] as any[] });
 
+  // Settings State
+  const [escrowFee, setEscrowFee] = useState("1.5");
+  const [referralBonus, setReferralBonus] = useState("500");
+  const [savingSettings, setSavingSettings] = useState(false);
+
   useEffect(() => {
     document.title = "Admin Dashboard | TechTrust";
     loadVendors();
     loadEscrowStats();
     loadUsers();
+    loadSettings();
   }, []);
+
+  const loadSettings = async () => {
+    const { data, error } = await supabase.from("app_settings").select("*");
+    if (!error && data) {
+      data.forEach((setting) => {
+        if (setting.key === "escrow_fee") setEscrowFee(setting.value);
+        if (setting.key === "referral_bonus") setReferralBonus(setting.value);
+      });
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const updates = [
+        { key: "escrow_fee", value: escrowFee, updated_at: new Date().toISOString() },
+        { key: "referral_bonus", value: referralBonus, updated_at: new Date().toISOString() }
+      ];
+
+      const { error } = await supabase.from("app_settings").upsert(updates, { onConflict: 'key' });
+
+      if (error) throw error;
+      toast.success("Settings updated successfully");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to update settings");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const loadUsers = async () => {
     const { data } = await supabase.from("profiles").select("*").limit(50).order("id", { ascending: false });
@@ -447,13 +483,29 @@ const AdminDashboard = () => {
           <div className="space-y-6 max-w-md">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Escrow Fee Percentage</label>
-              <Input type="number" defaultValue={1.5} className="bg-slate-50" />
+              <Input 
+                type="number" 
+                value={escrowFee} 
+                onChange={(e) => setEscrowFee(e.target.value)} 
+                className="bg-slate-50" 
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Referral Bonus (KES)</label>
-              <Input type="number" defaultValue={500} className="bg-slate-50" />
+              <Input 
+                type="number" 
+                value={referralBonus} 
+                onChange={(e) => setReferralBonus(e.target.value)} 
+                className="bg-slate-50" 
+              />
             </div>
-            <Button className="bg-primary text-white">Save Changes</Button>
+            <Button 
+              className="bg-primary text-white" 
+              onClick={handleSaveSettings}
+              disabled={savingSettings}
+            >
+              {savingSettings ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </div>
       );
