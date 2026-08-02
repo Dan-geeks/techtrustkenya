@@ -42,12 +42,14 @@ const AdminDashboard = () => {
           <TabsTrigger value="disputes">Disputes</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="mt-6"><AdminOverview /></TabsContent>
         <TabsContent value="vendors" className="mt-6"><AdminVendors /></TabsContent>
         <TabsContent value="disputes" className="mt-6"><AdminDisputes /></TabsContent>
         <TabsContent value="users" className="mt-6"><AdminUsers /></TabsContent>
         <TabsContent value="payments" className="mt-6"><AdminPayments /></TabsContent>
+        <TabsContent value="settings" className="mt-6"><AdminSettings /></TabsContent>
       </Tabs>
       </div>
     </div>
@@ -973,4 +975,77 @@ const AdminPayments = () => {
   );
 };
 
+
+// ---------------------------------------------------------------------------
+// Settings tab
+// ---------------------------------------------------------------------------
+
+const AdminSettings = () => {
+  const [escrowFee, setEscrowFee] = useState("5");
+  const [referralBonus, setReferralBonus] = useState("500");
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("app_settings").select("*");
+      if (data) {
+        const fee = data.find((s: any) => s.key === "escrow_fee_percentage");
+        const bonus = data.find((s: any) => s.key === "referral_bonus_kes");
+        if (fee) setEscrowFee(fee.value);
+        if (bonus) setReferralBonus(bonus.value);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    await supabase.from("app_settings").upsert([
+      { key: "escrow_fee_percentage", value: escrowFee, updated_at: new Date().toISOString() },
+      { key: "referral_bonus_kes", value: referralBonus, updated_at: new Date().toISOString() }
+    ]);
+    toast.success("Settings updated successfully");
+    setSavingSettings(false);
+  };
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-accent" /></div>;
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+      <h2 className="text-xl font-semibold text-slate-900 mb-6">Platform Settings (Escrow & Referral)</h2>
+      <div className="space-y-6 max-w-md">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Escrow Fee Percentage</label>
+          <Input 
+            type="number" 
+            value={escrowFee} 
+            onChange={(e) => setEscrowFee(e.target.value)} 
+            className="bg-slate-50" 
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Referral Bonus (KES)</label>
+          <Input 
+            type="number" 
+            value={referralBonus} 
+            onChange={(e) => setReferralBonus(e.target.value)} 
+            className="bg-slate-50" 
+          />
+        </div>
+        <Button 
+          className="bg-primary text-white" 
+          onClick={handleSaveSettings}
+          disabled={savingSettings}
+        >
+          {savingSettings ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export default AdminDashboard;
+

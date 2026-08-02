@@ -16,7 +16,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(true);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("express");
-  const [phoneNumber, setPhoneNumber] = useState("0759898920");
+  const [phoneNumber, setPhoneNumber] = useState("0712345678");
   const [paybillNumber, setPaybillNumber] = useState("400200");
   const [accountNumber, setAccountNumber] = useState("TT-8492-MK2");
   const [tillNumber, setTillNumber] = useState("890123");
