@@ -31,6 +31,29 @@ const Checkout = () => {
     document.title = "Secure Escrow Checkout | TechTrust Kenya";
   }, []);
 
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (stkModalOpen) {
+      intervalId = setInterval(async () => {
+        const { data } = await supabase
+          .from("orders")
+          .select("payment_status")
+          .eq("id", "3469010c-a1a9-437a-9b72-f75dc5c5949f")
+          .maybeSingle();
+
+        if (data && (data.payment_status === "paid_float" || data.payment_status === "paid")) {
+          toast.success("Payment Received & Escrow Locked!");
+          navigate("/orders/3469010c-a1a9-437a-9b72-f75dc5c5949f");
+        }
+      }, 3000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [stkModalOpen, navigate]);
+
   const triggerLiveStkPush = async (phone: string) => {
     const digits = String(phone ?? "").replace(/^\+/, "").replace(/\D/g, "");
     let formattedPhone = digits;
@@ -297,36 +320,19 @@ const Checkout = () => {
                 <span className="font-bold">TT-8492-MK2</span>
               </div>
             </div>
-            <div className="flex flex-col gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={handleConfirmPaymentReceived}
-                className="w-full bg-[#0F3D8C] hover:bg-[#0B2E6B] text-white py-3 rounded-xl font-bold text-xs transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                <span>I Have Entered My PIN / Confirm</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  triggerLiveStkPush(phoneNumber);
-                  toast.info(`Resent M-Pesa STK Push prompt to +254 ${phoneNumber}`);
-                }}
-                className="w-full bg-slate-100 hover:bg-slate-200 text-[#0F172A] py-2.5 rounded-xl font-semibold text-xs transition-colors border border-slate-300 cursor-pointer"
-              >
-                Resend STK Push Prompt
-              </button>
-
+            <div className="flex flex-col items-center justify-center gap-3 pt-4">
+              <Loader2 className="h-8 w-8 text-[#0F3D8C] animate-spin" />
+              <span className="text-sm font-semibold text-[#0F172A]">Waiting for payment...</span>
+              <p className="text-xs text-[#64748B]">Please enter your M-Pesa PIN on your phone to complete the transaction. We are waiting for the confirmation callback.</p>
               <button
                 type="button"
                 onClick={() => {
                   setStkModalOpen(false);
                   setProcessing(false);
                 }}
-                className="w-full text-slate-500 hover:text-slate-700 py-1.5 text-xs font-medium cursor-pointer"
+                className="mt-4 text-slate-500 hover:text-slate-700 py-1.5 text-xs font-medium cursor-pointer transition-colors"
               >
-                Cancel / Change Phone Number
+                Cancel
               </button>
             </div>
           </div>
