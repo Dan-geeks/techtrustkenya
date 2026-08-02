@@ -41,9 +41,9 @@ export const TopNav = () => {
     <header className="fixed top-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
       <div className="max-w-[1280px] mx-auto px-6 md:px-12 flex justify-between items-center h-20 w-full">
         {/* Brand: "TechTrust" text followed by logo image */}
-        <Link to="/" className="font-display-h2 text-2xl md:text-3xl font-bold text-[#002766] tracking-tight shrink-0 flex items-center gap-2">
+        <Link to="/" className="font-display-h2 text-2xl md:text-3xl font-bold text-[#002766] tracking-tight shrink-0 flex items-center gap-2.5">
           <span>TechTrust</span>
-          <img src="/logo.jpg" alt="TechTrust Logo" className="h-8 w-auto object-contain rounded-md shadow-sm" />
+          <img src="/logo.jpg" alt="TechTrust Logo" className="h-14 md:h-16 w-auto object-contain rounded-md shadow-sm" />
         </Link>
 
         {/* Navigation Links (Desktop) */}

@@ -30,11 +30,12 @@ export const Footer = () => {
         </div>
 
         {/* Link Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          {/* Brand & Description */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <span className="font-display-h2 text-2xl font-bold text-primary">TechTrust</span>
-              <img src="/logo.jpg" alt="TechTrust Logo" className="h-7 w-auto object-contain rounded-md" />
+              <img src="/logo.jpg" alt="TechTrust Logo" className="h-10 md:h-12 w-auto object-contain rounded-md" />
             </Link>
             <p className="font-ui-label text-xs md:text-sm text-on-surface-variant max-w-xs leading-relaxed">
               Kenya's premier verified tech marketplace with Float escrow protection.
