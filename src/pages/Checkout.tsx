@@ -23,7 +23,7 @@ const Checkout = () => {
   const [stkModalOpen, setStkModalOpen] = useState(false);
   
   const subtotal = product.price;
-  const escrowFee = Math.round(subtotal * 0.015);
+  const escrowFee = Math.round(subtotal * 0.05);
   const totalDue = subtotal + escrowFee;
 
   useEffect(() => {
@@ -118,7 +118,7 @@ const Checkout = () => {
                   <span className="font-mono text-[#0F172A] font-bold text-price">KES {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[#64748B]">
-                  <span>Float Escrow Fee (1.5%)</span>
+                  <span>Float Escrow Fee (5%)</span>
                   <span className="font-mono text-[#0F172A] font-bold text-price">KES {escrowFee.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center pt-3 border-t border-slate-200">
