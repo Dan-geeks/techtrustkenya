@@ -4,6 +4,7 @@ import { ShieldCheck, Camera, FileText, Loader2, Upload, X, MapPin, Check, Arrow
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
@@ -502,9 +503,38 @@ const VendorOnboarding = () => {
                 className="mt-1"
               />
               <Label htmlFor="agree" className="text-sm font-normal leading-relaxed">
-                I agree to the TechTrust Vendor Terms. I confirm my shop physically exists at
-                the address above and accept that approval requires admin verification.
-              </Label>
+                  I agree to the{" "}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button type="button" className="text-blue-600 hover:underline inline">TechTrust Vendor Terms</button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>TechTrust Vendor Terms</DialogTitle>
+                      </DialogHeader>
+                      <div className="text-sm text-slate-600 space-y-4">
+                        <p>
+                          <strong>1. Vendor Verification</strong>
+                          <br />All vendors must provide accurate physical address details and valid identification documents. Approval is subject to admin verification.
+                        </p>
+                        <p>
+                          <strong>2. Product Quality</strong>
+                          <br />Products listed must accurately reflect their condition (Brand New, Refurbished, Used). Counterfeit or restricted items are strictly prohibited.
+                        </p>
+                        <p>
+                          <strong>3. Float Escrow & Payments</strong>
+                          <br />All marketplace payments are held securely in the TechTrust Float Escrow. Funds are released to your nominated Till/Paybill only after the buyer confirms receipt and satisfaction.
+                        </p>
+                        <p>
+                          <strong>4. Dispute Resolution</strong>
+                          <br />In the event of a dispute, TechTrust administration holds the final authority to mediate and release or refund escrowed funds.
+                        </p>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  . I confirm my shop physically exists at
+                  the address above and accept that approval requires admin verification.
+                </Label>
             </div>
             <Err name="agree" />
 
