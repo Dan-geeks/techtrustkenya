@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, MessageCircle, Lock, Verified, Star, CheckCircle, MapPin, Loader2 } from "lucide-react";
+import { ShieldCheck, MessageCircle, Lock, Verified, Star, CheckCircle, MapPin, Loader2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { SAMPLE_PRODUCTS } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +41,7 @@ const ProductDetail = () => {
           category: data.category,
           condition: data.condition,
           vendor: data.vendor_profiles?.business_name || "Unknown Vendor",
+          vendor_id: data.vendor_profiles?.id,
           vendorVerified: data.vendor_profiles?.verification_status === "approved",
           location: "Nairobi", // Default or fetch if location exists
           gallery: data.image_urls || [data.image_urls?.[0] || "/placeholder.svg"],
@@ -168,12 +175,33 @@ const ProductDetail = () => {
               <Lock className="w-5 h-5" />
               Buy Now with Float
             </Button>
-            <Button size="lg" variant="outline" className="w-full text-base h-14 border-2 font-bold gap-2 text-slate-700 hover:text-slate-900" asChild>
-              <a href={`https://wa.me/254700000000?text=${encodeURIComponent(`Hi, I am interested in the ${product.title} (KES ${product.price})`)}`} target="_blank" rel="noreferrer">
-                <MessageCircle className="w-5 h-5" />
-                Message Vendor
-              </a>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="lg" variant="outline" className="w-full text-base h-14 border-2 font-bold gap-2 text-slate-700 hover:text-slate-900 cursor-pointer">
+                  <MessageCircle className="w-5 h-5" />
+                  Message Vendor
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuItem 
+                  className="cursor-pointer flex items-center gap-2 py-3"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("open-chat", {
+                      detail: { partnerId: product.vendor_id, partnerName: product.vendor }
+                    }));
+                  }}
+                >
+                  <MessageCircle className="w-4 h-4 text-blue-500" />
+                  <span>In-App Chat</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <a href={`https://wa.me/254700000000?text=${encodeURIComponent(`Hi, I am interested in the ${product.title} (KES ${product.price})`)}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 py-3 w-full">
+                    <Phone className="w-4 h-4 text-green-500" />
+                    <span>WhatsApp</span>
+                  </a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Seller Card */}
