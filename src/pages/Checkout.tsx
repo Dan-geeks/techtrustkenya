@@ -9,15 +9,10 @@ type PaymentMethodType = "express" | "paybill" | "till" | "mobile_money";
 const Checkout = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const productId = searchParams.get("product");
-  const product = SAMPLE_PRODUCTS.find(p => p.id === productId) || {
-    id: "default",
-    title: "DJI Mavic 3 Pro Drone",
-    price: 44500,
-    condition: "Refurbished - Grade A",
-    vendor: "TechHaven Nairobi",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDW8xQHbgxQmBd-8dAib8KiDG-ZT7jQoqTyOgV5WwmIx-gMmEFkL7q-YlKLaMMVazXjgfD_vjXLFfB8UeAJQbHLMAtRK-13vpDWjjM2aS3Fo_THeBLgoUFn9rX6qAzTptPEl5cXVhfSXEHzQh8dbKjGYr5ogvrDf4pQAK-oFa6EAqWqrm4XfgapPHKG5PYO_3OfhjckTwoMMGH-yHe1-63NBYxl6uR5325_1rBxwunaCD2sDu4V2ObRUQ"
-  };
+  const productId = searchParams.get("product") || searchParams.get("id");
+  const product =
+    SAMPLE_PRODUCTS.find((p) => p.id === productId || p.id.toLowerCase() === productId?.toLowerCase()) ||
+    SAMPLE_PRODUCTS[0]; // Lenovo ThinkPad T14 Gen 2 - 16GB RAM, 512GB SSD
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("express");
   const [phoneNumber, setPhoneNumber] = useState("712345678");
