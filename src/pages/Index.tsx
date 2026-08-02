@@ -73,7 +73,7 @@ const Index = () => {
                   to="/browse"
                   className="bg-[#0f3d8c] text-white px-6 py-3 rounded-lg font-bold text-base hover:bg-[#002766] transition-colors shadow-sm inline-flex items-center justify-center"
                 >
-                  Start Browsing
+                  Browse Verified Tech
                 </Link>
               </div>
             </div>

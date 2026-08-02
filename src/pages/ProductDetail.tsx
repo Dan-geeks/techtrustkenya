@@ -74,7 +74,7 @@ const ProductDetail = () => {
             <h1 className="text-3xl font-display font-bold text-slate-900 mb-3">{product.title}</h1>
             
             <div className="flex items-end gap-3">
-              <span className="text-4xl font-bold text-slate-900 tracking-tight">KES {product.price.toLocaleString()}</span>
+              <span className="text-4xl font-bold text-slate-900 tracking-tight text-price font-data-price">KES {product.price.toLocaleString()}</span>
               <span className="text-lg text-slate-400 line-through mb-1 font-medium">KES {product.originalPrice?.toLocaleString()}</span>
             </div>
           </div>

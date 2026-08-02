@@ -86,8 +86,10 @@ export const Auth = () => {
 
       if (targetRedirect) {
         localStorage.setItem("auth_redirect_target", targetRedirect);
+        sessionStorage.setItem("auth_redirect_target", targetRedirect);
       } else {
         localStorage.removeItem("auth_redirect_target");
+        sessionStorage.removeItem("auth_redirect_target");
       }
 
       if (mode === "signup" && accountType === "vendor") {
