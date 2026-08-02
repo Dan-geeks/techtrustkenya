@@ -38,13 +38,36 @@ export const NotificationsBell = () => {
 
   const fetchItems = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data: notificationsData } = await supabase
       .from("notifications")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(10);
-    setItems((data as Notification[]) ?? []);
+
+    const { data: messagesData } = await supabase
+      .from("messages")
+      .select("*, sender:sender_id(full_name)")
+      .eq("receiver_id", user.id)
+      .eq("is_read", false)
+      .order("created_at", { ascending: false });
+
+    const messageNotifications = (messagesData || []).map((msg: any) => ({
+      id: msg.id,
+      title: "New Message",
+      message: `${msg.sender?.full_name || "Someone"}: ${msg.content}`,
+      type: "new_message",
+      is_read: false,
+      reference_id: msg.sender_id, // Store sender_id here to open chat
+      created_at: msg.created_at,
+      _partnerName: msg.sender?.full_name || "User"
+    }));
+
+    const merged = [...(notificationsData || []), ...messageNotifications].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    setItems(merged.slice(0, 15) as Notification[]);
   };
 
   useEffect(() => {
@@ -54,7 +77,7 @@ export const NotificationsBell = () => {
     }
     fetchItems();
 
-    const channel = supabase
+    const notificationsChannel = supabase
       .channel(`notifications:${user.id}`)
       .on(
         "postgres_changes",
@@ -68,8 +91,23 @@ export const NotificationsBell = () => {
       )
       .subscribe();
 
+    const messagesChannel = supabase
+      .channel(`unread_messages:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        () => fetchItems()
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(notificationsChannel);
+      supabase.removeChannel(messagesChannel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
@@ -89,7 +127,18 @@ export const NotificationsBell = () => {
       .eq("is_read", false);
   };
 
-  const handleClick = async (n: Notification) => {
+  const handleClick = async (n: Notification & { _partnerName?: string }) => {
+    if (n.type === "new_message") {
+      setOpen(false);
+      window.dispatchEvent(
+        new CustomEvent("open-chat", {
+          detail: { partnerId: n.reference_id, partnerName: n._partnerName || "User" },
+        })
+      );
+      fetchItems(); // refresh after opening
+      return;
+    }
+    
     if (!n.is_read) await markOne(n.id);
     const route = routeForNotification(n);
     setOpen(false);

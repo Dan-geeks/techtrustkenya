@@ -4,12 +4,13 @@ import { SettingsTab } from "@/components/vendor/SettingsTab";
 import { ProductsTab } from "@/components/vendor/ProductsTab";
 import { OverviewTab } from "@/components/vendor/OverviewTab";
 import { OrdersTab } from "@/components/vendor/OrdersTab";
+import { MessagesTab } from "@/components/vendor/MessagesTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 const VendorDashboard = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"Overview" | "Products" | "Orders" | "Settings">("Overview");
+  const [activeTab, setActiveTab] = useState<"Overview" | "Products" | "Orders" | "Messages" | "Settings">("Overview");
   const [vendor, setVendor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,7 +73,7 @@ const VendorDashboard = () => {
 
         {/* Tab Navigation */}
         <div className="flex gap-2 border-b border-border mb-8 overflow-x-auto">
-          {(["Overview", "Products", "Orders", "Settings"] as const).map((tab) => (
+          {(["Overview", "Products", "Orders", "Messages", "Settings"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -98,6 +99,10 @@ const VendorDashboard = () => {
 
         {activeTab === "Orders" && (
           <OrdersTab vendor={vendor} />
+        )}
+
+        {activeTab === "Messages" && (
+          <MessagesTab />
         )}
 
         {activeTab === "Settings" && (

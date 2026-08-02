@@ -1,19 +1,52 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ShieldCheck, Copy, Check, Gift, Wallet, User, Phone, Mail, MapPin, Key, Shield, ArrowLeft } from "lucide-react";
+import { ShieldCheck, Copy, Check, Gift, Wallet, User, Phone, Mail, MapPin, Key, Shield, ArrowLeft, MessageCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [fullName, setFullName] = useState("Kipchoge Keino");
   const [email] = useState("k.keino@example.com");
   const [phone, setPhone] = useState("712345678");
+  const [conversations, setConversations] = useState<any[]>([]);
   const referralCode = "TECH500";
   const shareLink = `https://techtrustkenya.web.app/auth?mode=signup&ref=${referralCode}`;
 
   useEffect(() => {
     document.title = "Profile & Referral Wallet | TechTrust Kenya";
-  }, []);
+    
+    if (user?.id) {
+      const fetchConversations = async () => {
+        const { data } = await supabase
+          .from("messages")
+          .select("*, sender:sender_id(full_name), receiver:receiver_id(full_name)")
+          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+          .order("created_at", { ascending: false });
+
+        if (data) {
+          const uniquePartners = new Map();
+          data.forEach((msg) => {
+            const partnerId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+            const partnerName = msg.sender_id === user.id ? msg.receiver?.full_name : msg.sender?.full_name;
+            if (!uniquePartners.has(partnerId)) {
+              uniquePartners.set(partnerId, {
+                partnerId,
+                partnerName: partnerName || "User",
+                lastMessage: msg.content,
+                isUnread: msg.receiver_id === user.id && !msg.is_read,
+                timestamp: msg.created_at,
+              });
+            }
+          });
+          setConversations(Array.from(uniquePartners.values()));
+        }
+      };
+      fetchConversations();
+    }
+  }, [user]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareLink);
@@ -126,6 +159,53 @@ const Profile = () => {
                   <p className="text-xs text-[#64748B] mt-1">Kilimani, Argwings Kodhek Rd</p>
                   <p className="text-xs text-[#64748B]">Apt 4B</p>
                 </div>
+              </div>
+            </section>
+
+            {/* Messages */}
+            <section className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0] space-y-4">
+              <h2 className="text-lg font-bold text-[#0F172A] pb-3 border-b border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-[#0F3D8C]" />
+                  <span>My Messages</span>
+                </div>
+              </h2>
+              <div className="space-y-3">
+                {conversations.length === 0 ? (
+                  <p className="text-sm text-slate-500 py-4 text-center">No messages yet.</p>
+                ) : (
+                  conversations.map((conv) => (
+                    <div 
+                      key={conv.partnerId} 
+                      onClick={() => {
+                        window.dispatchEvent(
+                          new CustomEvent("open-chat", {
+                            detail: { partnerId: conv.partnerId, partnerName: conv.partnerName },
+                          })
+                        );
+                      }}
+                      className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-[#0F3D8C]/30 bg-slate-50 hover:bg-[#EEF2FF] cursor-pointer transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#0F3D8C]/10 flex items-center justify-center text-[#0F3D8C] font-bold">
+                          {conv.partnerName.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-sm text-[#0F172A] flex items-center gap-2">
+                            {conv.partnerName}
+                            {conv.isUnread && (
+                              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                            )}
+                          </h3>
+                          <p className={`text-xs truncate max-w-[200px] sm:max-w-[300px] ${conv.isUnread ? 'text-[#0F172A] font-semibold' : 'text-slate-500'}`}>
+                            {conv.lastMessage}
+                          </p>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#0F3D8C]" />
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           </div>

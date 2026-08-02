@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ShieldCheck, MapPin, Star, Store, CheckCircle, ArrowRight, Phone, Mail } from "lucide-react";
+import { ShieldCheck, MapPin, Star, Store, CheckCircle, ArrowRight, Phone, Mail, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface VendorProfile {
@@ -135,9 +135,23 @@ const ShopPage = () => {
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground leading-relaxed text-left">
+            <p className="text-xs text-muted-foreground leading-relaxed text-left mb-4">
               Joined {joinedDate}. Trusted electronics merchant offering quality devices.
             </p>
+
+            <button
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent("open-chat", {
+                    detail: { partnerId: vendor.id, partnerName: vendor.business_name },
+                  })
+                );
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-[#0f3d8c] hover:bg-[#002766] text-white py-2.5 rounded-lg font-bold text-sm transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Message Vendor
+            </button>
           </div>
 
           <div className="bg-card border border-border rounded-xl p-6 shadow-xs space-y-3">
