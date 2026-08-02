@@ -12,18 +12,25 @@ export const OrderDetail = () => {
   const fetchOrder = async () => {
     if (!id) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*, product:product_id(*), vendor:vendor_id(*)")
-      .eq("id", id)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*, product:product_id(*), vendor:vendor_id(*)")
+        .eq("id", id)
+        .maybeSingle();
 
-    if (error) {
-      toast.error("Error loading order details.");
-    } else if (data) {
-      setOrder(data);
+      if (error) {
+        console.error("Supabase Error:", error);
+        toast.error("Error loading order details: " + error.message);
+      } else if (data) {
+        setOrder(data);
+      }
+    } catch (e: any) {
+      console.error("Unexpected Error:", e);
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -125,12 +132,12 @@ export const OrderDetail = () => {
                   <h2 className="text-xl font-bold text-[#0F172A]">Payment is secured in Float Escrow</h2>
                 </div>
                 <p className="text-xs text-[#64748B]">
-                  Amount: <strong className="text-[#0F172A]">KES {order.total_amount_ksh.toLocaleString()}</strong>.
+                  Amount: <strong className="text-[#0F172A]">KES {order.total_amount_ksh?.toLocaleString() || "0"}</strong>.
                   Funds will only be released to the vendor once you confirm delivery.
                 </p>
               </div>
               <div className="bg-[#EEF2FF] text-[#0F3D8C] border border-[#0F3D8C]/20 px-4 py-2 rounded-xl font-bold text-sm">
-                Status: {order.status.replace(/_/g, " ").toUpperCase()}
+                Status: {order.status?.replace(/_/g, " ").toUpperCase() || "UNKNOWN"}
               </div>
             </div>
 
@@ -189,7 +196,7 @@ export const OrderDetail = () => {
                   <p className="text-xs text-[#64748B] mt-0.5">Quantity: {order.quantity}</p>
                 </div>
                 <div className="font-mono text-lg font-bold text-[#0F172A] text-price font-data-price">
-                  KES {order.total_amount_ksh.toLocaleString()}
+                  KES {order.total_amount_ksh?.toLocaleString() || "0"}
                 </div>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-slate-100 text-xs">
