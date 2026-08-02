@@ -357,7 +357,7 @@ const AdminDashboard = () => {
         <div className="h-full px-6 max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-8">
             <Link to="/admin/dashboard" className="flex items-center gap-2 text-primary font-bold text-xl tracking-tight">
-              <img src="/logo.png" alt="TechTrust" className="h-8 w-auto object-contain rounded-md" />
+              <img src="/logo.jpg" alt="TechTrust" className="h-8 w-auto object-contain rounded-md" />
               <span>TechTrust<span className="text-accent text-xs align-top ml-1 uppercase tracking-wider">Admin</span></span>
             </Link>
             <nav className="hidden md:flex gap-6 items-center">

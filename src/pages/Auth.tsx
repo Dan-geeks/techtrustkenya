@@ -232,7 +232,7 @@ export const Auth = () => {
 
         <div className="relative z-10 flex flex-col space-y-6 max-w-lg">
           <Link to="/" className="flex items-center gap-3 text-[#3B82F6] hover:opacity-90 transition-opacity">
-            <img src="/logo.png" alt="TechTrust Kenya" className="h-10 w-auto object-contain rounded-lg shadow-md" />
+            <img src="/logo.jpg" alt="TechTrust Kenya" className="h-10 w-auto object-contain rounded-lg shadow-md" />
           </Link>
           <h1 className="font-display-h1 text-4xl font-bold leading-tight">
             Financial-Grade Escrow for Electronics Trading
@@ -284,7 +284,7 @@ export const Auth = () => {
           {/* Mobile Branding Header */}
           <div className="md:hidden text-center space-y-2 mb-4">
             <Link to="/" className="inline-flex justify-center items-center gap-2 text-[#0F3D8C]">
-              <img src="/logo.png" alt="TechTrust" className="h-10 w-auto object-contain rounded-lg shadow-sm" />
+              <img src="/logo.jpg" alt="TechTrust" className="h-10 w-auto object-contain rounded-lg shadow-sm" />
             </Link>
             <p className="text-xs text-[#64748B] font-medium">Verified Escrow Electronics Marketplace</p>
           </div>
