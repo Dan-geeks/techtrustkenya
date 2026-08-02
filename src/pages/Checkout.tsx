@@ -37,9 +37,15 @@ const Checkout = () => {
     else if (/^[71]\d{8}$/.test(digits)) formattedPhone = `254${digits}`;
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch("https://techtrust-escrow-api-production.up.railway.app/mpesa-stkpush", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           order_id: "3469010c-a1a9-437a-9b72-f75dc5c5949f",
           phone: formattedPhone,
@@ -80,12 +86,13 @@ const Checkout = () => {
 
     setTimeout(() => {
       setProcessing(false);
-      toast.success("M-Pesa STK Push prompt sent to your phone!");
-      setTimeout(() => {
-        toast.success("Payment Received & Escrow Locked! Redirecting to Order Tracker...");
-        navigate("/orders/3469010c-a1a9-437a-9b72-f75dc5c5949f");
-      }, 2500);
-    }, 2500);
+      toast.success("M-Pesa STK Push prompt sent to your phone! Please enter your PIN.");
+    }, 1500);
+  };
+
+  const handleConfirmPaymentReceived = () => {
+    toast.success("Payment Received & Escrow Locked! Redirecting to Order Tracker...");
+    navigate("/orders/3469010c-a1a9-437a-9b72-f75dc5c5949f");
   };
 
   return (
@@ -290,9 +297,37 @@ const Checkout = () => {
                 <span className="font-bold">TT-8492-MK2</span>
               </div>
             </div>
-            <div className="flex items-center justify-center gap-2 text-xs text-[#10B981] font-bold">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Awaiting M-Pesa PIN confirmation...</span>
+            <div className="flex flex-col gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={handleConfirmPaymentReceived}
+                className="w-full bg-[#0F3D8C] hover:bg-[#0B2E6B] text-white py-3 rounded-xl font-bold text-xs transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span>I Have Entered My PIN / Confirm</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  triggerLiveStkPush(phoneNumber);
+                  toast.info(`Resent M-Pesa STK Push prompt to +254 ${phoneNumber}`);
+                }}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-[#0F172A] py-2.5 rounded-xl font-semibold text-xs transition-colors border border-slate-300 cursor-pointer"
+              >
+                Resend STK Push Prompt
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setStkModalOpen(false);
+                  setProcessing(false);
+                }}
+                className="w-full text-slate-500 hover:text-slate-700 py-1.5 text-xs font-medium cursor-pointer"
+              >
+                Cancel / Change Phone Number
+              </button>
             </div>
           </div>
         </div>
