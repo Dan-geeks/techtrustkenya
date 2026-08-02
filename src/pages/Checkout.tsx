@@ -124,19 +124,19 @@ const Checkout = () => {
               <div className="flex items-start gap-4">
                 <div className="w-20 h-20 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200 p-2 flex items-center justify-center">
                   <img
-                    src={product.image}
-                    alt={product.title}
+                    src={product.image || (product as any).images?.[0] || "/placeholder.svg"}
+                    alt={product.title || "Product"}
                     className="max-h-full max-w-full object-contain"
                   />
                 </div>
                 <div className="flex-1 flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-base text-[#0F172A]">{product.title}</h3>
-                    <p className="text-xs text-[#64748B] mt-0.5">Condition: {product.condition}</p>
-                    <p className="text-xs text-[#0F3D8C] font-semibold">Seller: {product.vendor}</p>
+                    <h3 className="font-bold text-base text-[#0F172A]">{product.title || "Tech Product"}</h3>
+                    <p className="text-xs text-[#64748B] mt-0.5">Condition: {product.condition || "Refurbished - Grade A"}</p>
+                    <p className="text-xs text-[#0F3D8C] font-semibold">Seller: {product.vendor || "Verified Vendor"}</p>
                   </div>
                   <div className="font-mono text-base font-bold text-[#0F172A] text-price font-data-price">
-                    KES {product.price.toLocaleString()}
+                    KES {(product.price || 0).toLocaleString()}
                   </div>
                 </div>
               </div>
