@@ -33,40 +33,45 @@ export const TopNav = () => {
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      "text-[15px] font-medium transition-smooth hover:text-accent",
-      isActive ? "text-accent" : "text-foreground/70"
+      "font-body-md text-sm transition-colors duration-200 hover:text-secondary font-medium",
+      isActive ? "text-primary font-bold" : "text-on-surface-variant"
     );
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-lg">
-      <div className="container flex h-16 items-center gap-4">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <img src="/logo.jpg" alt="TechTrust" className="h-7 w-auto object-contain rounded-md" />
+    <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/95 backdrop-blur-md shadow-sm border-b border-outline-variant/20">
+      <div className="flex justify-between items-center h-20 px-6 sm:px-10 md:px-16 lg:px-24 max-w-[1440px] mx-auto w-full">
+        {/* Brand: "TechTrust" text then logo */}
+        <Link to="/" className="font-display-h2 text-2xl font-bold text-primary flex items-center gap-2 shrink-0">
+          <span>TechTrust</span>
+          <img src="/logo.jpg" alt="TechTrust Logo" className="h-7 w-auto object-contain rounded-md" />
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-6 ml-6">
-          <NavLink to="/" end className={navLinkClass}>Home</NavLink>
+        {/* Navigation Links (Desktop) */}
+        <nav className="hidden md:flex gap-8 items-center mx-6">
           <NavLink to="/browse" className={navLinkClass}>Browse</NavLink>
           <NavLink to="/repairs" className={navLinkClass}>Repairs</NavLink>
           <NavLink to="/how-it-works" className={navLinkClass}>How It Works</NavLink>
         </nav>
 
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-4">
+        {/* Search Bar */}
+        <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-sm mx-4">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-outline" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search laptops, phones, repairs..."
-              className="pl-9 bg-secondary/50 border-transparent focus:border-input"
+              placeholder="Search laptops, phones, gear..."
+              className="pl-10 bg-surface-container-low border-transparent focus:border-primary text-sm rounded-xl py-2"
             />
           </div>
         </form>
 
-        <div className="flex items-center gap-2 ml-auto">
+        {/* Trailing Actions */}
+        <div className="flex items-center gap-4 md:gap-6">
           <CartIcon />
+
           {user ? (
-            <>
+            <div className="flex items-center gap-3">
               {isAdmin && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -75,7 +80,7 @@ export const TopNav = () => {
                       size="icon"
                       onClick={() => navigate("/admin")}
                       aria-label="Admin Dashboard"
-                      className="text-accent hover:text-accent hover:bg-accent/10"
+                      className="text-primary hover:bg-surface-container-high"
                     >
                       <Shield className="h-5 w-5" strokeWidth={2.25} />
                     </Button>
@@ -87,7 +92,7 @@ export const TopNav = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
-                    <div className="h-8 w-8 rounded-full gradient-accent grid place-items-center text-white text-sm font-semibold">
+                    <div className="h-9 w-9 rounded-full bg-primary text-on-primary grid place-items-center text-sm font-bold shadow-sm">
                       {(user.email?.[0] ?? "U").toUpperCase()}
                     </div>
                   </Button>
@@ -121,16 +126,23 @@ export const TopNav = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </>
+            </div>
           ) : (
-            <>
-              <Button variant="ghost" asChild className="hidden sm:inline-flex">
-                <Link to="/auth" state={{ from: location.pathname }}>Sign In</Link>
-              </Button>
-              <Button variant="accent" asChild>
-                <Link to="/vendor/onboarding">List Your Shop</Link>
-              </Button>
-            </>
+            <div className="hidden md:flex items-center gap-5">
+              <Link
+                to="/auth"
+                state={{ from: location.pathname }}
+                className="text-on-surface-variant font-body-md-bold text-sm hover:text-secondary transition-colors duration-200 font-semibold"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/vendor/onboarding"
+                className="bg-primary-container text-on-primary px-4 py-2 rounded-lg font-body-md-bold text-sm hover:bg-primary transition-all duration-150 active:scale-95 shadow-sm font-semibold"
+              >
+                List Your Shop
+              </Link>
+            </div>
           )}
         </div>
       </div>
