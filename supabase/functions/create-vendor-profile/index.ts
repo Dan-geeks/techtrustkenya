@@ -27,7 +27,8 @@ serve(async (req) => {
       shopPhotoUrls,
       businessCertificateUrl,
       tillNumber,
-      whatsapp
+      whatsapp,
+      offersRepairs
     } = payload;
 
     const supabase = createClient(
@@ -53,6 +54,7 @@ serve(async (req) => {
         shop_photo_urls: shopPhotoUrls || [],
         business_certificate_url: businessCertificateUrl || null,
         till_number: tillNumber || null,
+        offers_repairs: offersRepairs || false,
         verification_status: "pending",
         average_rating: 0,
         completed_transactions_count: 0,

@@ -44,6 +44,7 @@ const VendorOnboarding = () => {
     latitude: "",
     longitude: "",
     google_maps_link: "",
+    offers_repairs: false,
     agree: false,
   });
   const [shopPhotos, setShopPhotos] = useState<File[]>([]);
@@ -206,6 +207,7 @@ const VendorOnboarding = () => {
           businessCertificateUrl: certPath,
           tillNumber: finalPaymentString,
           whatsapp: vsu.whatsapp,
+          offersRepairs: vsu.offers_repairs,
         },
       });
       if (fnErr || !fnRes?.success) {
@@ -495,7 +497,22 @@ const VendorOnboarding = () => {
               </label>
             </div>
 
-            <div className="flex items-start gap-2 pt-2">
+            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2 mt-4">
+              <Label className="text-base font-semibold">Services Offered</Label>
+              <label className="flex items-start gap-2.5 text-sm cursor-pointer select-none pt-2">
+                <Checkbox
+                  checked={vsu.offers_repairs}
+                  onCheckedChange={(c) => setVsu({ ...vsu, offers_repairs: !!c })}
+                  className="mt-1"
+                />
+                <div>
+                  <span className="font-medium text-slate-900 block">Offer Repair as a Service</span>
+                  <span className="text-muted-foreground text-xs block">Allow clients to send you repair requests for their laptops and electronics. You will be listed on the Repairs page.</span>
+                </div>
+              </label>
+            </div>
+
+            <div className="flex items-start gap-2 pt-2 mt-4">
               <Checkbox
                 id="agree"
                 checked={vsu.agree}
