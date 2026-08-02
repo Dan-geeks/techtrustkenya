@@ -198,14 +198,17 @@ const AdminDashboard = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
-                  <th className="px-6 py-4">User ID</th>
+                  <th className="px-6 py-4">User Details</th>
                   <th className="px-6 py-4">Onboarding Complete</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
                 {users.map(u => (
                   <tr key={u.id}>
-                    <td className="px-6 py-4 font-mono text-xs">{u.id}</td>
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-slate-900">{u.full_name || "Unknown"}</p>
+                      <p className="text-xs text-slate-500">{u.email}</p>
+                    </td>
                     <td className="px-6 py-4">
                       {u.onboarding_complete ? (
                         <span className="text-emerald-600 bg-emerald-50 px-2 py-1 rounded text-xs font-bold">Yes</span>
