@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
-import { Search, ShieldCheck, User as UserIcon, LogOut, Store, Package, Shield } from "lucide-react";
+import { Search, User as UserIcon, LogOut, Store, Package, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,35 +33,34 @@ export const TopNav = () => {
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      "font-body-md text-sm transition-colors duration-200 hover:text-secondary font-medium",
-      isActive ? "text-primary font-bold" : "text-on-surface-variant"
+      "font-body-md text-base transition-colors duration-200 hover:text-[#0058be] font-medium",
+      isActive ? "text-[#002766] font-bold" : "text-[#434651]"
     );
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/95 backdrop-blur-md shadow-sm border-b border-outline-variant/20">
-      <div className="flex justify-between items-center h-20 px-6 sm:px-10 md:px-16 lg:px-24 max-w-[1440px] mx-auto w-full">
-        {/* Brand: "TechTrust" text then logo */}
-        <Link to="/" className="font-display-h2 text-2xl font-bold text-primary flex items-center gap-2 shrink-0">
-          <span>TechTrust</span>
-          <img src="/logo.jpg" alt="TechTrust Logo" className="h-7 w-auto object-contain rounded-md" />
+    <header className="fixed top-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+      <div className="max-w-[1280px] mx-auto px-6 md:px-12 flex justify-between items-center h-20 w-full">
+        {/* Brand: Pure "TechTrust" text matching landing.PNG */}
+        <Link to="/" className="font-display-h2 text-2xl md:text-3xl font-bold text-[#002766] tracking-tight shrink-0">
+          TechTrust
         </Link>
 
         {/* Navigation Links (Desktop) */}
-        <nav className="hidden md:flex gap-8 items-center mx-6">
+        <nav className="hidden md:flex gap-8 items-center mx-8">
           <NavLink to="/browse" className={navLinkClass}>Browse</NavLink>
           <NavLink to="/repairs" className={navLinkClass}>Repairs</NavLink>
           <NavLink to="/how-it-works" className={navLinkClass}>How It Works</NavLink>
         </nav>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-sm mx-4">
+        <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-xs mx-4">
           <div className="relative w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-outline" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#747782]" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search laptops, phones, gear..."
-              className="pl-10 bg-surface-container-low border-transparent focus:border-primary text-sm rounded-xl py-2"
+              placeholder="Search marketplace..."
+              className="pl-10 bg-slate-100/80 border-transparent focus:border-[#0f3d8c] text-sm rounded-xl py-2"
             />
           </div>
         </form>
@@ -80,7 +79,7 @@ export const TopNav = () => {
                       size="icon"
                       onClick={() => navigate("/admin")}
                       aria-label="Admin Dashboard"
-                      className="text-primary hover:bg-surface-container-high"
+                      className="text-[#0f3d8c] hover:bg-slate-100"
                     >
                       <Shield className="h-5 w-5" strokeWidth={2.25} />
                     </Button>
@@ -92,7 +91,7 @@ export const TopNav = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
-                    <div className="h-9 w-9 rounded-full bg-primary text-on-primary grid place-items-center text-sm font-bold shadow-sm">
+                    <div className="h-9 w-9 rounded-full bg-[#0f3d8c] text-white grid place-items-center text-sm font-bold shadow-sm">
                       {(user.email?.[0] ?? "U").toUpperCase()}
                     </div>
                   </Button>
@@ -132,13 +131,13 @@ export const TopNav = () => {
               <Link
                 to="/auth"
                 state={{ from: location.pathname }}
-                className="text-on-surface-variant font-body-md-bold text-sm hover:text-secondary transition-colors duration-200 font-semibold"
+                className="text-[#434651] font-bold text-sm hover:text-[#0058be] transition-colors duration-200"
               >
                 Sign In
               </Link>
               <Link
                 to="/vendor/onboarding"
-                className="bg-primary-container text-on-primary px-4 py-2 rounded-lg font-body-md-bold text-sm hover:bg-primary transition-all duration-150 active:scale-95 shadow-sm font-semibold"
+                className="bg-[#0f3d8c] text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-[#002766] transition-all duration-150 active:scale-95 shadow-sm"
               >
                 List Your Shop
               </Link>

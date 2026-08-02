@@ -5,9 +5,9 @@ import { MobileBottomNav } from "./MobileBottomNav";
 
 export const AppLayout = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background text-on-background">
       <TopNav />
-      <main className="flex-1 pb-20 lg:pb-0">
+      <main className="flex-1 pt-20 pb-20 lg:pb-0">
         <Outlet />
       </main>
       <Footer />
