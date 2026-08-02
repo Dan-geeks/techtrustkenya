@@ -253,9 +253,7 @@ const VendorOnboarding = () => {
             Back
           </Button>
           <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
-            <div className="bg-white p-1.5 rounded-xl shadow-sm">
-              <img src="/logo-transparent.png" alt="TechTrust" className="h-14 w-auto object-contain" />
-            </div>
+            <img src="/logo-transparent.png" alt="TechTrust" className="h-14 w-auto object-contain drop-shadow-sm brightness-0 invert" />
             <span className="font-display-h2 font-bold text-2xl text-white drop-shadow-sm">TechTrust</span>
           </Link>
           <div className="w-[72px]" /> {/* Spacer for centering */}
