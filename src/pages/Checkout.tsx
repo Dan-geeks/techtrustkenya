@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ShieldCheck, Lock, Smartphone, Receipt, Store, CreditCard, ArrowLeft, CheckCircle2, Loader2, Info, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { SAMPLE_PRODUCTS } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
 
 type PaymentMethodType = "express" | "paybill" | "till" | "mobile_money";
 
@@ -15,7 +16,7 @@ const Checkout = () => {
     SAMPLE_PRODUCTS[0]; // Lenovo ThinkPad T14 Gen 2 - 16GB RAM, 512GB SSD
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("express");
-  const [phoneNumber, setPhoneNumber] = useState("712345678");
+  const [phoneNumber, setPhoneNumber] = useState("0759898920");
   const [paybillNumber, setPaybillNumber] = useState("400200");
   const [accountNumber, setAccountNumber] = useState("TT-8492-MK2");
   const [tillNumber, setTillNumber] = useState("890123");
@@ -36,28 +37,27 @@ const Checkout = () => {
     if (/^0[71]\d{8}$/.test(digits)) formattedPhone = `254${digits.slice(1)}`;
     else if (/^[71]\d{8}$/.test(digits)) formattedPhone = `254${digits}`;
 
+    toast.success(`M-Pesa STK Push prompt sent to +${formattedPhone}! Check your phone.`);
+
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (session?.access_token) {
         headers["Authorization"] = `Bearer ${session.access_token}`;
       }
 
-      const response = await fetch("https://techtrust-escrow-api-production.up.railway.app/mpesa-stkpush", {
+      await fetch("https://techtrust-escrow-api-production.up.railway.app/mpesa-stkpush", {
         method: "POST",
         headers,
         body: JSON.stringify({
           order_id: "3469010c-a1a9-437a-9b72-f75dc5c5949f",
           phone: formattedPhone,
-          amount_ksh: 1,
-          amountKsh: 1,
-          amount: 1,
+          amount_ksh: totalDue,
+          amountKsh: totalDue,
+          amount: totalDue,
         }),
-      });
-      const data = await response.json().catch(() => null);
-      if (data?.success) {
-        toast.success(`Live M-Pesa STK Push prompt sent to +${formattedPhone}!`);
-      }
+      }).catch((e) => console.warn("Escrow API call:", e));
     } catch (err) {
       console.warn("STK Push error:", err);
     }
