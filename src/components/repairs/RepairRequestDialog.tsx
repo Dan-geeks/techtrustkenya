@@ -97,7 +97,7 @@ export const RepairRequestDialog = ({ open, onOpenChange, service }: Props) => {
               <Input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="07XXXXXXXX"
+                placeholder="712 345 678"
                 className="mt-1.5"
                 autoComplete="tel"
               />

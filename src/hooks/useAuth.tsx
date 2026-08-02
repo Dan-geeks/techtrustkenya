@@ -24,18 +24,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    const fetchRoles = async (userId: string) => {
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-      if (mounted) setRoles((data?.map((r) => r.role as Role)) ?? []);
-    };
-
     const handleSession = async (nextSession: Session | null) => {
       if (!mounted) return;
       setSession(nextSession);
-      setUser(nextSession?.user ?? null);
       if (nextSession?.user) {
-        await fetchRoles(nextSession.user.id);
-      } else if (mounted) {
+        try {
+          const { data } = await supabase.from("user_roles").select("role").eq("user_id", nextSession.user.id);
+          if (mounted) {
+            setRoles((data?.map((r) => r.role as Role)) ?? []);
+            setUser(nextSession.user);
+          }
+        } catch (e) {
+          if (mounted) {
+            setRoles([]);
+            setUser(nextSession.user);
+          }
+        }
+      } else {
+        setUser(null);
         setRoles([]);
       }
     };

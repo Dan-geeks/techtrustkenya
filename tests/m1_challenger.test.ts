@@ -67,7 +67,7 @@ describe("M1 Empirical Verification & Stress Testing Suite", () => {
     });
 
     it("case 4: repair_update with null reference_id returns null (DEFECT: fails to return /repairs)", () => {
-      expect(routeForNotification({ type: "repair_update", reference_id: null })).toBe(null);
+      expect(routeForNotification({ type: "repair_update", reference_id: null })).toBe("/repairs");
     });
 
     it("case 5: vendor_application with reference_id returns /vendor/dashboard", () => {
@@ -75,7 +75,7 @@ describe("M1 Empirical Verification & Stress Testing Suite", () => {
     });
 
     it("case 6: vendor_application with null reference_id returns null (DEFECT: fails to navigate to dashboard when reference_id is null)", () => {
-      expect(routeForNotification({ type: "vendor_application", reference_id: null })).toBe(null);
+      expect(routeForNotification({ type: "vendor_application", reference_id: null })).toBe("/vendor/dashboard");
     });
 
     it("case 7: unknown type with reference_id returns null", () => {

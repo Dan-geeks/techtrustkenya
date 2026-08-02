@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ShieldCheck, Loader2, Gift } from "lucide-react";
+import { ShieldCheck, Loader2, Gift, ArrowLeft } from "lucide-react";
 import { ShoppingBagIcon } from "@/components/icons/ShoppingBagIcon";
 import { StoreIcon } from "@/components/icons/StoreIcon";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,13 +72,23 @@ const Welcome = () => {
   }
 
   return (
-    <div className="min-h-screen grid place-items-center px-4 py-10 bg-gradient-subtle">
-      <div className="w-full max-w-lg">
+    <div className="min-h-screen relative grid place-items-center px-4 py-10 bg-gradient-subtle">
+      {/* Back Button */}
+      <button
+        type="button"
+        onClick={async () => {
+          await supabase.auth.signOut();
+          navigate("/auth", { replace: true });
+        }}
+        className="absolute top-6 left-6 flex items-center justify-center gap-2 px-4 py-2 bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm rounded-lg transition-all font-medium text-sm z-10"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </button>
+
+      <div className="w-full max-w-lg mt-8">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight font-display">
-            Tech<span className="text-accent">Trust</span>
-          </span>
+          <img src="/logo.jpg" alt="TechTrust" className="h-8 w-auto object-contain rounded-md shadow-sm" />
         </Link>
 
         <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card text-center">

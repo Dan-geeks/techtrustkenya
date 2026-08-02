@@ -1,172 +1,281 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ShieldCheck, Lock, CheckCircle2, Clock, RotateCcw, AlertTriangle, ArrowRight, Store, Wrench } from "lucide-react";
+
+interface ProcessStep {
+  number: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  bulletPoints: string[];
+  iconName: string;
+}
+
+const buyerSteps: ProcessStep[] = [
+  {
+    number: "01",
+    title: "Vendor Vetting & Verification",
+    subtitle: "Step 1: Physical & Identity Vetting",
+    description: "Before any merchant lists electronics on TechTrust, they undergo physical inspection or identity verification, KRA PIN validation, and business checks.",
+    bulletPoints: [
+      "Physical store location & address validation",
+      "KRA PIN & National ID / Passport confirmation",
+      "Refundable security deposit for online sellers"
+    ],
+    iconName: "storefront"
+  },
+  {
+    number: "02",
+    title: "Float Protected Payment",
+    subtitle: "Step 2: Escrow Payment Hold",
+    description: "When you place an order, your payment is deposited directly into TechTrust's Float escrow account via M-Pesa. The seller is notified to dispatch, but funds stay locked.",
+    bulletPoints: [
+      "Payment held safely in Float escrow",
+      "Seller cannot access funds until you inspect and approve",
+      "Instant M-Pesa STK Push payment integration"
+    ],
+    iconName: "lock"
+  },
+  {
+    number: "03",
+    title: "Dispatch & Inspection Window",
+    subtitle: "Step 3: 48-Hour Testing Period",
+    description: "Upon receiving your device, you have a 48-hour inspection window to test all specifications, battery health, and condition against the seller's listing.",
+    bulletPoints: [
+      "48 hours for local purchases / 72 hours for courier delivery",
+      "Test device thoroughly before approving payment",
+      "Option to open a formal dispute if anything is wrong"
+    ],
+    iconName: "task_alt"
+  },
+  {
+    number: "04",
+    title: "Payout Release or Refund",
+    subtitle: "Step 4: Confirmed Release",
+    description: "Once you confirm receipt or the 48-hour window passes with no issue, funds are released to the vendor minus a 10% platform commission. In case of a dispute, funds are refunded.",
+    bulletPoints: [
+      "Vendor paid via M-Pesa upon receipt confirmation",
+      "Automatic release after 48h if no dispute is raised",
+      "Full M-Pesa refund if dispute is resolved in buyer favor"
+    ],
+    iconName: "verified"
+  }
+];
+
+const vendorSteps: ProcessStep[] = [
+  {
+    number: "01",
+    title: "Submit Verification Documents",
+    subtitle: "Step 1: Verification Track Selection",
+    description: "Register your business and choose between Physically Verified (physical shop) or Identity Verified (online seller) tracks.",
+    bulletPoints: [
+      "Provide National ID, KRA PIN, store photos, and address",
+      "Online sellers submit a refundable security deposit",
+      "Receive official TechTrust Verification Badge"
+    ],
+    iconName: "badge"
+  },
+  {
+    number: "02",
+    title: "List Genuine Tech & Repair Services",
+    subtitle: "Step 2: Product & Repair Listing",
+    description: "Create detailed listings with genuine photos, exact specifications, battery health, and transparent pricing in KSH.",
+    bulletPoints: [
+      "Set transparent prices with no hidden post-sale fees",
+      "Specify condition: New, Refurbished, or Used",
+      "Offer repair services with clear component quotes"
+    ],
+    iconName: "inventory_2"
+  },
+  {
+    number: "03",
+    title: "Fulfill Orders & Secure Payments",
+    subtitle: "Step 3: Instant Float Notification",
+    description: "Receive instant notifications when a buyer pays into Float. Ship or prepare the item with complete confidence that funds are secured.",
+    bulletPoints: [
+      "Secured M-Pesa payment held in Float escrow",
+      "Guaranteed payout upon buyer receipt or 48-hour auto-release",
+      "Fair and neutral dispute review process"
+    ],
+    iconName: "payments"
+  }
+];
+
+const faqs = [
+  {
+    q: "What is Float escrow?",
+    a: "Float is TechTrust's escrow payment system. When a buyer pays for a product or repair, the money is held safely by TechTrust and is not given to the vendor until the buyer confirms they received what they paid for."
+  },
+  {
+    q: "How does the 48-Hour Inspection Rule work?",
+    a: "After the item is marked delivered, the buyer has 48 hours to inspect the item and either confirm receipt or raise a dispute. If no action is taken within 48 hours, Float automatically releases payment to the vendor."
+  },
+  {
+    q: "What platform fees or commissions apply?",
+    a: "TechTrust charges a 10% platform commission on completed transactions, automatically deducted when Float is released to the vendor. Buyers pay no additional hidden fees."
+  },
+  {
+    q: "How does Float work for repairs?",
+    a: "Repairs use the same escrow protection: the buyer approves a quote and pays into Float. The technician completes the repair, and funds are only released after the buyer inspects and approves the repaired device."
+  },
+  {
+    q: "What happens if a delivered item is faulty or fake?",
+    a: "If an item is damaged, faulty, counterfeit, or not as described, click 'Raise Dispute' in your order dashboard within 48 hours. Float funds remain frozen while TechTrust reviews evidence and issues a full refund if valid."
+  }
+];
 
 const HowItWorks = () => {
+  const [activeTab, setActiveTab] = useState<"buyer" | "vendor">("buyer");
+
   useEffect(() => {
-    document.title = "How Float Escrow Works | TechTrust Kenya";
-
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href
-      );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
-
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+    document.title = "How TechTrust Works | Float Escrow & Verification";
   }, []);
 
+  const steps = activeTab === "buyer" ? buyerSteps : vendorSteps;
+
   return (
-    <div className="bg-background text-on-background font-body-md antialiased overflow-x-hidden">
-      <main className="w-full max-w-container-max mx-auto px-6 md:px-12 pt-12 md:pt-16 pb-20 md:pb-28">
-        {/* Hero Section */}
-        <section className="mb-16 md:mb-24 text-center max-w-3xl mx-auto">
-          <span className="font-ui-label text-xs md:text-sm text-[#0F3D8C] uppercase tracking-wider font-bold mb-3 block">
-            Escrow Protection Overview
-          </span>
-          <h1 className="font-display-h1 text-3xl md:text-5xl font-bold text-[#0F172A] mb-6 leading-tight">
-            Financial-Grade Security for Electronics Trading
+    <div className="bg-background text-foreground font-body antialiased overflow-x-hidden min-h-screen">
+      <main className="w-full max-w-6xl mx-auto px-4 md:px-8 pt-10 pb-20">
+        
+        {/* Main Title Header */}
+        <section className="text-center max-w-3xl mx-auto mb-12">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+            <ShieldCheck className="w-4 h-4 text-accent" />
+            Trust & Escrow Protocol
+          </div>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
+            How TechTrust Works
           </h1>
-          <p className="font-body-lg text-base md:text-lg text-[#64748B] leading-relaxed">
-            We operate a strict escrow process to guarantee the safety of your funds and the authenticity of your devices. Understand exactly how your transaction is protected every step of the way.
+          <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+            Financial-grade escrow protection for electronics trading in Kenya. Discover how Float keeps your money safe from order placement to final delivery.
           </p>
+
+          {/* Toggle Buyer / Vendor view */}
+          <div className="flex justify-center gap-3 mt-8">
+            <button
+              onClick={() => setActiveTab("buyer")}
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                activeTab === "buyer"
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Buyer Guide
+            </button>
+            <button
+              onClick={() => setActiveTab("vendor")}
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                activeTab === "vendor"
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Vendor & Technician Guide
+            </button>
+          </div>
         </section>
 
-        {/* Process Timeline */}
-        <section className="space-y-24 md:space-y-36 relative">
-          {/* Central Line (Desktop) */}
-          <div className="hidden md:block absolute left-[50%] top-12 bottom-12 w-px bg-[#E2E8F0] z-0 -translate-x-1/2"></div>
-
-          {/* Step 1: Verification */}
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
-            {/* Content Left */}
-            <div className="md:w-1/2 order-2 md:order-1 text-left md:text-right md:pr-12">
-              <div className="inline-flex items-center gap-2 bg-[#EEF2FF] text-[#0F3D8C] px-3.5 py-1.5 rounded-full mb-4 font-bold text-xs">
-                <span>STEP 01</span>
+        {/* Float Escrow Summary Banner */}
+        <section className="bg-card border border-border rounded-2xl p-6 md:p-8 mb-16 shadow-sm">
+          <div className="grid md:grid-cols-4 gap-6 text-center md:text-left">
+            <div className="flex flex-col items-center md:items-start">
+              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center mb-3">
+                <Clock className="w-5 h-5" />
               </div>
-              <h2 className="font-display-h2 text-2xl md:text-3xl text-[#0F172A] font-bold mb-4">
-                Physical Inspection &amp; Vetting of Vendors
-              </h2>
-              <p className="font-body-md text-base text-[#64748B] mb-6 leading-relaxed">
-                Before a merchant can list high-value electronics on our platform, they undergo rigorous vetting. We conduct physical site visits to verify store premises, business permits, and inventory storage conditions.
-              </p>
-              <ul className="space-y-3 inline-block text-left">
-                <li className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#10B981]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    check_circle
-                  </span>
-                  <span className="font-body-md text-sm text-[#0F172A] font-medium">Physical address &amp; shop building confirmation</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#10B981]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    check_circle
-                  </span>
-                  <span className="font-body-md text-sm text-[#0F172A] font-medium">KRA PIN &amp; Business Permit license validation</span>
-                </li>
-              </ul>
+              <h3 className="font-semibold text-foreground text-sm">1. Pending</h3>
+              <p className="text-xs text-muted-foreground mt-1">Checkout initiated; no money moved yet.</p>
             </div>
-            {/* Center Marker */}
-            <div className="hidden md:flex w-16 h-16 rounded-full bg-white border-4 border-[#E2E8F0] items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm group-hover:border-[#0F3D8C] transition-all duration-300 z-20">
-              <span className="material-symbols-outlined text-[#0F3D8C] text-3xl">storefront</span>
-            </div>
-            {/* Visual Right */}
-            <div className="md:w-1/2 order-1 md:order-2 w-full">
-              <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-2 w-full h-[320px] hover:shadow-md transition-all duration-300">
-                <div
-                  className="bg-cover bg-center w-full h-full rounded-xl"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCEDU3mXcgzsogAN1cju7drN7f8ojrnD0WXewJTgbkGYei0-0pZWIYrWmKZvJpPzzXnlkPLxtIj7KEZ4Tw1aeZrkWU7hiKtRXw9QH3xPt5w51_LvB92C1aj76CkCxpaRFV1hXlczvg5_drdSe7Zec1uTzqhBaCKa6wac7Ag7eTC9dB6rt8RaqmZBx7gEXJ7TPtIEViQvonkB5amzKu7EWPrmBYAq_wQK8m8xpf6IOOEs51C3dIAPt77Vw')",
-                  }}
-                ></div>
+            <div className="flex flex-col items-center md:items-start">
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 flex items-center justify-center mb-3">
+                <Lock className="w-5 h-5" />
               </div>
+              <h3 className="font-semibold text-foreground text-sm">2. Held (Float Escrow)</h3>
+              <p className="text-xs text-muted-foreground mt-1">Paid via M-Pesa; frozen until buyer inspects device.</p>
+            </div>
+            <div className="flex flex-col items-center md:items-start">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center mb-3">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <h3 className="font-semibold text-foreground text-sm">3. Released</h3>
+              <p className="text-xs text-muted-foreground mt-1">Buyer confirms receipt; vendor paid minus 10% commission.</p>
+            </div>
+            <div className="flex flex-col items-center md:items-start">
+              <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 flex items-center justify-center mb-3">
+                <RotateCcw className="w-5 h-5" />
+              </div>
+              <h3 className="font-semibold text-foreground text-sm">4. Refunded</h3>
+              <p className="text-xs text-muted-foreground mt-1">Dispute upheld; 100% money returned via M-Pesa.</p>
             </div>
           </div>
+        </section>
 
-          {/* Step 2: Escrow Hold */}
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
-            {/* Visual Left */}
-            <div className="md:w-1/2 w-full">
-              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl shadow-sm border border-[#E2E8F0] p-6 w-full h-[320px] flex flex-col justify-center items-center">
-                <div className="bg-white w-full max-w-sm rounded-xl shadow-md border border-[#E2E8F0] p-6 space-y-5">
-                  <div className="flex justify-between items-center pb-4 border-b border-[#E2E8F0]">
-                    <span className="font-body-md text-sm text-[#64748B] font-medium">M-Pesa Escrow Status</span>
-                    <div className="bg-[#0F3D8C] text-white px-3 py-1 rounded-full font-mono text-xs uppercase tracking-wider flex items-center gap-1 font-bold">
-                      <span className="material-symbols-outlined text-[14px]">lock</span> Held in Float
-                    </div>
-                  </div>
-                  <div>
-                    <span className="block text-xs text-[#64748B] mb-1 font-medium">Secured Payment Amount</span>
-                    <span className="font-mono text-2xl font-bold text-[#0F3D8C]">KES 145,000</span>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2.5">
-                    <div className="bg-[#10B981] h-2.5 rounded-full w-2/3"></div>
-                  </div>
+        {/* Process Timeline Steps (mapped array) */}
+        <section className="space-y-12 mb-20">
+          <h2 className="text-2xl font-bold text-center text-foreground mb-8">
+            {activeTab === "buyer" ? "4-Step Buyer Protection Process" : "4-Step Vendor Onboarding & Sales Process"}
+          </h2>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {steps.map((step) => (
+              <div key={step.number} className="bg-card border border-border rounded-xl p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-xs font-bold px-3 py-1 bg-primary/10 text-primary rounded-full">
+                    {step.number}
+                  </span>
+                  <span className="text-xs text-muted-foreground uppercase font-semibold">{step.subtitle}</span>
                 </div>
+                <h3 className="text-xl font-bold text-foreground mb-3">{step.title}</h3>
+                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{step.description}</p>
+                <ul className="space-y-2">
+                  {step.bulletPoints.map((point, i) => (
+                    <li key={i} className="flex items-center gap-2 text-xs font-medium text-foreground">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-            {/* Center Marker */}
-            <div className="hidden md:flex w-16 h-16 rounded-full bg-white border-4 border-[#E2E8F0] items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm group-hover:border-[#0F3D8C] transition-all duration-300 z-20">
-              <span className="material-symbols-outlined text-[#0F3D8C] text-3xl">account_balance</span>
-            </div>
-            {/* Content Right */}
-            <div className="md:w-1/2 text-left md:pl-12">
-              <div className="inline-flex items-center gap-2 bg-[#EEF2FF] text-[#0F3D8C] px-3.5 py-1.5 rounded-full mb-4 font-bold text-xs">
-                <span>STEP 02</span>
-              </div>
-              <h2 className="font-display-h2 text-2xl md:text-3xl text-[#0F172A] font-bold mb-4">
-                The Payment Float Hold
-              </h2>
-              <p className="font-body-md text-base text-[#64748B] mb-6 leading-relaxed">
-                When you place an order, your payment is deposited directly into a financial-grade escrow float account. The vendor is notified to package and dispatch the item, but funds remain locked in Float until you confirm receipt.
-              </p>
-              <p className="font-body-md-bold text-base text-[#0F3D8C] font-bold">
-                ✓ Your money remains yours until you test and confirm your order.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 3: Release */}
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
-            {/* Content Left */}
-            <div className="md:w-1/2 order-2 md:order-1 text-left md:text-right md:pr-12">
-              <div className="inline-flex items-center gap-2 bg-[#EEF2FF] text-[#0F3D8C] px-3.5 py-1.5 rounded-full mb-4 font-bold text-xs">
-                <span>STEP 03</span>
-              </div>
-              <h2 className="font-display-h2 text-2xl md:text-3xl text-[#0F172A] font-bold mb-4">
-                Inspection Window &amp; Payout Release
-              </h2>
-              <p className="font-body-md text-base text-[#64748B] mb-6 leading-relaxed">
-                Upon delivery, you have a 48-hour inspection window to test the device. Verify that the specifications, battery health, and condition match the vendor's listing. Once you approve the item in your order dashboard, funds are released to the vendor.
-              </p>
-              <Link
-                to="/browse"
-                className="bg-[#0F3D8C] text-white hover:bg-[#0A2D6B] transition-colors duration-200 px-6 py-3 rounded-lg font-body-md-bold text-sm inline-flex items-center gap-2 font-bold shadow-md"
-              >
-                Browse Protected Products <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </Link>
-            </div>
-            {/* Center Marker */}
-            <div className="hidden md:flex w-16 h-16 rounded-full bg-white border-4 border-[#E2E8F0] items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm group-hover:border-[#0F3D8C] transition-all duration-300 z-20">
-              <span className="material-symbols-outlined text-[#10B981] text-3xl">task_alt</span>
-            </div>
-            {/* Visual Right */}
-            <div className="md:w-1/2 order-1 md:order-2 w-full">
-              <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-2 w-full h-[320px] hover:shadow-md transition-all duration-300">
-                <div
-                  className="bg-cover bg-center w-full h-full rounded-xl"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD7BXDCgKlvJmsHQQAJwqXMLE0-jPS6Z01x2_EvGgRc565m4c6ifThJBSfOxv4UwTc8sLOkOoCSxFb3D-Cd5F1kyPZaWKQY4HAPIKVe8qdQm3z4ptiN-ZcWbWmqUmZyREHRt7nYKzSscLqFFnR7nznzR-Fep1n8DmMiy_YYAChaylU2482qoGRcAonjJgiq51MwZZxk8h-KleUYWjFQ613N-ENKuU00XIrdRBkG1BoinJpiGKEd72RLpw')",
-                  }}
-                ></div>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
+
+        {/* FAQ Accordion Section */}
+        <section className="max-w-3xl mx-auto mb-20">
+          <h2 className="text-2xl font-bold text-center text-foreground mb-8">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-4">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="bg-card border border-border rounded-xl p-5 shadow-xs">
+                <h3 className="font-semibold text-foreground text-base mb-2">{faq.q}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Call To Action Buttons */}
+        <section className="bg-primary/5 border border-primary/20 rounded-2xl p-8 text-center max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-foreground mb-3">Ready to Trade Tech Safely?</h2>
+          <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-6">
+            Join thousands of buyers and verified sellers across Kenya trading laptops, phones, and repair services with complete Float protection.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              to="/browse"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors px-6 py-3 rounded-lg font-semibold text-sm inline-flex items-center gap-2 shadow-sm"
+            >
+              Start Shopping <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/vendor/register"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors px-6 py-3 rounded-lg font-semibold text-sm inline-flex items-center gap-2 border border-border"
+            >
+              Become a Vendor <Store className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
+
       </main>
     </div>
   );

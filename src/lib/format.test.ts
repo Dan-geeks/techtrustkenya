@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { routeForNotification } from "./format";
 
 describe("routeForNotification - Empirical Verification", () => {
-  it("repair_update returns /repairs regardless of reference_id", () => {
-    expect(routeForNotification({ type: "repair_update", reference_id: "req-123" })).toBe("/repairs");
+  it("repair_update returns /repairs/${reference_id} when reference_id is present, or /repairs when null", () => {
+    expect(routeForNotification({ type: "repair_update", reference_id: "req-123" })).toBe("/repairs/req-123");
     expect(routeForNotification({ type: "repair_update", reference_id: null })).toBe("/repairs");
     expect(routeForNotification({ type: "repair_update", reference_id: "" })).toBe("/repairs");
   });

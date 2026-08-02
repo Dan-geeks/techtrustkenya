@@ -1,26 +1,121 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ShieldCheck, Clock, CheckCircle2, ArrowRight, Loader2, RefreshCw } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-const pageHtml = "<!-- Header -->\n\n<main class=\"flex-grow pt-[104px] pb-margin-desktop px-margin-mobile md:px-margin-desktop flex flex-col items-center justify-center\">\n<div class=\"w-full max-w-3xl mx-auto flex flex-col gap-8\">\n<!-- Hero Trust Section -->\n<div class=\"text-center flex flex-col items-center gap-4\">\n<div class=\"w-20 h-20 rounded-full bg-secondary-fixed flex items-center justify-center mb-4\">\n<span class=\"material-symbols-outlined text-4xl text-primary\" style=\"font-variation-settings: 'FILL' 1;\">\nshield_person\n</span>\n</div>\n<h2 class=\"font-display-h2 text-display-h2 text-primary\">Verification in Progress</h2>\n<p class=\"font-body-lg text-body-lg text-on-surface-variant max-w-xl\">\nThank you for submitting your documentation. We are currently reviewing your profile to ensure the highest security standards for our marketplace.\n</p>\n</div>\n<!-- Bento Layout for Status & Actions -->\n<div class=\"grid grid-cols-1 md:grid-cols-3 gap-6 mt-8\">\n<!-- Timeline Card (Spans 2 columns) -->\n<div class=\"md:col-span-2 bg-surface rounded-xl shadow-sm border border-surface-variant p-8 flex flex-col gap-6 relative overflow-hidden group hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-shadow\">\n<div class=\"flex items-center gap-3 border-b border-surface-variant pb-4\">\n<span class=\"material-symbols-outlined text-primary\">pending_actions</span>\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary\">Verification Timeline</h3>\n</div>\n<div class=\"relative flex flex-col gap-8 pt-4 ml-4\">\n<!-- Connecting Line -->\n<div class=\"absolute left-[11px] top-[24px] bottom-8 w-[2px] bg-surface-container-highest z-0\"></div>\n<div class=\"absolute left-[11px] top-[24px] h-[50%] w-[2px] bg-secondary z-0\"></div>\n<!-- Step 1: Done -->\n<div class=\"flex gap-6 relative z-10\">\n<div class=\"w-6 h-6 rounded-full bg-secondary flex items-center justify-center shrink-0 shadow-sm ring-4 ring-surface\">\n<span class=\"material-symbols-outlined text-[14px] text-on-secondary\" style=\"font-variation-settings: 'FILL' 1;\">check</span>\n</div>\n<div class=\"flex flex-col gap-1\">\n<span class=\"font-body-md-bold text-body-md-bold text-on-background\">Documents Submitted</span>\n<span class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Identity and business registration received on Oct 24, 2024.</span>\n</div>\n</div>\n<!-- Step 2: Current -->\n<div class=\"flex gap-6 relative z-10\">\n<div class=\"w-6 h-6 rounded-full bg-surface border-2 border-secondary flex items-center justify-center shrink-0 ring-4 ring-surface\">\n<div class=\"w-2 h-2 rounded-full bg-secondary animate-pulse\"></div>\n</div>\n<div class=\"flex flex-col gap-1\">\n<span class=\"font-body-md-bold text-body-md-bold text-primary\">Document Review</span>\n<span class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Our compliance team is currently analyzing your submission.</span>\n</div>\n</div>\n<!-- Step 3: Pending -->\n<div class=\"flex gap-6 relative z-10\">\n<div class=\"w-6 h-6 rounded-full bg-surface border-2 border-surface-variant flex items-center justify-center shrink-0 ring-4 ring-surface\"></div>\n<div class=\"flex flex-col gap-1\">\n<span class=\"font-body-md-bold text-body-md-bold text-outline\">Physical Visit Pending</span>\n<span class=\"font-body-md text-body-md text-outline text-sm\">A representative will schedule a site visit upon document approval.</span>\n</div>\n</div>\n</div>\n</div>\n<!-- Support & Info Card (1 Column) -->\n<div class=\"flex flex-col gap-6\">\n<div class=\"bg-surface rounded-xl shadow-sm border border-surface-variant p-6 flex flex-col gap-4\">\n<h3 class=\"font-ui-label text-ui-label text-on-surface-variant uppercase tracking-wider\">Application Details</h3>\n<div class=\"flex flex-col gap-2\">\n<div class=\"flex justify-between items-center\">\n<span class=\"font-body-md text-body-md text-on-surface-variant\">Reference</span>\n<span class=\"font-data-id text-data-id text-primary bg-surface-container px-2 py-1 rounded\">APP-8492-TTK</span>\n</div>\n<div class=\"flex justify-between items-center\">\n<span class=\"font-body-md text-body-md text-on-surface-variant\">Est. Time</span>\n<span class=\"font-body-md-bold text-body-md-bold text-on-background\">2-4 Bus. Days</span>\n</div>\n</div>\n</div>\n<!-- Support Card -->\n<div class=\"bg-inverse-surface rounded-xl p-6 flex flex-col gap-4 text-surface\">\n<div class=\"flex items-center gap-2\">\n<span class=\"material-symbols-outlined text-secondary-fixed-dim\">support_agent</span>\n<h3 class=\"font-body-md-bold text-body-md-bold\">Need Assistance?</h3>\n</div>\n<p class=\"font-body-md text-body-md text-outline-variant text-sm\">\nIf you have questions about the verification process, our support team is available.\n</p>\n<button class=\"w-full py-2 bg-secondary text-on-secondary rounded-lg font-ui-label text-ui-label hover:bg-on-secondary-fixed-variant transition-colors mt-2\">\nContact Support\n</button>\n</div>\n</div>\n</div>\n</div>\n</main>\n<!-- Footer Component from JSON -->\n";
+export const VendorPending = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [checking, setChecking] = useState(false);
+  const [status, setStatus] = useState<string>("pending");
 
-const VendorPending = () => {
+  const checkStatus = async () => {
+    if (!user) return;
+    setChecking(true);
+    try {
+      const { data, error } = await supabase
+        .from("vendor_profiles")
+        .select("verification_status")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      const currentStatus = data?.verification_status || "pending";
+      setStatus(currentStatus);
+
+      if (currentStatus === "approved" || currentStatus === "verified") {
+        toast.success("Congratulations! Your vendor application has been approved!");
+        navigate("/vendor/dashboard", { replace: true });
+      } else if (currentStatus === "suspended") {
+        navigate("/vendor/suspended", { replace: true });
+      } else if (currentStatus === "rejected") {
+        navigate("/vendor/rejected", { replace: true });
+      } else {
+        toast.info("Application status: Pending Review.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to check status");
+    } finally {
+      setChecking(false);
+    }
+  };
+
   useEffect(() => {
-    document.title = "Application Pending - TechTrust Kenya";
+    document.title = "Application Pending | TechTrust Kenya";
+    void checkStatus();
+  }, [user]);
 
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
-      );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-6 antialiased">
+      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-slate-200 p-8 md:p-12 text-center space-y-8">
+        <div className="flex justify-center">
+          <div className="w-20 h-20 bg-amber-500/10 border border-amber-500/30 rounded-3xl flex items-center justify-center text-amber-600">
+            <Clock className="w-10 h-10 animate-pulse" />
+          </div>
+        </div>
 
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-  }, []);
+        <div className="space-y-3 max-w-lg mx-auto">
+          <span className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full">
+            Status: Pending Review
+          </span>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+            Vendor Application Received
+          </h1>
+          <p className="text-slate-600 text-base leading-relaxed">
+            Thank you for registering your shop on TechTrust Kenya. Our physical location verification and compliance team is reviewing your documents.
+          </p>
+        </div>
 
-  return <div className="bg-[#F8FAFC] text-on-surface antialiased min-h-screen flex flex-col" dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+        {/* Verification Checklist */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-left space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+            Verification Steps
+          </h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-3 text-emerald-700 font-medium">
+              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+              <span>Business Registration & M-Pesa Till Submitted</span>
+            </div>
+            <div className="flex items-center gap-3 text-amber-700 font-medium">
+              <Loader2 className="w-5 h-5 shrink-0 animate-spin text-amber-600" />
+              <span>Document & Compliance Review (In Progress)</span>
+            </div>
+            <div className="flex items-center gap-3 text-slate-400 font-medium">
+              <div className="w-5 h-5 rounded-full border-2 border-slate-300 shrink-0"></div>
+              <span>Physical Location Inspection</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <button
+            onClick={checkStatus}
+            disabled={checking}
+            className="w-full sm:w-auto px-6 py-3.5 bg-[#0F3D8C] hover:bg-[#0A2D6B] text-white font-bold rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {checking ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            <span>Check Application Status</span>
+          </button>
+          
+          <Link
+            to="/browse"
+            className="w-full sm:w-auto px-6 py-3.5 border-2 border-slate-300 hover:border-slate-400 text-slate-700 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2"
+          >
+            <span>Browse Marketplace</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default VendorPending;

@@ -1,26 +1,194 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ShieldCheck, MessageCircle, Lock, Verified, Star, CheckCircle, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-const pageHtml = "\n<!-- Main Content Canvas -->\n<main class=\"flex-1 mt-20 pt-8 pb-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full\">\n<!-- Breadcrumbs -->\n\n<div class=\"grid grid-cols-1 lg:grid-cols-12 gap-gutter\">\n<!-- Left: Image Gallery (Bento-ish) -->\n<div class=\"lg:col-span-7 flex flex-col gap-4\">\n<!-- Main Image -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-default overflow-hidden aspect-video relative group border border-outline-variant\">\n<img alt=\"Main product image\" class=\"w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500\" data-alt=\"A pristine, high-resolution product photography shot of a sleek, modern silver laptop (like a MacBook Pro) resting slightly open on a minimal white surface. The lighting is precise and studio-quality, highlighting the metallic texture and clean edges, creating a highly professional and trustworthy aesthetic suitable for an electronics marketplace.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuBNjSZv8rfoQvukUej12m1vF83ptirN4QMeHorHtscl3L07Er0-KcND24gMF9_fFNGsGJq0GhM3iiOq1_S0BbPRm_c-P28tHiGDXgbpV_eY_VKGvmyY8-h4PQCL5PN2myW6x8BXgRoC9Sg8EoltFCaHvQqYV5EsehQYlGYRb-g81rFfhC1tPC1owYBcdKAD0Kvc2x_h8VghauixHoM2ENr0M5zH7xqVLl9VJh7sTP97VGfvlK_IDvX_KA\"/>\n</div>\n<!-- Thumbnails -->\n<div class=\"grid grid-cols-4 gap-4\">\n<div class=\"bg-surface-container-lowest rounded-lg shadow-default overflow-hidden aspect-square border-2 border-primary-container cursor-pointer\">\n<img alt=\"Thumbnail 1\" class=\"w-full h-full object-cover\" data-alt=\"A close-up shot of the laptop's keyboard and trackpad, focusing on the high-quality materials and precise engineering. Soft, diffuse lighting emphasizes the professional and clean nature of the device.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuAJWzCF_VejkAN0oe8LwJZFFOlW6lBq1JhXdZvWrRwi1FgTBk9RPg40jbNgO_Oue_-8_brJ-du9xvvOmWTBlKB-ckZwVBDaHQNLsnOBW5tZTBZfKpXPz1bOVorJNgaaM5KseQLnAaNJoUAio2_0GHz7p4fG45Dtc-vmcmdeJN2mlJFnfn1AtqSXEaFgAFbTxCla0wGS-jz2dkFnKDrWwiBTswX2Vpw3x7tFbMmcoDfMwxvGqTVBN1SixQ\"/>\n</div>\n<div class=\"bg-surface-container-lowest rounded-lg shadow-default overflow-hidden aspect-square border border-outline-variant hover:border-outline transition-colors cursor-pointer opacity-70 hover:opacity-100\">\n<img alt=\"Thumbnail 2\" class=\"w-full h-full object-cover\" data-alt=\"A profile view of the thin, modern laptop, showing its side ports and slim profile. Shot against a stark white background with studio lighting to emphasize sleekness and condition.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuBPv6F3DEZxlSJgKxgNA-kgm250NT_M_kShXu3a4B6myvDULDqiiy55GZSTf_fP-3_Vk6KJVa6izunmEqHVGnCidIfB9sZs3Xx5cVvGj8xzEUiIcQWSo-3RTh_FqYp5HvLY_nOO15qq5q0uFl1PF85VBHpba0uyVY7M6ftH9M4oWtBz9p6GvB0UUpQEq_f_xqqOjGOaIMKrgvj_n-3n6YJAb2HLYBkIVJvHaXmfFr3ws7Ocmqo6QbghNQ\"/>\n</div>\n<div class=\"bg-surface-container-lowest rounded-lg shadow-default overflow-hidden aspect-square border border-outline-variant hover:border-outline transition-colors cursor-pointer opacity-70 hover:opacity-100\">\n<img alt=\"Thumbnail 3\" class=\"w-full h-full object-cover\" data-alt=\"A detailed shot focusing on the laptop screen displaying a vibrant abstract graphic to demonstrate display quality. The surrounding bezel is crisp, set against a minimal white background.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuDPyurFLjFJkRCHeDspXWM-OeTspp8GTX6fXDdLi6xSkSvVp8SuuGAP5b9sXJWRfooUKr_tD-h_lUmbaIwh3kYrFGVKJpF2zYYfelTWwOEJZ1mtgI9SO4Iim5So952ojq7fOM8a_Tho9Nva8Nlr9rZYXma55pOK1jAFjP2b-C9yNDn86332q0FRzmQpk-qMsODQHEvTbfQZxn4ZWM1IEMfiQRJvsHmVtg8d5YLdNSX4HEFxd1AexrJxbw\"/>\n</div>\n<div class=\"bg-surface-container-lowest rounded-lg shadow-default overflow-hidden aspect-square border border-outline-variant hover:border-outline transition-colors cursor-pointer opacity-70 hover:opacity-100 relative\">\n<img alt=\"Thumbnail 4\" class=\"w-full h-full object-cover\" data-alt=\"A shot showing the bottom casing of the laptop to indicate condition. The image is clean, well-lit, and professional, typical of high-end refurbished electronics listings.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuC-w9KIwVd0rji4-KSSvfc50bXH8p9laUTzD8LmZwKoIPTjtQoI3XobBSI9gLUbU_1PBRTof3FrhFWHjZNgrTysc0lftF2Tn0LISHUObgWH4SF5GYskASjr1fIzojKtwAHtsuEz1LcAO-qXGUxS1OWV38uA0N3RiAzrmjp8kVWIPFyQ-U1jmWSxLXgQfyXKvJeCT1XHqz_duYhFYDXmCYBiYfT8UtPpJhfVNX9AEEtRkuUPY7PwBpMB4Q\"/>\n<div class=\"absolute inset-0 bg-surface-variant/80 flex items-center justify-center font-body-md-bold text-on-surface\">\n                            +2\n                        </div>\n</div>\n</div>\n</div>\n<!-- Right: Product Info & Actions -->\n<div class=\"lg:col-span-5 flex flex-col gap-6\">\n<!-- Header & Price -->\n<div>\n<div class=\"flex items-center gap-2 mb-2\">\n<span class=\"bg-[#22C55E] text-white font-ui-label text-ui-label px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm\">\n<span class=\"material-symbols-outlined text-[14px]\" data-icon=\"shield\" data-weight=\"fill\">shield</span>\n                            Protected by Float\n                        </span>\n<span class=\"text-on-surface-variant font-ui-label text-ui-label bg-surface-container-low px-2 py-0.5 rounded-full\">Refurbished - Excellent</span>\n</div>\n<h1 class=\"font-display-h2 text-display-h2 text-on-surface mb-2\">MacBook Pro 16\" M3 Max</h1>\n<div class=\"flex items-end gap-3\">\n<span class=\"font-data-price text-[36px] font-bold text-on-surface leading-none\">KES 350,000</span>\n<span class=\"text-on-surface-variant font-body-md text-body-md mb-1 line-through\">KES 380,000</span>\n</div>\n</div>\n<!-- Float Protection Card -->\n<div class=\"bg-[#EEF2FF] rounded-xl p-6 border border-[#B1C5FF] shadow-sm flex flex-col gap-3 relative overflow-hidden\">\n<!-- Subtle pattern/accent -->\n<div class=\"absolute -right-4 -top-4 w-24 h-24 bg-primary-container/5 rounded-full blur-xl\"></div>\n<div class=\"flex items-center gap-3 relative z-10\">\n<span class=\"material-symbols-outlined text-primary-container text-[28px]\" data-icon=\"account_balance\" data-weight=\"fill\">account_balance</span>\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary-fixed-variant\">Financial-Grade Escrow</h3>\n</div>\n<p class=\"font-body-md text-body-md text-on-surface-variant relative z-10\">\n                        Your funds are held securely in a regulated escrow account. You have a 48-hour window upon delivery to verify the device condition before funds are released to the vendor.\n                    </p>\n<div class=\"flex items-center gap-2 mt-1 relative z-10\">\n<span class=\"w-full h-1 bg-[#3B82F6] rounded-full\"></span>\n<span class=\"w-full h-1 bg-[#3B82F6]/30 rounded-full\"></span>\n<span class=\"w-full h-1 bg-[#3B82F6]/30 rounded-full\"></span>\n</div>\n<span class=\"font-ui-label text-ui-label text-primary-container relative z-10\">Step 1: Secure Funds</span>\n</div>\n<!-- CTAs -->\n<div class=\"flex flex-col gap-3\">\n<button class=\"w-full bg-primary-container text-on-primary font-body-md-bold text-body-md-bold py-3 px-4 rounded-lg hover:bg-[#0A2D6B] hover:shadow-elevated transition-all flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined\" data-icon=\"lock\">lock</span>\n                        Buy Now with Float\n                    </button>\n<button class=\"w-full bg-transparent border border-primary-container text-primary-container font-body-md-bold text-body-md-bold py-3 px-4 rounded-lg hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined\" data-icon=\"chat\">chat</span>\n                        Message Vendor\n                    </button>\n</div>\n<!-- Seller Card -->\n<div class=\"bg-surface-container-lowest rounded-xl p-5 border border-outline-variant shadow-default hover:shadow-elevated hover:border-[#EEF2FF] transition-all flex items-start gap-4 mt-2\">\n<div class=\"relative\">\n<img alt=\"Vendor Logo\" class=\"w-12 h-12 rounded-lg object-cover border border-outline-variant\" data-alt=\"A professional logo for a high-end electronics vendor. The design is modern, minimal, and geometric, fitting a corporate marketplace setting. It sits on a solid, clean background, conveying trust and established business presence.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuAJg38FvLC2iTW0iYJS_JN6cKa80lBTjY-OFZHWiqw2LO5O7RRsreIw1bpW3XpBgN7zLY7a7pjIJ732-9ZXx3vXNxLG2uhUtY5RoGfdp0Il14s4tSGK9kh-EymUx11q3DXP18-qVAbqvyqggIJFh9MUMWyTs5bX0ao3meCE1hDhroPQ1HCXGEecO8thMMgh_uj3CsX4yk8a7_89MGd4QPdpGkNKMnKFDRdIR4HKZGca5hsprOQhvdNIuQ\"/>\n<div class=\"absolute -bottom-1 -right-1 bg-[#22C55E] rounded-full p-0.5 border-2 border-white shadow-sm\">\n<span class=\"material-symbols-outlined text-white text-[12px]\" data-icon=\"verified\" data-weight=\"fill\">verified</span>\n</div>\n</div>\n<div class=\"flex-1\">\n<div class=\"flex justify-between items-start\">\n<h4 class=\"font-body-md-bold text-body-md-bold text-on-surface\">TechHub Nairobi</h4>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant flex items-center gap-1\">\n<span class=\"material-symbols-outlined text-[14px]\" data-icon=\"star\" data-weight=\"fill\">star</span>\n                                4.9 (128)\n                            </span>\n</div>\n<div class=\"flex flex-col gap-1 mt-1\">\n<span class=\"font-ui-label text-ui-label text-primary-container flex items-center gap-1\">\n<span class=\"material-symbols-outlined text-[14px]\" data-icon=\"check_circle\" data-weight=\"fill\">check_circle</span>\n                                Physical Verification Verified\n                            </span>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant flex items-center gap-1\">\n<span class=\"material-symbols-outlined text-[14px]\" data-icon=\"location_on\">location_on</span>\n                                Nairobi, Kenya\n                            </span>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Joined March 2022</span>\n</div>\n</div>\n</div>\n</div>\n</div>\n<!-- Specifications Table -->\n<div class=\"mt-16\">\n<h2 class=\"font-display-h2 text-display-h2 text-on-surface mb-6\">Technical Specifications</h2>\n<div class=\"bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-default\">\n<table class=\"w-full text-left border-collapse\">\n<tbody>\n<tr class=\"border-b border-outline-variant/50 hover:bg-surface-container-lowest/50 transition-colors\">\n<th class=\"py-4 px-6 font-ui-label text-ui-label text-on-surface font-semibold bg-surface-container-low w-1/3 border-r border-outline-variant/50\">Processor</th>\n<td class=\"py-4 px-6 font-body-md text-body-md text-on-surface-variant\">Apple M3 Max (14-core CPU, 30-core GPU)</td>\n</tr>\n<tr class=\"border-b border-outline-variant/50 hover:bg-surface-container-lowest/50 transition-colors\">\n<th class=\"py-4 px-6 font-ui-label text-ui-label text-on-surface font-semibold bg-surface-container-low w-1/3 border-r border-outline-variant/50\">Memory</th>\n<td class=\"py-4 px-6 font-body-md text-body-md text-on-surface-variant\">36GB Unified Memory</td>\n</tr>\n<tr class=\"border-b border-outline-variant/50 hover:bg-surface-container-lowest/50 transition-colors\">\n<th class=\"py-4 px-6 font-ui-label text-ui-label text-on-surface font-semibold bg-surface-container-low w-1/3 border-r border-outline-variant/50\">Storage</th>\n<td class=\"py-4 px-6 font-body-md text-body-md text-on-surface-variant\">1TB SSD</td>\n</tr>\n<tr class=\"border-b border-outline-variant/50 hover:bg-surface-container-lowest/50 transition-colors\">\n<th class=\"py-4 px-6 font-ui-label text-ui-label text-on-surface font-semibold bg-surface-container-low w-1/3 border-r border-outline-variant/50\">Display</th>\n<td class=\"py-4 px-6 font-body-md text-body-md text-on-surface-variant\">16.2-inch Liquid Retina XDR display</td>\n</tr>\n<tr class=\"border-b border-outline-variant/50 hover:bg-surface-container-lowest/50 transition-colors\">\n<th class=\"py-4 px-6 font-ui-label text-ui-label text-on-surface font-semibold bg-surface-container-low w-1/3 border-r border-outline-variant/50\">Condition Notes</th>\n<td class=\"py-4 px-6 font-body-md text-body-md text-on-surface-variant\">Pristine condition. Battery health at 98 percent. Includes original box and 140W USB-C Power Adapter.</td>\n</tr>\n<tr class=\"hover:bg-surface-container-lowest/50 transition-colors\">\n<th class=\"py-4 px-6 font-ui-label text-ui-label text-on-surface font-semibold bg-surface-container-low w-1/3 border-r border-outline-variant/50\">Device ID</th>\n<td class=\"py-4 px-6 font-data-id text-data-id text-on-surface-variant tracking-wider\">APL-M3M-16-9827</td>\n</tr>\n</tbody>\n</table>\n</div>\n</div>\n</main>\n";
+import { SAMPLE_PRODUCTS } from "@/data/products";
 
 const ProductDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const product = SAMPLE_PRODUCTS.find(p => p.id === id) || SAMPLE_PRODUCTS[5]; // fallback to macbook
+  
+  // Use the product's actual gallery if available, otherwise just its main image
+  const gallery = (product as any).gallery || [product.image];
+
+  const [activeImage, setActiveImage] = useState(gallery[0]);
+
+  // When id changes, update image
   useEffect(() => {
-    document.title = "TechTrust - Product Detail";
+    setActiveImage(gallery[0]);
+  }, [product.id]);
 
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
-      );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
 
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-  }, []);
+  useEffect(() => {
+    document.title = `${product.title} | TechTrust`;
+    window.scrollTo(0, 0);
+  }, [product.title]);
 
-  return <div dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+  return (
+    <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-6xl">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+        {/* Left: Image Gallery */}
+        <div className="lg:col-span-7 flex flex-col gap-4">
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden aspect-video relative border border-border group">
+            <img 
+              src={activeImage} 
+              alt="MacBook Pro" 
+              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" 
+            />
+          </div>
+          
+          {gallery.length > 1 && (
+            <div className="grid grid-cols-4 gap-3 md:gap-4">
+              {gallery.map((img: string, idx: number) => (
+                <button 
+                  key={idx}
+                  onClick={() => setActiveImage(img)}
+                  className={`bg-white rounded-xl overflow-hidden aspect-square border-2 transition-all ${
+                    activeImage === img ? 'border-primary ring-2 ring-primary/20' : 'border-border opacity-70 hover:opacity-100 hover:border-slate-300'
+                  }`}
+                >
+                  <img src={img} alt={`Thumbnail ${idx + 1}`} className={`w-full h-full object-cover ${idx > 0 && product.category === 'Laptops' ? 'mix-blend-multiply' : ''}`} />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Product Info & Actions */}
+        <div className="lg:col-span-5 flex flex-col gap-6">
+          
+          {/* Header & Price */}
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="bg-emerald-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Protected by Float
+              </span>
+              <span className="text-slate-600 bg-slate-100 text-xs font-medium px-2.5 py-1 rounded-full border border-slate-200">
+                Refurbished - Excellent
+              </span>
+            </div>
+            
+            <h1 className="text-3xl font-display font-bold text-slate-900 mb-3">{product.title}</h1>
+            
+            <div className="flex items-end gap-3">
+              <span className="text-4xl font-bold text-slate-900 tracking-tight">KES {product.price.toLocaleString()}</span>
+              <span className="text-lg text-slate-400 line-through mb-1 font-medium">KES {product.originalPrice?.toLocaleString()}</span>
+            </div>
+          </div>
+
+          {/* Float Protection Card */}
+          <div className="bg-[#EEF2FF] rounded-2xl p-6 border border-[#B1C5FF] shadow-sm flex flex-col gap-4 relative overflow-hidden">
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                <Lock className="w-5 h-5 text-blue-600" />
+              </div>
+              <h3 className="font-bold text-blue-900 text-lg">Financial-Grade Escrow</h3>
+            </div>
+            <p className="text-sm text-blue-800/80 leading-relaxed relative z-10">
+              Your funds are held securely in a regulated escrow account. You have a 48-hour window upon delivery to verify the device condition before funds are released to the vendor.
+            </p>
+            <div className="flex items-center gap-2 relative z-10">
+              <span className="w-full h-1.5 bg-blue-600 rounded-full"></span>
+              <span className="w-full h-1.5 bg-blue-600/20 rounded-full"></span>
+              <span className="w-full h-1.5 bg-blue-600/20 rounded-full"></span>
+            </div>
+            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wider relative z-10">Step 1: Secure Funds</span>
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-col gap-3">
+            <Button 
+              size="lg" 
+              className="w-full text-base h-14 bg-primary hover:bg-primary-deep shadow-md font-bold gap-2"
+              onClick={() => navigate(`/checkout?product=${product.id}`)}
+            >
+              <Lock className="w-5 h-5" />
+              Buy Now with Float
+            </Button>
+            <Button size="lg" variant="outline" className="w-full text-base h-14 border-2 font-bold gap-2 text-slate-700 hover:text-slate-900" asChild>
+              <a href={`https://wa.me/254700000000?text=${encodeURIComponent(`Hi, I am interested in the ${product.title} (KES ${product.price})`)}`} target="_blank" rel="noreferrer">
+                <MessageCircle className="w-5 h-5" />
+                Message Vendor
+              </a>
+            </Button>
+          </div>
+
+          {/* Seller Card */}
+          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all flex items-start gap-4 mt-2">
+            <div className="relative shrink-0">
+              <img 
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJg38FvLC2iTW0iYJS_JN6cKa80lBTjY-OFZHWiqw2LO5O7RRsreIw1bpW3XpBgN7zLY7a7pjIJ732-9ZXx3vXNxLG2uhUtY5RoGfdp0Il14s4tSGK9kh-EymUx11q3DXP18-qVAbqvyqggIJFh9MUMWyTs5bX0ao3meCE1hDhroPQ1HCXGEecO8thMMgh_uj3CsX4yk8a7_89MGd4QPdpGkNKMnKFDRdIR4HKZGca5hsprOQhvdNIuQ" 
+                alt="TechHub Nairobi" 
+                className="w-14 h-14 rounded-xl object-cover border border-slate-100" 
+              />
+              <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-0.5 border-2 border-white">
+                <CheckCircle className="w-3.5 h-3.5 text-white" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-start">
+                <h4 className="font-bold text-slate-900 truncate">{product.vendor}</h4>
+                <span className="flex items-center gap-1 text-sm font-semibold text-slate-700">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  4.9 <span className="text-slate-400 font-normal">(128)</span>
+                </span>
+              </div>
+              <div className="flex flex-col gap-1.5 mt-2">
+                {product.vendorVerified && (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded-md">
+                    <Verified className="w-3.5 h-3.5" />
+                    Physically Verified
+                  </span>
+                )}
+                <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {product.location}, Kenya
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Specifications Table */}
+      <div className="mt-16 max-w-4xl">
+        <h2 className="text-2xl font-bold text-slate-900 mb-6">Technical Specifications</h2>
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <table className="w-full text-left border-collapse">
+            <tbody className="divide-y divide-slate-200">
+              <tr className="hover:bg-slate-50 transition-colors">
+                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Processor</th>
+                <td className="py-4 px-6 text-sm text-slate-600">{product.specs.Processor}</td>
+              </tr>
+              <tr className="hover:bg-slate-50 transition-colors">
+                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Memory</th>
+                <td className="py-4 px-6 text-sm text-slate-600">{product.specs.Memory}</td>
+              </tr>
+              <tr className="hover:bg-slate-50 transition-colors">
+                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Storage</th>
+                <td className="py-4 px-6 text-sm text-slate-600">{product.specs.Storage}</td>
+              </tr>
+              <tr className="hover:bg-slate-50 transition-colors">
+                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Display</th>
+                <td className="py-4 px-6 text-sm text-slate-600">{product.specs.Display}</td>
+              </tr>
+              <tr className="hover:bg-slate-50 transition-colors">
+                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Condition Notes</th>
+                <td className="py-4 px-6 text-sm text-slate-600 leading-relaxed">{product.specs.Condition}</td>
+              </tr>
+              <tr className="hover:bg-slate-50 transition-colors">
+                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Device ID</th>
+                <td className="py-4 px-6 text-sm font-mono font-medium text-slate-500 tracking-wider">{product.specs.DeviceID}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  );
 };
 
 export default ProductDetail;

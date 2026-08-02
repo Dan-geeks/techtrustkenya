@@ -15,7 +15,7 @@ describe("Notification Navigation Integration Verification", () => {
     };
 
     const targetRoute = routeForNotification(repairNotif);
-    expect(targetRoute).toBe("/repairs");
+    expect(targetRoute).toBe("/repairs/req-789");
   });
 
   it("order_update notification resolves to /orders/${id}", () => {

@@ -1,26 +1,199 @@
 import { useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ShieldCheck, MapPin, Star, Store, CheckCircle, ArrowRight, Phone, Mail } from "lucide-react";
 
-const pageHtml = "\n<!-- Main Content -->\n<main class=\"flex-grow pt-[88px] pb-margin-desktop px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-gutter\">\n<!-- Sidebar / Vendor Info -->\n<aside class=\"col-span-1 lg:col-span-3 flex flex-col gap-unit\">\n<!-- Vendor Profile Card -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 flex flex-col items-center text-center border border-surface-container\">\n<div class=\"w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-surface-container-high\">\n<img alt=\"Vendor Logo\" class=\"w-full h-full object-cover\" data-alt=\"A clean, modern corporate logo for a high-end electronics retailer, featuring a stylized geometric 'E' in deep navy blue on a pristine white background. The aesthetic is professional, minimalist, and conveys absolute trust and technical precision.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuDLsL6PVGo3y65riFq_vTJaKbNY4b0CEY7RlDjRQJHQPD2g_dCnM4I7BjW643W2_3qpHkyk_E6W8EWzw308t6k1-G-mGEQ6zJAoiQflI2vPzLpJGr8BdNxzWdB-AsTZCu018PLhKnh5u42kq7kKd0FVp9fxKz9iDziUxeVtHbTz3x8pqhvf1ynrwBWdsB0e7IE7xJPwggwlHxIvy2XZ7h8yM2pniQ08Uou0039jcSqfRuea6dBqjmUzUQ\"/>\n</div>\n<h1 class=\"font-display-h2 text-display-h2 text-primary mb-1\">ElectroHub Nairobi</h1>\n<!-- Verified Badge -->\n<div class=\"inline-flex items-center gap-1 bg-[#22C55E] text-white px-3 py-1 rounded-full mb-4\">\n<span class=\"material-symbols-outlined text-[16px]\" style=\"font-variation-settings: 'FILL' 1;\">shield</span>\n<span class=\"font-ui-label text-ui-label\">Verified Merchant</span>\n</div>\n<div class=\"flex items-center gap-2 text-on-surface-variant font-body-md text-body-md mb-6\">\n<span class=\"material-symbols-outlined text-[18px]\">location_on</span>\n<span>CBD, Nairobi</span>\n</div>\n<div class=\"w-full flex justify-between px-4 py-3 bg-surface-container-low rounded-lg mb-6\">\n<div class=\"flex flex-col items-center\">\n<span class=\"font-data-price text-data-price text-primary\">4.9</span>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Rating</span>\n</div>\n<div class=\"w-[1px] bg-outline-variant\"></div>\n<div class=\"flex flex-col items-center\">\n<span class=\"font-data-price text-data-price text-primary\">1.2k</span>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Sales</span>\n</div>\n<div class=\"w-[1px] bg-outline-variant\"></div>\n<div class=\"flex flex-col items-center\">\n<span class=\"font-data-price text-data-price text-primary\">100%</span>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Fulfillment</span>\n</div>\n</div>\n<button class=\"w-full bg-primary-container text-on-primary font-body-md-bold text-body-md-bold py-2 rounded-lg hover:bg-primary transition-colors flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined text-[20px]\">chat</span>\n                    Contact Vendor\n                </button>\n</div>\n<!-- Verification Details -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 border border-surface-container mt-4\">\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary mb-4 uppercase tracking-wider text-[12px]\">Verification Details</h3>\n<ul class=\"flex flex-col gap-4\">\n<li class=\"flex items-start gap-3\">\n<span class=\"material-symbols-outlined text-secondary text-[20px] mt-0.5\">verified_user</span>\n<div>\n<p class=\"font-ui-label text-ui-label text-on-surface\">Identity Verified</p>\n<p class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Government ID matched</p>\n</div>\n</li>\n<li class=\"flex items-start gap-3\">\n<span class=\"material-symbols-outlined text-secondary text-[20px] mt-0.5\">store</span>\n<div>\n<p class=\"font-ui-label text-ui-label text-on-surface\">Physical Store Verified</p>\n<p class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Kimathi Street, Nairobi CBD</p>\n</div>\n</li>\n<li class=\"flex items-start gap-3\">\n<span class=\"material-symbols-outlined text-secondary text-[20px] mt-0.5\">description</span>\n<div>\n<p class=\"font-ui-label text-ui-label text-on-surface\">Business License Valid</p>\n<p class=\"font-data-id text-data-id text-on-surface-variant text-sm mt-1\">ID: BZK-894-2023</p>\n</div>\n</li>\n</ul>\n</div>\n<!-- About Section -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 border border-surface-container mt-4\">\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary mb-2 uppercase tracking-wider text-[12px]\">About</h3>\n<p class=\"font-body-md text-body-md text-on-surface-variant leading-relaxed\">\n                    Premium electronics retailer specializing in high-end laptops, smartphones, and professional networking gear. Authorized reseller for major brands. All devices pass a strict 40-point inspection before listing.\n                </p>\n</div>\n</aside>\n<!-- Product Grid -->\n<section class=\"col-span-1 lg:col-span-9 flex flex-col gap-6\">\n<!-- Filters / Sorting Header -->\n<div class=\"flex flex-col sm:flex-row justify-between items-center bg-surface-container-lowest p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-surface-container\">\n<div class=\"flex items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0\">\n<div class=\"relative w-full sm:w-64\">\n<span class=\"material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline\">search</span>\n<input class=\"w-full pl-10 pr-4 py-2 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md focus:border-primary focus:ring-0 transition-colors\" placeholder=\"Search this store...\" type=\"text\"/>\n</div>\n</div>\n<div class=\"flex items-center gap-3 w-full sm:w-auto\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant whitespace-nowrap\">Sort by:</span>\n<select class=\"bg-surface border border-outline-variant rounded-lg font-ui-label text-ui-label px-3 py-2 pr-8 focus:border-primary focus:ring-0 cursor-pointer\">\n<option>Newest Arrivals</option>\n<option>Price: Low to High</option>\n<option>Price: High to Low</option>\n<option>Highest Rated</option>\n</select>\n</div>\n</div>\n<!-- Grid -->\n<div class=\"grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter\">\n<!-- Product Card 1 -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-transparent hover:border-[#EEF2FF] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 flex flex-col overflow-hidden group cursor-pointer\">\n<div class=\"aspect-square bg-surface-container-low relative overflow-hidden\">\n<img alt=\"Product Image\" class=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-500\" data-alt=\"A sleek, high-end professional laptop resting on a clean, white modern desk. The lighting is bright and studio-quality, highlighting the brushed aluminum chassis. The aesthetic is premium corporate tech, with no background clutter, focusing purely on the pristine device.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuCokv45mRVrSIXOWebAFT4UoYazAFFcUbgCGEbnmD9yGyNV54x7N43L91196famiDQcKRBVxbcpDt2X4sEIkqlbHZYWIDsXksFw49njdx5TJb8PLi75aaZAXYAfs7-3sxTCNLBO7OYOPqEquk_48fNbyYChnf2_w9YLaoxr4MXfqm0oWPd7x4sYs05pH9KAgelZoOvLMbksbYq9D99zvRU4PTIp6icBuvUj7K_LLbFHW4-k_oiQwwCUFg\"/>\n<!-- Float Indicator -->\n<div class=\"absolute top-3 left-3 bg-[#3B82F6] text-white px-2 py-1 rounded-sm flex items-center gap-1 shadow-sm\">\n<span class=\"material-symbols-outlined text-[14px]\">local_shipping</span>\n<span class=\"font-data-id text-data-id uppercase tracking-wider\">Fast Ship</span>\n</div>\n</div>\n<div class=\"p-4 flex flex-col flex-grow\">\n<div class=\"flex justify-between items-start mb-2\">\n<h4 class=\"font-body-md-bold text-body-md-bold text-primary line-clamp-2\">ThinkPad X1 Carbon Gen 10</h4>\n<button class=\"text-outline-variant hover:text-error transition-colors\">\n<span class=\"material-symbols-outlined\" data-icon=\"favorite_border\">favorite_border</span>\n</button>\n</div>\n<p class=\"font-data-id text-data-id text-outline mb-4\">SKU: LNV-X1-8492</p>\n<div class=\"mt-auto flex justify-between items-end\">\n<div class=\"flex flex-col\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Escrow Price</span>\n<span class=\"font-data-price text-data-price text-secondary font-bold\">KES 185,000</span>\n</div>\n<span class=\"material-symbols-outlined text-outline group-hover:text-secondary transition-colors\">arrow_forward</span>\n</div>\n</div>\n</div>\n<!-- Product Card 2 -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-transparent hover:border-[#EEF2FF] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 flex flex-col overflow-hidden group cursor-pointer\">\n<div class=\"aspect-square bg-surface-container-low relative overflow-hidden\">\n<img alt=\"Product Image\" class=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-500\" data-alt=\"A pristine, latest-model premium smartphone sitting upright on a minimalist white display stand. The studio lighting casts a soft reflection on the glass back. The environment is clinical, bright, and highly professional, emphasizing the mint condition of the tech device.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuBjjJ9N_yTUiaw6_mQSmGEhSshU2fSCpnJ30l4x7wmSPOFjuomWHAR482UNqaUcquKZmOuN6R2_BxrRLgOzSsuPjLKGV90G92ApbixdgjmhfS21hQO86p3kaXasrD9jkrHpgAZwpePYfeE3MD2tpAwRjeDsMjXvUtjakTBen8YpdMR_S14RfHp-L06v1RcxnDlRMn0RiVO9OYSOk6UcEhr5avQELw6iso5cy7WAUrVuOJWm0HlJXACttQ\"/>\n</div>\n<div class=\"p-4 flex flex-col flex-grow\">\n<div class=\"flex justify-between items-start mb-2\">\n<h4 class=\"font-body-md-bold text-body-md-bold text-primary line-clamp-2\">iPhone 14 Pro Max 256GB - Deep Purple</h4>\n<button class=\"text-outline-variant hover:text-error transition-colors\">\n<span class=\"material-symbols-outlined\" data-icon=\"favorite_border\">favorite_border</span>\n</button>\n</div>\n<p class=\"font-data-id text-data-id text-outline mb-4\">SKU: APL-14PM-256</p>\n<div class=\"mt-auto flex justify-between items-end\">\n<div class=\"flex flex-col\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Escrow Price</span>\n<span class=\"font-data-price text-data-price text-secondary font-bold\">KES 142,000</span>\n</div>\n<span class=\"material-symbols-outlined text-outline group-hover:text-secondary transition-colors\">arrow_forward</span>\n</div>\n</div>\n</div>\n<!-- Product Card 3 -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-transparent hover:border-[#EEF2FF] hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300 flex flex-col overflow-hidden group cursor-pointer\">\n<div class=\"aspect-square bg-surface-container-low relative overflow-hidden\">\n<img alt=\"Product Image\" class=\"w-full h-full object-cover group-hover:scale-105 transition-transform duration-500\" data-alt=\"A professional-grade networking switch or enterprise router shot in macro detail against a clean white backdrop. The metallic ports and subtle LED indicators are sharp and in focus. The lighting is cool, corporate, and evokes enterprise-level technical infrastructure.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuCAIw68Od2d-magWgsPSjhLpFSB-xeiT16teJeRUZ7kYslGqFv4ZjJ4Jm_l9d3DR-5OK9tsf5FhXSCMIly8LBbumdWCGR-ozo_fhPPfHuNcC2TJvGzNCymkzUdNPzYGT3jJkw74NsSXhksTr-APx-qLHEhOmwqwf0PLMROldHdvwtpZ_kaqACX5Z7iOI8_qdS47jKYjGqzIZxl8LZF7iK29dhGf82PafORHCDJzF85OaHzhDNDjGspAvw\"/>\n<!-- Float Indicator -->\n<div class=\"absolute top-3 left-3 bg-surface-container-high text-on-surface px-2 py-1 rounded-sm flex items-center gap-1 shadow-sm\">\n<span class=\"font-data-id text-data-id uppercase tracking-wider text-[10px]\">Only 2 Left</span>\n</div>\n</div>\n<div class=\"p-4 flex flex-col flex-grow\">\n<div class=\"flex justify-between items-start mb-2\">\n<h4 class=\"font-body-md-bold text-body-md-bold text-primary line-clamp-2\">Cisco Catalyst 9300 Series Switch</h4>\n<button class=\"text-outline-variant hover:text-error transition-colors\">\n<span class=\"material-symbols-outlined\" data-icon=\"favorite_border\">favorite_border</span>\n</button>\n</div>\n<p class=\"font-data-id text-data-id text-outline mb-4\">SKU: CSC-9300-48P</p>\n<div class=\"mt-auto flex justify-between items-end\">\n<div class=\"flex flex-col\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-[12px]\">Escrow Price</span>\n<span class=\"font-data-price text-data-price text-secondary font-bold\">KES 320,000</span>\n</div>\n<span class=\"material-symbols-outlined text-outline group-hover:text-secondary transition-colors\">arrow_forward</span>\n</div>\n</div>\n</div>\n</div>\n<!-- Pagination -->\n<div class=\"flex justify-center items-center gap-2 mt-8\">\n<button class=\"w-10 h-10 rounded-lg border border-outline-variant flex items-center justify-center text-outline hover:border-primary hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed\" disabled=\"\">\n<span class=\"material-symbols-outlined\">chevron_left</span>\n</button>\n<button class=\"w-10 h-10 rounded-lg bg-primary-container text-on-primary font-body-md-bold flex items-center justify-center transition-colors\">1</button>\n<button class=\"w-10 h-10 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary font-body-md-bold transition-colors\">2</button>\n<button class=\"w-10 h-10 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary font-body-md-bold transition-colors\">3</button>\n<button class=\"w-10 h-10 rounded-lg border border-outline-variant flex items-center justify-center text-outline hover:border-primary hover:text-primary transition-colors\">\n<span class=\"material-symbols-outlined\">chevron_right</span>\n</button>\n</div>\n</section>\n</main>\n";
+interface VendorDetails {
+  id: string;
+  business_name: string;
+  is_verified: boolean;
+  rating: number;
+  sales_count: number;
+  location: string;
+  joined_date: string;
+  bio: string;
+  products: Array<{
+    id: string;
+    title: string;
+    price_ksh: number;
+    condition: string;
+    sku: string;
+    image_url: string;
+  }>;
+}
+
+const mockVendors: Record<string, VendorDetails> = {
+  v100: {
+    id: "v100",
+    business_name: "TechHub Nairobi",
+    is_verified: true,
+    rating: 4.9,
+    sales_count: 128,
+    location: "CBD, Nairobi",
+    joined_date: "March 2022",
+    bio: "Premium electronics retailer specializing in high-end laptops, smartphones, and professional gear. All devices pass strict 40-point Float inspection before listing.",
+    products: [
+      {
+        id: "p1",
+        title: "MacBook Pro 16\" M3 Max",
+        price_ksh: 350000,
+        condition: "Refurbished - Excellent",
+        sku: "APL-M3M-16",
+        image_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuBNjSZv8rfoQvukUej12m1vF83ptirN4QMeHorHtscl3L07Er0-KcND24gMF9_fFNGsGJq0GhM3iiOq1_S0BbPRm_c-P28tHiGDXgbpV_eY_VKGvmyY8-h4PQCL5PN2myW6x8BXgRoC9Sg8EoltFCaHvQqYV5EsehQYlGYRb-g81rFfhC1tPC1owYBcdKAD0Kvc2x_h8VghauixHoM2ENr0M5zH7xqVLl9VJh7sTP97VGfvlK_IDvX_KA"
+      },
+      {
+        id: "p2",
+        title: "ThinkPad X1 Carbon Gen 10",
+        price_ksh: 185000,
+        condition: "Used - Like New",
+        sku: "LNV-X1-8492",
+        image_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuCokv45mRVrSIXOWebAFT4UoYazAFFcUbgCGEbnmD9yGyNV54x7N43L91196famiDQcKRBVxbcpDt2X4sEIkqlbHZYWIDsXksFw49njdx5TJb8PLi75aaZAXYAfs7-3sxTCNLBO7OYOPqEquk_48fNbyYChnf2_w9YLaoxr4MXfqm0oWPd7x4sYs05pH9KAgelZoOvLMbksbYq9D99zvRU4PTIp6icBuvUj7K_LLbFHW4-k_oiQwwCUFg"
+      }
+    ]
+  }
+};
 
 const ShopPage = () => {
+  const { vendorId } = useParams<{ vendorId: string }>();
+  const vendor = mockVendors[vendorId || "v100"] || {
+    id: vendorId || "v100",
+    business_name: "TechHub Nairobi",
+    is_verified: true,
+    rating: 4.9,
+    sales_count: 128,
+    location: "Nairobi, Kenya",
+    joined_date: "March 2022",
+    bio: "Verified merchant operating under Float Escrow protection.",
+    products: [
+      {
+        id: "p1",
+        title: "MacBook Pro 16\" M3 Max",
+        price_ksh: 350000,
+        condition: "Refurbished",
+        sku: "APL-M3M-16",
+        image_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuBNjSZv8rfoQvukUej12m1vF83ptirN4QMeHorHtscl3L07Er0-KcND24gMF9_fFNGsGJq0GhM3iiOq1_S0BbPRm_c-P28tHiGDXgbpV_eY_VKGvmyY8-h4PQCL5PN2myW6x8BXgRoC9Sg8EoltFCaHvQqYV5EsehQYlGYRb-g81rFfhC1tPC1owYBcdKAD0Kvc2x_h8VghauixHoM2ENr0M5zH7xqVLl9VJh7sTP97VGfvlK_IDvX_KA"
+      }
+    ]
+  };
+
   useEffect(() => {
-    document.title = "Vendor Storefront - TechTrust Kenya";
+    document.title = `${vendor.business_name} | TechTrust Storefront`;
+  }, [vendor.business_name]);
 
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
-      );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
+  return (
+    <div className="bg-background text-foreground font-body antialiased min-h-screen py-8">
+      <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Sidebar Vendor Info */}
+        <aside className="lg:col-span-4 space-y-6">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-xs text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary font-bold text-2xl">
+              {vendor.business_name.substring(0, 2)}
+            </div>
+            <h1 className="text-2xl font-bold text-foreground mb-1">{vendor.business_name}</h1>
+            
+            {vendor.is_verified && (
+              <div className="inline-flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold mb-4">
+                <ShieldCheck className="w-4 h-4" />
+                Physically Verified Merchant
+              </div>
+            )}
 
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-  }, []);
+            <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mb-4">
+              <MapPin className="w-4 h-4 text-primary" />
+              <span>{vendor.location}</span>
+            </div>
 
-  return <div className="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col" dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+            <div className="grid grid-cols-3 gap-2 bg-muted p-3 rounded-lg text-xs mb-6">
+              <div>
+                <span className="font-bold text-foreground block">{vendor.rating} ★</span>
+                <span className="text-muted-foreground">Rating</span>
+              </div>
+              <div>
+                <span className="font-bold text-foreground block">{vendor.sales_count}</span>
+                <span className="text-muted-foreground">Sales</span>
+              </div>
+              <div>
+                <span className="font-bold text-foreground block">100%</span>
+                <span className="text-muted-foreground">Float</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed text-left">
+              {vendor.bio}
+            </p>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-6 shadow-xs space-y-3">
+            <h3 className="font-bold text-foreground text-sm uppercase tracking-wider">Verification Badge Status</h3>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                <span>Physical Shop Premises Inspected</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                <span>KRA PIN & Business Registration Validated</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                <span>Float Escrow Payment Integration Enabled</span>
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        {/* Products Listing Grid */}
+        <section className="lg:col-span-8 space-y-6">
+          <div className="flex justify-between items-center bg-card border border-border p-4 rounded-xl shadow-xs">
+            <h2 className="text-lg font-bold text-foreground">
+              Store Listings ({vendor.products.length})
+            </h2>
+            <Link to="/browse" className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
+              Back to Browse <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {vendor.products.map((item) => (
+              <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group flex flex-col">
+                <div className="aspect-video bg-muted relative overflow-hidden">
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <span className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-xs">
+                    Float Escrow Protected
+                  </span>
+                </div>
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                  <div>
+                    <h3 className="font-bold text-foreground text-base leading-snug">{item.title}</h3>
+                    <span className="text-xs text-muted-foreground">{item.condition} · SKU: {item.sku}</span>
+                  </div>
+                  <div className="flex justify-between items-end pt-2 border-t border-border">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Price (KSH)</span>
+                      <span className="font-data-price text-price text-lg font-bold text-primary">
+                        KSH {item.price_ksh.toLocaleString()}
+                      </span>
+                    </div>
+                    <Link
+                      to={`/product/${item.id}`}
+                      className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors"
+                    >
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+      </div>
+    </div>
+  );
 };
 
 export default ShopPage;

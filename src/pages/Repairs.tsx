@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 const Repairs = () => {
   useEffect(() => {
     document.title = "Certified Tech Repairs | TechTrust Kenya";
+    window.scrollTo(0, 0);
 
     const ensureStylesheet = (href: string) => {
       const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
@@ -39,7 +40,7 @@ const Repairs = () => {
               </p>
               <div className="flex flex-wrap gap-4 pt-2">
                 <Link
-                  to="/browse"
+                  to="/book-repair"
                   className="bg-[#0F3D8C] text-white px-8 py-3.5 rounded-lg font-body-md-bold text-base hover:bg-[#0A2D6B] transition-all duration-200 shadow-md inline-block font-semibold"
                 >
                   Book a Repair

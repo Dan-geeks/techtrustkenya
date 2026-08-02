@@ -16,7 +16,7 @@ export const routeForNotification = (n: {
 }): string | null => {
   switch (n.type) {
     case "repair_update":
-      return "/repairs";
+      return n.reference_id ? `/repairs/${n.reference_id}` : "/repairs";
     case "order_update":
     case "escrow_release":
     case "dispute_opened":

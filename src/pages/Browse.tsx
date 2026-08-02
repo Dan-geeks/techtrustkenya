@@ -1,239 +1,41 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Search, Tune, X, Shield, Verified, ArrowRight, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 
-const pageHtml = `
-<main class="flex-grow w-full max-w-container-max mx-auto px-6 md:px-12 pt-8 md:pt-12 pb-16 md:pb-24 flex flex-col md:flex-row gap-8 md:gap-12">
-  <!-- Filter Sidebar -->
-  <aside class="w-full md:w-64 flex-shrink-0 flex flex-col gap-6">
-    <!-- Mobile Search & Filter Toggle (Visible only on mobile) -->
-    <div class="md:hidden flex flex-col gap-4 mb-4">
-      <div class="relative w-full">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-        <input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl font-body-md text-body-md" placeholder="Search electronics..." type="text"/>
-      </div>
-      <button class="flex items-center justify-center gap-2 bg-surface-container-low py-2.5 rounded-xl border border-outline-variant font-ui-label text-ui-label">
-        <span class="material-symbols-outlined">tune</span> Filters
-      </button>
-    </div>
+interface Product {
+  id: string;
+  title: string;
+  category: string;
+  condition: string;
+  price: number;
+  image: string;
+  vendor: string;
+  vendorVerified: boolean;
+  location: string;
+  badge?: string;
+}
 
-    <!-- Desktop Filters Wrapper -->
-    <div class="hidden md:flex flex-col gap-8 sticky top-24">
-      <div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
-        <h2 class="font-body-md-bold text-lg text-on-surface font-bold">Filters</h2>
-        <button class="font-ui-label text-xs text-secondary hover:underline font-semibold">Clear all</button>
-      </div>
+import { SAMPLE_PRODUCTS } from "@/data/products";
 
-      <!-- Category -->
-      <div class="flex flex-col gap-3">
-        <h3 class="font-ui-label text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Category</h3>
-        <div class="flex flex-col gap-2.5">
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input checked="" class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
-            <span class="font-body-md text-sm text-on-surface">Laptops</span>
-            <span class="ml-auto font-data-id text-xs text-outline">124</span>
-          </label>
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
-            <span class="font-body-md text-sm text-on-surface">Smartphones</span>
-            <span class="ml-auto font-data-id text-xs text-outline">89</span>
-          </label>
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
-            <span class="font-body-md text-sm text-on-surface">Tablets</span>
-            <span class="ml-auto font-data-id text-xs text-outline">45</span>
-          </label>
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
-            <span class="font-body-md text-sm text-on-surface">Components &amp; Accessories</span>
-            <span class="ml-auto font-data-id text-xs text-outline">210</span>
-          </label>
-        </div>
-      </div>
+const CATEGORIES = ["Laptops", "Smartphones", "Tablets", "Components & Accessories", "Cameras", "Wearables"];
+const CONDITIONS = ["Brand New", "Refurbished - Grade A", "Used - Good"];
 
-      <!-- Condition -->
-      <div class="flex flex-col gap-3">
-        <h3 class="font-ui-label text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Condition</h3>
-        <div class="flex flex-col gap-2.5">
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
-            <span class="font-body-md text-sm text-on-surface">Brand New</span>
-          </label>
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input checked="" class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
-            <span class="font-body-md text-sm text-on-surface">Refurbished - Grade A</span>
-          </label>
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input class="rounded border-outline-variant text-primary-container focus:ring-primary-container w-4 h-4" type="checkbox"/>
-            <span class="font-body-md text-sm text-on-surface">Used - Good</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Price Range -->
-      <div class="flex flex-col gap-3">
-        <h3 class="font-ui-label text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Price Range (KES)</h3>
-        <div class="flex items-center gap-2">
-          <input class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg font-data-id text-xs focus:border-primary-container focus:ring-0" placeholder="Min" type="number"/>
-          <span class="text-outline">-</span>
-          <input class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg font-data-id text-xs focus:border-primary-container focus:ring-0" placeholder="Max" type="number"/>
-        </div>
-      </div>
-
-      <!-- Location -->
-      <div class="flex flex-col gap-3">
-        <h3 class="font-ui-label text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Location</h3>
-        <div class="relative">
-          <select class="w-full appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg py-2.5 pl-3 pr-8 font-body-md text-sm focus:border-primary-container focus:ring-0 cursor-pointer">
-            <option>All Locations</option>
-            <option>Nairobi</option>
-            <option>Mombasa</option>
-            <option>Kisumu</option>
-            <option>Nakuru</option>
-          </select>
-          <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
-        </div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Main Product Grid Area -->
-  <div class="flex-grow flex flex-col gap-8">
-    <!-- Page Header & Active Filters -->
-    <div class="flex flex-col gap-4">
-      <div>
-        <h1 class="font-display-h2 text-3xl font-bold text-on-surface mb-1">Browse Verified Marketplace</h1>
-        <p class="text-sm text-on-surface-variant">Every purchase is protected by Float escrow until delivery confirmation.</p>
-      </div>
-
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2">
-        <!-- Active Chips -->
-        <div class="flex flex-wrap gap-2">
-          <div class="flex items-center gap-1.5 px-3 py-1 bg-[#EEF2FF] rounded-full font-ui-label text-xs text-primary-container border border-[#adc6ff]">
-            Laptops
-            <button class="material-symbols-outlined text-[14px] hover:text-primary transition-colors">close</button>
-          </div>
-          <div class="flex items-center gap-1.5 px-3 py-1 bg-[#EEF2FF] rounded-full font-ui-label text-xs text-primary-container border border-[#adc6ff]">
-            Refurbished - Grade A
-            <button class="material-symbols-outlined text-[14px] hover:text-primary transition-colors">close</button>
-          </div>
-        </div>
-
-        <!-- Sorting -->
-        <div class="flex items-center gap-2 ml-auto">
-          <span class="font-ui-label text-xs text-on-surface-variant">Sort by:</span>
-          <select class="bg-transparent border border-outline-variant/40 rounded-lg px-3 py-1.5 font-ui-label text-xs text-primary-container font-semibold focus:ring-0 cursor-pointer">
-            <option>Recommended</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
-            <option>Newest Arrivals</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Product Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Product Card 1 -->
-      <div class="product-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300">
-        <div class="h-[220px] w-full bg-surface-container-low relative group">
-          <img alt="ThinkPad T14" class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdleXUwqWkylQCOowAj-deG4t_yt5eqlkSDpOfJTsUE_TEzXc2uwMThZ5SiHnN4rGaXPLltFx2e2bvBMXlmt7h23D9JDcAwrgBWnk25yrtWV9Y65uWX4j_tb8tGMGlMBZ3kDnVCqv3GmuFs0CVE5VSET-436nAbEtiAsCJ217dw8VPw0BH0P8ziSkZ7oaop3Rb6RvJGLRvpEGYLwt07Ki1eXqe8a8R7OUlStgnkRU_I1_zwX-pEuifwg"/>
-          <div class="absolute top-3 right-3 flex gap-1">
-            <span class="px-2.5 py-1 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-xs rounded-md shadow-sm border border-outline-variant/30">Refurbished</span>
-          </div>
-        </div>
-        <div class="p-6 flex flex-col gap-3 flex-grow">
-          <div class="flex items-center gap-1.5">
-            <span class="font-data-id text-xs text-on-surface-variant font-medium">TechHub Nairobi</span>
-            <span class="material-symbols-outlined fill text-on-tertiary-container text-[14px]">verified</span>
-          </div>
-          <h3 class="font-body-md-bold text-base text-on-surface line-clamp-2">Lenovo ThinkPad T14 Gen 2 - 16GB RAM, 512GB SSD</h3>
-          <div class="mt-auto pt-4 border-t border-outline-variant/20 flex flex-col gap-2">
-            <div class="font-data-price text-xl font-bold text-primary-container">KES 85,000</div>
-            <div class="flex items-center gap-1 text-on-tertiary-container font-data-id text-xs">
-              <span class="material-symbols-outlined text-[14px]">shield</span>
-              Protected by Float
-            </div>
-            <a href="/cart" class="mt-2 w-full text-center py-2.5 bg-[#EEF2FF] hover:bg-primary-container hover:text-on-primary text-primary-container font-ui-label text-sm rounded-xl transition-all border border-primary-container/20 block font-semibold">
-              Buy with Float
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product Card 2 -->
-      <div class="product-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300">
-        <div class="h-[220px] w-full bg-surface-container-low relative group">
-          <img alt="iPhone 13" class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrAVOO-8QraKP-C9Q1BT_ANbGgN4ma4AkBUSrEtjap_A16QmSssQFV6XKp67QkcCAAvrUgH4-sXXvkHUt8OGZKKjMTQjzyZctoJPCq78q5or9dZlgqa4sbDpW5sqmQYBqRC4olTWpCZ0kkycV-jep1JAn9PzVOEhSwblYg_a0oUwfDVo7uHsaH7A6nACPKsyobb53asm6bwkPz-JRXBLQv8x3E5aPOvJa_w6KqhwVlzf671kYr-XIvTg"/>
-          <div class="absolute top-3 right-3 flex gap-1">
-            <span class="px-2.5 py-1 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-xs rounded-md shadow-sm border border-outline-variant/30">New</span>
-          </div>
-        </div>
-        <div class="p-6 flex flex-col gap-3 flex-grow">
-          <div class="flex items-center gap-1.5">
-            <span class="font-data-id text-xs text-on-surface-variant font-medium">Gadget Haven CBD</span>
-            <span class="material-symbols-outlined fill text-on-tertiary-container text-[14px]">verified</span>
-          </div>
-          <h3 class="font-body-md-bold text-base text-on-surface line-clamp-2">iPhone 13 Pro Max - 256GB - Sierra Blue</h3>
-          <div class="mt-auto pt-4 border-t border-outline-variant/20 flex flex-col gap-2">
-            <div class="font-data-price text-xl font-bold text-primary-container">KES 120,000</div>
-            <div class="flex items-center gap-1 text-on-tertiary-container font-data-id text-xs">
-              <span class="material-symbols-outlined text-[14px]">shield</span>
-              Protected by Float
-            </div>
-            <a href="/cart" class="mt-2 w-full text-center py-2.5 bg-[#EEF2FF] hover:bg-primary-container hover:text-on-primary text-primary-container font-ui-label text-sm rounded-xl transition-all border border-primary-container/20 block font-semibold">
-              Buy with Float
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product Card 3 -->
-      <div class="product-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300">
-        <div class="h-[220px] w-full bg-surface-container-low relative group">
-          <img alt="Dell Monitor" class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeDkgSjm_9dl_5_plv-StG9dwpsWMvmlKWoa02qBgjtpCluwvyQaumFyFOV8vvS7giHdOgpIBd_zTOfJ4Lu7cbSzj7852i3uxlo3Uc4NnoIrVmLgarTxvxa77QgwDtsmmioCZZ69Q608DxacnzKLMfZa79I0dLmXL3s7lZ6OgjhHZu_2rCF315CuISy3iONbZat4pml9413pA1Pvvm8x7PTd10YzHwdz5P3GrIGajEqCDC92l1Jj129A"/>
-          <div class="absolute top-3 right-3 flex gap-1">
-            <span class="px-2.5 py-1 bg-surface-container-lowest/90 backdrop-blur text-primary-container font-data-id text-xs rounded-md shadow-sm border border-outline-variant/30">Refurbished</span>
-          </div>
-        </div>
-        <div class="p-6 flex flex-col gap-3 flex-grow">
-          <div class="flex items-center gap-1.5">
-            <span class="font-data-id text-xs text-on-surface-variant font-medium">Electro World</span>
-            <span class="material-symbols-outlined fill text-on-tertiary-container text-[14px]">verified</span>
-          </div>
-          <h3 class="font-body-md-bold text-base text-on-surface line-clamp-2">Dell UltraSharp 27 4K USB-C Hub Monitor - U2723QE</h3>
-          <div class="mt-auto pt-4 border-t border-outline-variant/20 flex flex-col gap-2">
-            <div class="font-data-price text-xl font-bold text-primary-container">KES 65,500</div>
-            <div class="flex items-center gap-1 text-on-tertiary-container font-data-id text-xs">
-              <span class="material-symbols-outlined text-[14px]">shield</span>
-              Protected by Float
-            </div>
-            <a href="/cart" class="mt-2 w-full text-center py-2.5 bg-[#EEF2FF] hover:bg-primary-container hover:text-on-primary text-primary-container font-ui-label text-sm rounded-xl transition-all border border-primary-container/20 block font-semibold">
-              Buy with Float
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pagination -->
-    <div class="mt-12 flex justify-center items-center gap-2">
-      <button class="p-2.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50" disabled="">
-        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
-      </button>
-      <button class="w-9 h-9 rounded-lg bg-primary-container text-on-primary font-data-id text-sm flex items-center justify-center font-bold">1</button>
-      <button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface font-data-id text-sm flex items-center justify-center transition-colors">2</button>
-      <button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface font-data-id text-sm flex items-center justify-center transition-colors">3</button>
-      <span class="text-outline px-1">...</span>
-      <button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface font-data-id text-sm flex items-center justify-center transition-colors">12</button>
-      <button class="p-2.5 rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container-low transition-colors">
-        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-      </button>
-    </div>
-  </div>
-</main>
-`;
+const ITEMS_PER_PAGE = 6;
 
 const Browse = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialQuery = searchParams.get("q") || "";
+
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(["Laptops"]);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>(["Refurbished - Grade A"]);
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [selectedLocation, setSelectedLocation] = useState<string>("All Locations");
+  const [sortBy, setSortBy] = useState<string>("Recommended");
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     document.title = "Browse Verified Marketplace | TechTrust Kenya";
 
@@ -251,7 +53,448 @@ const Browse = () => {
     ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
   }, []);
 
-  return <div dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+  useEffect(() => {
+    setSearchQuery(searchParams.get("q") || "");
+  }, [searchParams]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategories, selectedConditions, minPrice, maxPrice, selectedLocation, sortBy]);
+
+  const handleCategoryToggle = (cat: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const handleConditionToggle = (cond: string) => {
+    setSelectedConditions((prev) =>
+      prev.includes(cond) ? prev.filter((c) => c !== cond) : [...prev, cond]
+    );
+  };
+
+  const handleRemoveCategory = (cat: string) => {
+    setSelectedCategories((prev) => prev.filter((c) => c !== cat));
+  };
+
+  const handleRemoveCondition = (cond: string) => {
+    setSelectedConditions((prev) => prev.filter((c) => c !== cond));
+  };
+
+  const handleClearAll = () => {
+    setSelectedCategories([]);
+    setSelectedConditions([]);
+    setSearchQuery("");
+    setMinPrice("");
+    setMaxPrice("");
+    setSelectedLocation("All Locations");
+    setSearchParams({});
+    setCurrentPage(1);
+  };
+
+  // Filter & Sort Products
+  const filteredProducts = useMemo(() => {
+    let result = [...SAMPLE_PRODUCTS];
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.vendor.toLowerCase().includes(q)
+      );
+    }
+
+    if (selectedCategories.length > 0) {
+      result = result.filter((p) => selectedCategories.includes(p.category));
+    }
+
+    if (selectedConditions.length > 0) {
+      result = result.filter((p) => selectedConditions.includes(p.condition));
+    }
+
+    if (selectedLocation !== "All Locations") {
+      result = result.filter((p) => p.location.toLowerCase() === selectedLocation.toLowerCase());
+    }
+
+    if (minPrice) {
+      const min = Number(minPrice);
+      if (!isNaN(min)) result = result.filter((p) => p.price >= min);
+    }
+
+    if (maxPrice) {
+      const max = Number(maxPrice);
+      if (!isNaN(max)) result = result.filter((p) => p.price <= max);
+    }
+
+    if (sortBy === "Price: Low to High") {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "Price: High to Low") {
+      result.sort((a, b) => b.price - a.price);
+    }
+
+    return result;
+  }, [searchQuery, selectedCategories, selectedConditions, selectedLocation, minPrice, maxPrice, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
+  const activeChips = [
+    ...selectedCategories.map((cat) => ({ type: "cat", label: cat })),
+    ...selectedConditions.map((cond) => ({ type: "cond", label: cond })),
+  ];
+
+  return (
+    <div className="bg-background text-on-background antialiased min-h-screen">
+      <main className="flex-grow w-full max-w-container-max mx-auto px-6 md:px-12 pt-8 md:pt-12 pb-16 md:pb-24 flex flex-col md:flex-row gap-8 md:gap-12">
+        {/* Filter Sidebar */}
+        <aside className="w-full md:w-64 flex-shrink-0 flex flex-col gap-6">
+          {/* Mobile Search & Filter Toggle */}
+          <div className="md:hidden flex flex-col gap-4 mb-2">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#CBD5E1] rounded-xl text-sm focus:border-[#0F3D8C]"
+                placeholder="Search electronics..."
+                type="text"
+              />
+            </div>
+            <button
+              onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
+              className="flex items-center justify-center gap-2 bg-[#EEF2FF] text-[#0F3D8C] py-2.5 rounded-xl border border-[#0F3D8C]/20 font-bold text-sm"
+            >
+              <SlidersHorizontal className="h-4 w-4" /> Filters ({activeChips.length})
+            </button>
+          </div>
+
+          {/* Desktop & Mobile Responsive Filters Container */}
+          <div
+            className={`${
+              mobileFilterOpen ? "flex" : "hidden md:flex"
+            } flex-col gap-8 sticky top-24 bg-white md:bg-transparent p-6 md:p-0 rounded-2xl md:rounded-none border md:border-none border-slate-200 shadow-lg md:shadow-none z-30`}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-[#E2E8F0]">
+              <h2 className="font-display-h2 text-lg text-[#0F172A] font-bold">Filters</h2>
+              {activeChips.length > 0 && (
+                <button
+                  onClick={handleClearAll}
+                  className="text-xs text-[#0F3D8C] hover:underline font-bold"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
+            {/* Category */}
+            <div className="flex flex-col gap-3">
+              <h3 className="font-ui-label text-xs text-[#64748B] uppercase tracking-wider font-semibold">
+                Category
+              </h3>
+              <div className="flex flex-col gap-2.5">
+                {[
+                  { name: "Laptops", count: 124 },
+                  { name: "Smartphones", count: 89 },
+                  { name: "Tablets", count: 45 },
+                  { name: "Components & Accessories", count: 210 },
+                  { name: "Cameras", count: 12 },
+                  { name: "Wearables", count: 34 },
+                ].map((cat) => (
+                  <label key={cat.name} className="flex items-center justify-between cursor-pointer select-none">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(cat.name)}
+                        onChange={() => handleCategoryToggle(cat.name)}
+                        className="rounded border-[#CBD5E1] text-[#0F3D8C] focus:ring-[#0F3D8C] w-4 h-4 cursor-pointer"
+                      />
+                      <span className="text-sm text-[#0F172A] font-medium">{cat.name}</span>
+                    </div>
+                    <span className="text-xs text-[#94A3B8] font-mono">{cat.count}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Condition */}
+            <div className="flex flex-col gap-3">
+              <h3 className="font-ui-label text-xs text-[#64748B] uppercase tracking-wider font-semibold">
+                Condition
+              </h3>
+              <div className="flex flex-col gap-2.5">
+                {CONDITIONS.map((cond) => (
+                  <label key={cond} className="flex items-center gap-3 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={selectedConditions.includes(cond)}
+                      onChange={() => handleConditionToggle(cond)}
+                      className="rounded border-[#CBD5E1] text-[#0F3D8C] focus:ring-[#0F3D8C] w-4 h-4 cursor-pointer"
+                    />
+                    <span className="text-sm text-[#0F172A] font-medium">{cond}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Price Range */}
+            <div className="flex flex-col gap-3">
+              <h3 className="font-ui-label text-xs text-[#64748B] uppercase tracking-wider font-semibold">
+                Price Range (KES)
+              </h3>
+              <div className="flex items-center gap-2">
+                <input
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-[#CBD5E1] rounded-lg text-xs focus:border-[#0F3D8C]"
+                  placeholder="Min"
+                  type="number"
+                />
+                <span className="text-[#94A3B8]">-</span>
+                <input
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-[#CBD5E1] rounded-lg text-xs focus:border-[#0F3D8C]"
+                  placeholder="Max"
+                  type="number"
+                />
+              </div>
+            </div>
+
+            {/* Location */}
+            <div className="flex flex-col gap-3">
+              <h3 className="font-ui-label text-xs text-[#64748B] uppercase tracking-wider font-semibold">
+                Location
+              </h3>
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="w-full appearance-none bg-white border border-[#CBD5E1] rounded-lg py-2.5 px-3 text-sm focus:border-[#0F3D8C] cursor-pointer"
+              >
+                <option>All Locations</option>
+                <option>Nairobi</option>
+                <option>Mombasa</option>
+                <option>Kisumu</option>
+                <option>Nakuru</option>
+              </select>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Product Grid Area */}
+        <div className="flex-grow flex flex-col gap-6">
+          {/* Page Header & Active Filters */}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h1 className="font-display-h2 text-2xl md:text-3xl font-bold text-[#0F172A] mb-1">
+                  Browse Verified Marketplace
+                </h1>
+                <p className="text-xs md:text-sm text-[#64748B]">
+                  Every purchase is protected by Float escrow until delivery confirmation.
+                </p>
+              </div>
+
+              {/* Desktop Search Bar */}
+              <div className="relative w-full md:w-72">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-8 py-2 bg-white border border-[#CBD5E1] rounded-xl text-sm focus:border-[#0F3D8C] outline-none shadow-sm"
+                  placeholder="Search marketplace..."
+                  type="text"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2 border-t border-[#E2E8F0]">
+              {/* Active Filter Chips */}
+              <div className="flex flex-wrap gap-2 items-center">
+                {activeChips.map((chip) => (
+                  <div
+                    key={`${chip.type}-${chip.label}`}
+                    onClick={() =>
+                      chip.type === "cat"
+                        ? handleRemoveCategory(chip.label)
+                        : handleRemoveCondition(chip.label)
+                    }
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EEF2FF] rounded-full text-xs font-semibold text-[#0F3D8C] border border-[#0F3D8C]/20 shadow-sm cursor-pointer hover:bg-[#E0E7FF] transition-colors"
+                  >
+                    <span>{chip.label}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        chip.type === "cat"
+                          ? handleRemoveCategory(chip.label)
+                          : handleRemoveCondition(chip.label);
+                      }}
+                      aria-label={`Remove filter ${chip.label}`}
+                      className="p-0.5 rounded-full hover:bg-[#0F3D8C]/20 hover:text-[#0F3D8C] transition-colors focus:outline-none flex items-center justify-center"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+
+                {activeChips.length > 0 && (
+                  <button
+                    onClick={handleClearAll}
+                    className="text-xs text-[#0F3D8C] hover:underline font-bold ml-1"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+
+              {/* Sorting */}
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-xs text-[#64748B] font-semibold">Sort by:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-white border border-[#CBD5E1] rounded-lg px-3 py-1.5 text-xs text-[#0F3D8C] font-bold focus:border-[#0F3D8C] cursor-pointer outline-none"
+                >
+                  <option>Recommended</option>
+                  <option>Price: Low to High</option>
+                  <option>Price: High to Low</option>
+                  <option>Newest Arrivals</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Grid */}
+          {filteredProducts.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-4">
+              <div className="w-16 h-16 bg-slate-100 rounded-2xl mx-auto flex items-center justify-center text-slate-400">
+                <Search className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-[#0F172A]">No products found</h3>
+              <p className="text-sm text-[#64748B] max-w-md mx-auto">
+                We couldn't find any products matching your filter criteria. Try clearing some filters or searching for something else.
+              </p>
+              <button
+                onClick={handleClearAll}
+                className="px-6 py-2.5 bg-[#0F3D8C] text-white rounded-xl font-bold text-sm hover:bg-[#0A2D6B] transition-all inline-block"
+              >
+                Reset All Filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {paginatedProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="group bg-white rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300"
+                >
+                  <div className="h-[220px] w-full bg-slate-50 relative overflow-hidden flex items-center justify-center p-4">
+                    <img
+                      alt={product.title}
+                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                      src={product.image}
+                    />
+                    {product.badge && (
+                      <div className="absolute top-3 right-3 flex gap-1">
+                        <span className="px-2.5 py-1 bg-white/90 backdrop-blur text-[#0F3D8C] font-mono text-xs font-bold rounded-md shadow-sm border border-[#E2E8F0]">
+                          {product.badge}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-6 flex flex-col gap-3 flex-grow">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-[#64748B] font-medium">{product.vendor}</span>
+                      <span
+                        className="material-symbols-outlined text-[#10B981] text-[14px]"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        verified
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-base text-[#0F172A] line-clamp-2">
+                      {product.title}
+                    </h3>
+                    <div className="mt-auto pt-4 border-t border-[#E2E8F0] flex flex-col gap-2">
+                      <div className="font-mono text-xl font-bold text-[#0F172A] text-price font-data-price">
+                        KES {product.price.toLocaleString()}
+                      </div>
+                      <div className="flex items-center gap-1 text-[#10B981] font-mono text-xs font-semibold">
+                        <span
+                          className="material-symbols-outlined text-[14px]"
+                          style={{ fontVariationSettings: "'FILL' 1" }}
+                        >
+                          shield
+                        </span>
+                        Protected by Float
+                      </div>
+                      <Link
+                        to={`/product/${product.id}`}
+                        className="mt-2 w-full text-center py-2.5 bg-[#EEF2FF] hover:bg-[#0F3D8C] hover:text-white text-[#0F3D8C] font-bold text-sm rounded-xl transition-all border border-[#0F3D8C]/20 block"
+                      >
+                        Buy with Float
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Dynamic Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                aria-label="Previous Page"
+                className="p-2.5 rounded-lg border border-[#E2E8F0] text-[#0F172A] hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`w-9 h-9 rounded-lg text-sm font-bold flex items-center justify-center transition-colors ${
+                    currentPage === pageNum
+                      ? "bg-[#0F3D8C] text-white shadow-sm"
+                      : "hover:bg-slate-100 text-[#0F172A]"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                aria-label="Next Page"
+                className="p-2.5 rounded-lg border border-[#E2E8F0] text-[#0F172A] hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
 };
 
 export default Browse;

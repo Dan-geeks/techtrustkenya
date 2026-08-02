@@ -26,7 +26,8 @@ serve(async (req) => {
       googleMapsLink,
       shopPhotoUrls,
       businessCertificateUrl,
-      tillNumber
+      tillNumber,
+      whatsapp
     } = payload;
 
     const supabase = createClient(

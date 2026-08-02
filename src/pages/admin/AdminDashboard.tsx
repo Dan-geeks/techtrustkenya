@@ -1,26 +1,402 @@
-import { useEffect } from "react";
-
-const pageHtml = "<!-- Top Navigation Anchor (Shared Component Execution) -->\n<header class=\"bg-surface-container-lowest dark:bg-inverse-surface shadow-sm fixed top-0 w-full z-50\">\n<div class=\"flex justify-between items-center h-20 px-margin-desktop max-w-container-max mx-auto\">\n<div class=\"flex items-center gap-8\">\n<a class=\"font-display-h2 text-display-h2 font-bold text-primary dark:text-primary-fixed-dim\" href=\"#\">TechTrust</a>\n<nav class=\"hidden md:flex gap-6 items-center\">\n<a class=\"text-on-surface-variant dark:text-outline-variant font-body-md text-body-md hover:text-secondary transition-colors duration-200\" href=\"#\">Users</a>\n<a class=\"text-primary dark:text-primary-fixed-dim border-b-2 border-primary font-body-md-bold text-body-md-bold pb-[26px] mt-[28px]\" href=\"#\">Verifications</a>\n<a class=\"text-on-surface-variant dark:text-outline-variant font-body-md text-body-md hover:text-secondary transition-colors duration-200\" href=\"#\">Disputes</a>\n<a class=\"text-on-surface-variant dark:text-outline-variant font-body-md text-body-md hover:text-secondary transition-colors duration-200\" href=\"#\">Escrow</a>\n<a class=\"text-on-surface-variant dark:text-outline-variant font-body-md text-body-md hover:text-secondary transition-colors duration-200\" href=\"#\">Settings</a>\n</nav>\n</div>\n<div class=\"flex items-center gap-4\">\n<button class=\"w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary hover:bg-surface-variant transition-colors\">\n<span class=\"material-symbols-outlined\">notifications</span>\n</button>\n<img alt=\"User profile\" class=\"w-10 h-10 rounded-full object-cover border border-outline-variant\" data-alt=\"A small, professional headshot of an administrator for the TechTrust platform. The image is a clear, well-lit studio portrait showing head and shoulders against a neutral background. The lighting is soft and corporate. The aesthetic is clean and modern, fitting a secure fintech interface.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuAJ_9QWAWfiD7K2aZOb40W6x27V_YqAwJo8--GQf76hgUmLi0btVNpSAIGUX2ceDM32OxlYvPePQA6ryALRgGFixTh0Yfz3gS2hRyeQbmImTkc9wVDF5kwO2aSYx6HrsPz95YBfRP0crDdBDmnrKsmDcW9Idlhq043lAVBfEgQuVAAg8ziKHWnVENKsFgxjMYdvGvxIjRnC4nd5me_efIuAhFQ6gH9thSwL91aKc_Puf8zlUkwHxlgbOA\"/>\n</div>\n</div>\n</header>\n<!-- Main Content Canvas -->\n<main class=\"pt-28 pb-12 px-margin-desktop max-w-container-max mx-auto space-y-8\">\n<!-- Header -->\n<div>\n<h1 class=\"font-display-h1 text-display-h1 text-primary\">Verification Queue</h1>\n<p class=\"font-body-lg text-body-lg text-on-surface-variant mt-2\">Review and manage pending vendor applications.</p>\n</div>\n<!-- Bento Grid Layout -->\n<div class=\"grid grid-cols-1 lg:grid-cols-12 gap-gutter\">\n<!-- Left Column: Verification Queue Table (High Density) -->\n<div class=\"lg:col-span-8 bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden\">\n<div class=\"p-6 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low\">\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Pending Actions</h2>\n<div class=\"relative\">\n<span class=\"material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-outline text-sm\">search</span>\n<input class=\"pl-9 pr-4 py-1.5 text-sm rounded-lg border border-outline-variant focus:border-primary focus:ring-0 outline-none w-48 font-data-id\" placeholder=\"Search ID...\" type=\"text\"/>\n</div>\n</div>\n<div class=\"overflow-x-auto\">\n<table class=\"w-full text-left border-collapse\">\n<thead>\n<tr class=\"bg-surface-bright border-b border-outline-variant/30 font-ui-label text-ui-label uppercase tracking-widest text-outline\">\n<th class=\"px-4 py-3 font-semibold\">Vendor</th>\n<th class=\"px-4 py-3 font-semibold\">ID / Reference</th>\n<th class=\"px-4 py-3 font-semibold\">Documents</th>\n<th class=\"px-4 py-3 font-semibold text-right\">Decision</th>\n</tr>\n</thead>\n<tbody class=\"font-body-md text-sm\">\n<tr class=\"border-b border-outline-variant/20 hover:bg-surface-container/30 transition-colors h-12\">\n<td class=\"px-4 py-2\">\n<div class=\"flex items-center gap-3\">\n<div class=\"w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-primary font-bold text-xs\">NL</div>\n<span class=\"font-medium\">Nairobi Laptops</span>\n</div>\n</td>\n<td class=\"px-4 py-2 font-data-id text-data-id text-on-surface-variant\">VND-4892A</td>\n<td class=\"px-4 py-2\">\n<div class=\"flex gap-2 text-primary\">\n<span class=\"material-symbols-outlined text-[18px] cursor-pointer hover:text-secondary\" title=\"User Photo\">account_circle</span>\n<span class=\"material-symbols-outlined text-[18px] cursor-pointer hover:text-secondary\" title=\"Business License\">description</span>\n<span class=\"material-symbols-outlined text-[18px] cursor-pointer hover:text-secondary\" title=\"Location\">location_on</span>\n</div>\n</td>\n<td class=\"px-4 py-2 text-right\">\n<div class=\"flex justify-end gap-2\">\n<button class=\"px-3 py-1 bg-tertiary-container text-on-tertiary-fixed font-medium rounded hover:bg-tertiary-fixed-dim transition-colors text-xs flex items-center gap-1\">Approve</button>\n<button class=\"px-3 py-1 border border-error text-error font-medium rounded hover:bg-error-container transition-colors text-xs\">Reject</button>\n</div>\n</td>\n</tr>\n<tr class=\"border-b border-outline-variant/20 hover:bg-surface-container/30 transition-colors h-12\">\n<td class=\"px-4 py-2\">\n<div class=\"flex items-center gap-3\">\n<div class=\"w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-primary font-bold text-xs\">PT</div>\n<span class=\"font-medium\">PhoneTech KE</span>\n</div>\n</td>\n<td class=\"px-4 py-2 font-data-id text-data-id text-on-surface-variant\">VND-9912B</td>\n<td class=\"px-4 py-2\">\n<div class=\"flex gap-2 text-primary\">\n<span class=\"material-symbols-outlined text-[18px] cursor-pointer hover:text-secondary\" title=\"User Photo\">account_circle</span>\n<span class=\"material-symbols-outlined text-[18px] cursor-pointer hover:text-secondary\" title=\"Business License\">description</span>\n</div>\n</td>\n<td class=\"px-4 py-2 text-right\">\n<div class=\"flex justify-end gap-2\">\n<button class=\"px-3 py-1 bg-tertiary-container text-on-tertiary-fixed font-medium rounded hover:bg-tertiary-fixed-dim transition-colors text-xs flex items-center gap-1\">Approve</button>\n<button class=\"px-3 py-1 border border-error text-error font-medium rounded hover:bg-error-container transition-colors text-xs\">Reject</button>\n</div>\n</td>\n</tr>\n<tr class=\"border-b border-outline-variant/20 hover:bg-surface-container/30 transition-colors h-12\">\n<td class=\"px-4 py-2\">\n<div class=\"flex items-center gap-3\">\n<div class=\"w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-primary font-bold text-xs\">GS</div>\n<span class=\"font-medium\">GameStop CBD</span>\n</div>\n</td>\n<td class=\"px-4 py-2 font-data-id text-data-id text-on-surface-variant\">VND-1102C</td>\n<td class=\"px-4 py-2\">\n<div class=\"flex gap-2 text-primary\">\n<span class=\"material-symbols-outlined text-[18px] cursor-pointer hover:text-secondary\" title=\"User Photo\">account_circle</span>\n<span class=\"material-symbols-outlined text-[18px] cursor-pointer hover:text-secondary\" title=\"Business License\">description</span>\n<span class=\"material-symbols-outlined text-[18px] cursor-pointer hover:text-secondary\" title=\"Location\">location_on</span>\n</div>\n</td>\n<td class=\"px-4 py-2 text-right\">\n<div class=\"flex justify-end gap-2\">\n<button class=\"px-3 py-1 bg-tertiary-container text-on-tertiary-fixed font-medium rounded hover:bg-tertiary-fixed-dim transition-colors text-xs flex items-center gap-1\">Approve</button>\n<button class=\"px-3 py-1 border border-error text-error font-medium rounded hover:bg-error-container transition-colors text-xs\">Reject</button>\n</div>\n</td>\n</tr>\n</tbody>\n</table>\n</div>\n<div class=\"p-3 border-t border-outline-variant/30 bg-surface-bright flex justify-center\">\n<button class=\"text-sm font-medium text-secondary hover:text-primary transition-colors\">View All Pending</button>\n</div>\n</div>\n<!-- Right Column: Escrow Float Status -->\n<div class=\"lg:col-span-4 flex flex-col gap-gutter\">\n<!-- Quick Stats Card -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-6\">\n<h3 class=\"font-ui-label text-ui-label uppercase tracking-widest text-outline mb-4\">Escrow Overview</h3>\n<div class=\"mb-4\">\n<p class=\"text-sm text-on-surface-variant mb-1\">Total Float Volume</p>\n<p class=\"font-data-price text-display-h2 text-primary\">KES 4.2M</p>\n</div>\n<div class=\"w-full h-2 bg-surface-container-high rounded-full overflow-hidden mb-2\">\n<div class=\"h-full bg-secondary w-3/4 rounded-full\"></div>\n</div>\n<div class=\"flex justify-between text-xs font-medium text-on-surface-variant\">\n<span>Cleared: 3.1M</span>\n<span>Pending: 1.1M</span>\n</div>\n</div>\n<!-- Recent Escrow Transactions Table -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden flex-1\">\n<div class=\"p-4 border-b border-outline-variant/30 bg-surface-container-low flex justify-between items-center\">\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-surface text-sm\">Float Ledger</h2>\n<span class=\"material-symbols-outlined text-outline text-sm\">more_horiz</span>\n</div>\n<div class=\"overflow-x-auto\">\n<table class=\"w-full text-left border-collapse\">\n<tbody class=\"font-body-md text-sm\">\n<tr class=\"border-b border-outline-variant/10 hover:bg-surface-container/20 h-10\">\n<td class=\"px-4 py-2 font-data-id text-data-id text-on-surface-variant w-1/2\">TXN-884A</td>\n<td class=\"px-4 py-2 font-data-price text-right text-primary\">KES 45,000</td>\n</tr>\n<tr class=\"border-b border-outline-variant/10 hover:bg-surface-container/20 h-10\">\n<td class=\"px-4 py-2 font-data-id text-data-id text-on-surface-variant w-1/2\">TXN-885B</td>\n<td class=\"px-4 py-2 font-data-price text-right text-primary\">KES 120,500</td>\n</tr>\n<tr class=\"border-b border-outline-variant/10 hover:bg-surface-container/20 h-10\">\n<td class=\"px-4 py-2 font-data-id text-data-id text-on-surface-variant w-1/2\">TXN-886C</td>\n<td class=\"px-4 py-2 font-data-price text-right text-primary\">KES 8,000</td>\n</tr>\n<tr class=\"border-b border-outline-variant/10 hover:bg-surface-container/20 h-10\">\n<td class=\"px-4 py-2 font-data-id text-data-id text-on-surface-variant w-1/2\">TXN-887D</td>\n<td class=\"px-4 py-2 font-data-price text-right text-primary\">KES 65,000</td>\n</tr>\n</tbody>\n</table>\n</div>\n</div>\n</div>\n</div>\n</main>";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ShieldCheck, Bell, Search, User, FileText, MapPin, MoreHorizontal, Check, X, LogOut, LayoutDashboard, Users, FileCheck, AlertTriangle, Shield, Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("verifications");
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [escrowStats, setEscrowStats] = useState({ totalFloat: 0, cleared: 0, pending: 0, ledger: [] as any[] });
+
   useEffect(() => {
     document.title = "Admin Dashboard | TechTrust";
+    if (activeTab === "verifications") {
+      loadVendors();
+    } else if (activeTab === "escrow") {
+      loadEscrowStats();
+    } else if (activeTab === "users") {
+      loadUsers();
+    }
+  }, [activeTab]);
 
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
+  const loadUsers = async () => {
+    const { data } = await supabase.from("profiles").select("*").limit(50).order("id", { ascending: false });
+    if (data) setUsers(data);
+  };
+
+  const loadVendors = async () => {
+    // We cannot join profiles directly because the foreign key is to auth.users, not profiles.
+    // Fetch pending vendors
+    const { data: vendorData, error: vendorError } = await supabase
+      .from("vendor_profiles")
+      .select("*")
+      .eq("verification_status", "pending");
+    
+    if (vendorError) {
+      console.error(vendorError);
+      return;
+    }
+
+    if (vendorData) {
+      setVendors(vendorData);
+    }
+  };
+
+  const loadEscrowStats = async () => {
+    const { data: orders, error } = await supabase
+      .from("orders")
+      .select("id, status, payment_status, total_amount_ksh, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    if (orders) {
+      let totalFloat = 0;
+      let cleared = 0;
+      let pending = 0;
+
+      orders.forEach(o => {
+        const amt = o.total_amount_ksh || 0;
+        if (o.status === "confirmed" || o.payout_status === "paid") {
+          cleared += amt;
+        } else if (o.payment_status === "paid_float" || o.status === "payment_held" || o.status === "pending_payment") {
+          pending += amt;
+        }
+      });
+      totalFloat = cleared + pending;
+
+      setEscrowStats({
+        totalFloat,
+        cleared,
+        pending,
+        ledger: orders.slice(0, 10)
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
+  const updateStatus = async (id: string, status: string) => {
+    const { error } = await supabase
+      .from("vendor_profiles")
+      .update({ verification_status: status })
+      .eq("id", id);
+      
+    if (error) {
+      toast.error("Failed to update status");
+    } else {
+      toast.success(`Vendor ${status}`);
+      loadVendors();
+    }
+  };
+
+  const approvePayout = async (orderId: string) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ payout_status: 'paid' })
+      .eq("id", orderId);
+    
+    if (error) {
+      toast.error("Failed to approve payout");
+    } else {
+      toast.success("Payout Approved and Funds Released to Vendor!");
+      loadEscrowStats();
+    }
+  };
+
+  const renderTabContent = () => {
+    if (activeTab === "verifications") {
+      return (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+            <h2 className="font-semibold text-slate-900">Pending Actions ({vendors.length})</h2>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input className="pl-9 h-9 w-64 bg-white" placeholder="Search vendors..." />
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                  <th className="px-6 py-4">Vendor</th>
+                  <th className="px-6 py-4">Details</th>
+                  <th className="px-6 py-4">Documents</th>
+                  <th className="px-6 py-4 text-right">Decision</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {vendors.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                      No pending vendor verifications.
+                    </td>
+                  </tr>
+                ) : (
+                  vendors.map((vendor) => (
+                    <tr key={vendor.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
+                            {vendor.business_name?.substring(0, 2).toUpperCase() || "??"}
+                          </div>
+                          <div>
+                            <p className="font-medium text-slate-900">{vendor.business_name}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-slate-600">{vendor.physical_address || "No location"}</p>
+                        <p className="text-xs text-slate-400 font-mono mt-1">{vendor.id.substring(0, 8)}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-3 text-slate-400">
+                          <User className="h-5 w-5 hover:text-blue-600 cursor-pointer" title="ID Document" />
+                          <FileText className="h-5 w-5 hover:text-blue-600 cursor-pointer" title="Business Registration" />
+                          {vendor.physical_address && <MapPin className="h-5 w-5 hover:text-blue-600 cursor-pointer" title="Location Proof" />}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" onClick={() => updateStatus(vendor.id, 'approved')} className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 px-3 text-xs">
+                            <Check className="h-3 w-3 mr-1" /> Approve
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => updateStatus(vendor.id, 'rejected')} className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 h-8 px-3 text-xs">
+                            <X className="h-3 w-3 mr-1" /> Reject
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
+    }
 
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-  }, []);
+    if (activeTab === "users") {
+      return (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="p-4 border-b border-slate-200 bg-slate-50/50">
+            <h2 className="font-semibold text-slate-900">Registered Users</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                  <th className="px-6 py-4">User ID</th>
+                  <th className="px-6 py-4">Onboarding Complete</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {users.map(u => (
+                  <tr key={u.id}>
+                    <td className="px-6 py-4 font-mono text-xs">{u.id}</td>
+                    <td className="px-6 py-4">
+                      {u.onboarding_complete ? (
+                        <span className="text-emerald-600 bg-emerald-50 px-2 py-1 rounded text-xs font-bold">Yes</span>
+                      ) : (
+                        <span className="text-slate-500 bg-slate-100 px-2 py-1 rounded text-xs">No</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {users.length === 0 && (
+                  <tr>
+                    <td colSpan={2} className="px-6 py-8 text-center text-slate-500">No users found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
 
-  return <div dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+    if (activeTab === "escrow") {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-4 space-y-8">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Escrow Overview</h3>
+              <div className="mb-6">
+                <p className="text-sm text-slate-500 mb-1">Total Float Volume</p>
+                <p className="text-3xl font-bold text-slate-900">KES {(escrowStats.totalFloat || 0).toLocaleString()}</p>
+              </div>
+              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-3">
+                <div 
+                  className="h-full bg-blue-600 rounded-full" 
+                  style={{ width: escrowStats.totalFloat > 0 ? `${(escrowStats.cleared / escrowStats.totalFloat) * 100}%` : '0%' }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs font-medium text-slate-500">
+                <span>Cleared: <span className="text-slate-900">{(escrowStats.cleared || 0).toLocaleString()}</span></span>
+                <span>Pending: <span className="text-slate-900">{(escrowStats.pending || 0).toLocaleString()}</span></span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="lg:col-span-8 space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
+                <h2 className="font-semibold text-slate-900 text-sm">Action Required: Payout Approvals</h2>
+              </div>
+              <div className="p-0">
+                <table className="w-full text-left">
+                  <tbody className="divide-y divide-slate-100 text-sm">
+                    {escrowStats.ledger.filter(t => t.payment_status === "paid_float" && t.status !== "confirmed").length === 0 ? (
+                      <tr>
+                        <td className="px-6 py-8 text-center text-slate-500">No pending payouts.</td>
+                      </tr>
+                    ) : (
+                      escrowStats.ledger.filter(t => t.payment_status === "paid_float" && t.status !== "confirmed").map((txn) => (
+                        <tr key={txn.id} className="hover:bg-slate-50/50">
+                          <td className="px-6 py-4 font-mono text-xs text-slate-500">{txn.id.substring(0, 8)}</td>
+                          <td className="px-6 py-4">KES {(txn.total_amount_ksh || 0).toLocaleString()}</td>
+                          <td className="px-6 py-4 text-right">
+                            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => approvePayout(txn.id)}>
+                              Approve Payout
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
+                <h2 className="font-semibold text-slate-900 text-sm">Recent Ledger Activity</h2>
+              </div>
+              <div className="p-0">
+                <table className="w-full text-left">
+                  <tbody className="divide-y divide-slate-100 text-sm">
+                    {escrowStats.ledger.length === 0 ? (
+                      <tr>
+                        <td className="px-6 py-8 text-center text-slate-500">No recent activity.</td>
+                      </tr>
+                    ) : (
+                      escrowStats.ledger.map((txn) => (
+                        <tr key={txn.id} className="hover:bg-slate-50/50">
+                          <td className="px-6 py-4 font-mono text-xs text-slate-500">{txn.id.substring(0, 8)}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              txn.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {txn.status.replace(/_/g, ' ')}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right font-medium text-slate-900">KES {(txn.total_amount_ksh || 0).toLocaleString()}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (activeTab === "disputes") {
+      return (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
+          <Shield className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-slate-700 mb-2">No Active Disputes</h2>
+          <p className="text-slate-500">There are currently no active transaction disputes requiring arbitration.</p>
+        </div>
+      );
+    }
+    
+    if (activeTab === "settings") {
+      return (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+          <h2 className="text-xl font-semibold text-slate-900 mb-6">Platform Settings</h2>
+          <div className="space-y-6 max-w-md">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Escrow Fee Percentage</label>
+              <Input type="number" defaultValue={1.5} className="bg-slate-50" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Referral Bonus (KES)</label>
+              <Input type="number" defaultValue={500} className="bg-slate-50" />
+            </div>
+            <Button className="bg-primary text-white">Save Changes</Button>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Top Navigation */}
+      <header className="bg-white border-b border-slate-200 fixed top-0 w-full z-50 h-16 shadow-sm">
+        <div className="h-full px-6 max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-8">
+            <Link to="/admin/dashboard" className="flex items-center gap-2 text-primary font-bold text-xl tracking-tight">
+              <img src="/logo.jpg" alt="TechTrust" className="h-8 w-auto object-contain rounded-md" />
+              <span>TechTrust<span className="text-accent text-xs align-top ml-1 uppercase tracking-wider">Admin</span></span>
+            </Link>
+            <nav className="hidden md:flex gap-6 items-center">
+              <button onClick={() => setActiveTab("users")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'users' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
+                <Users className="h-4 w-4" /> Users
+              </button>
+              <button onClick={() => setActiveTab("verifications")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'verifications' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
+                <FileCheck className="h-4 w-4" /> Verifications
+              </button>
+              <button onClick={() => setActiveTab("disputes")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'disputes' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
+                <AlertTriangle className="h-4 w-4" /> Disputes
+              </button>
+              <button onClick={() => setActiveTab("escrow")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'escrow' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
+                <Shield className="h-4 w-4" /> Escrow
+              </button>
+              <button onClick={() => setActiveTab("settings")} className={`transition-colors text-sm font-medium flex items-center gap-2 ${activeTab === 'settings' ? 'text-primary border-b-2 border-primary h-16' : 'text-slate-500 hover:text-primary'}`}>
+                <Settings className="h-4 w-4" /> Settings
+              </button>
+            </nav>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
+              <Bell className="h-5 w-5" />
+            </button>
+            <button onClick={handleLogout} className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600 hover:bg-red-100 transition-colors" title="Sign out">
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="pt-24 pb-12 px-6 max-w-7xl mx-auto w-full flex-1 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 capitalize">{activeTab}</h1>
+          <p className="text-slate-500 mt-2">Manage the TechTrust {activeTab} operations.</p>
+        </div>
+
+        {renderTabContent()}
+      </main>
+    </div>
+  );
 };
 
 export default AdminDashboard;

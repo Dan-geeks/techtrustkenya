@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, Camera, FileText, Loader2, Upload, X, MapPin, Check } from "lucide-react";
+import { ShieldCheck, Camera, FileText, Loader2, Upload, X, MapPin, Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +28,14 @@ const VendorOnboarding = () => {
   const [vsu, setVsu] = useState({
     owner_name: "",
     phone: "",
-    till_number: "",
+    whatsapp: "",
+    payment_method: "till" as "till" | "paybill" | "bank" | "phone",
+    payment_till: "",
+    payment_paybill_biz: "",
+    payment_paybill_acc: "",
+    payment_bank_name: "",
+    payment_bank_acc: "",
+    payment_phone: "",
     business_name: "",
     county: "",
     sub_county: "",
@@ -82,7 +89,7 @@ const VendorOnboarding = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate("/auth", { replace: true });
+      navigate("/auth", { replace: true, state: { from: "/vendor/onboarding", role: "vendor" } });
       return;
     }
     if (user) {
@@ -124,8 +131,26 @@ const VendorOnboarding = () => {
 
     const errs: Record<string, string> = {};
     if (!vsu.owner_name.trim()) errs.owner_name = "Required";
-    if (!phoneOk(vsu.phone)) errs.phone = "Use 07XXXXXXXX or 2547XXXXXXXX";
-    if (!vsu.till_number.trim()) errs.till_number = "Required";
+    if (!phoneOk(vsu.phone)) errs.phone = "Enter a valid mobile number";
+    if (!vsu.whatsapp.trim() || !phoneOk(vsu.whatsapp)) errs.whatsapp = "Enter a valid WhatsApp number";
+    
+    let finalPaymentString = "";
+    if (vsu.payment_method === "till") {
+      if (!vsu.payment_till.trim()) errs.payment_till = "Required";
+      finalPaymentString = `Till: ${vsu.payment_till.trim()}`;
+    } else if (vsu.payment_method === "paybill") {
+      if (!vsu.payment_paybill_biz.trim()) errs.payment_paybill_biz = "Required";
+      if (!vsu.payment_paybill_acc.trim()) errs.payment_paybill_acc = "Required";
+      finalPaymentString = `Paybill: ${vsu.payment_paybill_biz.trim()} | Acc: ${vsu.payment_paybill_acc.trim()}`;
+    } else if (vsu.payment_method === "bank") {
+      if (!vsu.payment_bank_name.trim()) errs.payment_bank_name = "Required";
+      if (!vsu.payment_bank_acc.trim()) errs.payment_bank_acc = "Required";
+      finalPaymentString = `Bank: ${vsu.payment_bank_name.trim()} | Acc: ${vsu.payment_bank_acc.trim()}`;
+    } else if (vsu.payment_method === "phone") {
+      if (!vsu.payment_phone.trim()) errs.payment_phone = "Required";
+      finalPaymentString = `M-Pesa Phone: ${vsu.payment_phone.trim()}`;
+    }
+
     if (!vsu.business_name.trim()) errs.business_name = "Required";
     if (!vsu.county) errs.county = "Required";
     if (!vsu.sub_county.trim()) errs.sub_county = "Required";
@@ -178,7 +203,8 @@ const VendorOnboarding = () => {
           googleMapsLink: vsu.google_maps_link || null,
           shopPhotoUrls: photoUrls,
           businessCertificateUrl: certPath,
-          tillNumber: vsu.till_number,
+          tillNumber: finalPaymentString,
+          whatsapp: vsu.whatsapp,
         },
       });
       if (fnErr || !fnRes?.success) {
@@ -216,12 +242,16 @@ const VendorOnboarding = () => {
   return (
     <div className="min-h-screen grid place-items-center px-4 py-10 bg-primary">
       <div className="w-full max-w-3xl">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-6">
-          <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight font-display text-white">
-            Tech<span className="text-accent">Trust</span>
-          </span>
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="border-slate-300 shadow-sm font-bold bg-white text-slate-800 hover:bg-slate-100 flex items-center gap-1.5 px-3">
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/logo.jpg" alt="TechTrust" className="h-8 w-auto object-contain rounded-md shadow-sm" />
+          </Link>
+          <div className="w-[72px]" /> {/* Spacer for centering */}
+        </div>
 
         <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-elegant">
           <div className="text-center mb-6">
@@ -238,17 +268,78 @@ const VendorOnboarding = () => {
               <Err name="owner_name" />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <Label>Phone</Label>
-                <Input type="tel" autoComplete="tel" value={vsu.phone} placeholder="07XXXXXXXX" onChange={(e) => setVsu({ ...vsu, phone: e.target.value })} className="mt-1.5" />
+                <Label>Phone (Calls)</Label>
+                <Input type="tel" autoComplete="tel" value={vsu.phone} placeholder="0712345678" onChange={(e) => setVsu({ ...vsu, phone: e.target.value })} className="mt-1.5" />
                 <Err name="phone" />
               </div>
               <div>
-                <Label>M-Pesa till number</Label>
-                <Input value={vsu.till_number} placeholder="e.g. 123456" onChange={(e) => setVsu({ ...vsu, till_number: e.target.value })} className="mt-1.5" />
-                <Err name="till_number" />
+                <Label>WhatsApp Number</Label>
+                <Input type="tel" value={vsu.whatsapp} placeholder="0712345678" onChange={(e) => setVsu({ ...vsu, whatsapp: e.target.value })} className="mt-1.5" />
+                <Err name="whatsapp" />
               </div>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-4">
+              <div>
+                <Label>Payment Method (How you receive payouts)</Label>
+                <Select value={vsu.payment_method} onValueChange={(v: any) => setVsu({ ...vsu, payment_method: v })}>
+                  <SelectTrigger className="mt-1.5 bg-white"><SelectValue placeholder="Select payment method" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="till">M-Pesa Till Number</SelectItem>
+                    <SelectItem value="paybill">M-Pesa Paybill</SelectItem>
+                    <SelectItem value="bank">Bank Account</SelectItem>
+                    <SelectItem value="phone">M-Pesa Phone Number</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {vsu.payment_method === "till" && (
+                <div>
+                  <Label>Till Number</Label>
+                  <Input value={vsu.payment_till} placeholder="e.g. 123456" onChange={(e) => setVsu({ ...vsu, payment_till: e.target.value })} className="mt-1.5 bg-white" />
+                  <Err name="payment_till" />
+                </div>
+              )}
+              
+              {vsu.payment_method === "paybill" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>Paybill Business No.</Label>
+                    <Input value={vsu.payment_paybill_biz} placeholder="e.g. 247247" onChange={(e) => setVsu({ ...vsu, payment_paybill_biz: e.target.value })} className="mt-1.5 bg-white" />
+                    <Err name="payment_paybill_biz" />
+                  </div>
+                  <div>
+                    <Label>Account No.</Label>
+                    <Input value={vsu.payment_paybill_acc} placeholder="e.g. 123456" onChange={(e) => setVsu({ ...vsu, payment_paybill_acc: e.target.value })} className="mt-1.5 bg-white" />
+                    <Err name="payment_paybill_acc" />
+                  </div>
+                </div>
+              )}
+
+              {vsu.payment_method === "bank" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>Bank Name</Label>
+                    <Input value={vsu.payment_bank_name} placeholder="e.g. KCB" onChange={(e) => setVsu({ ...vsu, payment_bank_name: e.target.value })} className="mt-1.5 bg-white" />
+                    <Err name="payment_bank_name" />
+                  </div>
+                  <div>
+                    <Label>Account No.</Label>
+                    <Input value={vsu.payment_bank_acc} placeholder="e.g. 1122334455" onChange={(e) => setVsu({ ...vsu, payment_bank_acc: e.target.value })} className="mt-1.5 bg-white" />
+                    <Err name="payment_bank_acc" />
+                  </div>
+                </div>
+              )}
+
+              {vsu.payment_method === "phone" && (
+                <div>
+                  <Label>M-Pesa Phone Number</Label>
+                  <Input type="tel" value={vsu.payment_phone} placeholder="0712345678" onChange={(e) => setVsu({ ...vsu, payment_phone: e.target.value })} className="mt-1.5 bg-white" />
+                  <Err name="payment_phone" />
+                </div>
+              )}
             </div>
 
             <div>

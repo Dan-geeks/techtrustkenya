@@ -1,26 +1,263 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ShieldCheck, Lock, Trash2, ArrowLeft, Info, Shield, CheckCircle2, ChevronRight, ShoppingBag } from "lucide-react";
 
-const pageHtml = "\n<!-- Main Content -->\n<main class=\"max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop\">\n\n<div class=\"grid grid-cols-1 lg:grid-cols-12 gap-gutter\">\n<!-- Cart Items List -->\n<div class=\"lg:col-span-8 flex flex-col gap-unit\">\n<!-- Item 1 -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-sm p-gutter border border-transparent group-card-hover transition-all flex flex-col sm:flex-row gap-gutter\">\n<div class=\"w-full sm:w-48 h-32 bg-surface-container rounded-lg overflow-hidden flex-shrink-0\">\n<img class=\"w-full h-full object-cover\" data-alt=\"A pristine, high-end professional digital camera body with a prime lens attached, resting on a clean, modern white surface. Soft, professional studio lighting highlights the metallic and matte black textures. The setting is minimal and sterile, reflecting a corporate modern e-commerce aesthetic.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuAwA-kJTEPK10Wg_bRHBIlfZubG3UUaAFPmoHmXVIm-9rtv2eRoKoArIYISqtZcpPp3r1STnxKVfmWD7Z80g_LSUJ1G4MNGQDCfLs0tkRQWICZlUHHM0PYY0MZve16ya9YeB-3W9XU6VmkyqtrZO1_W73BQAJbvejNJy_dy1lpZ7I83PW_Nfp_LV2Fl1NbgDZ8cRqwMNciflmEqsRlOo0iaW3O_ATqICPDAvBUyrbJBoBTjzctqbm37TA\"/>\n</div>\n<div class=\"flex-1 flex flex-col justify-between\">\n<div>\n<div class=\"flex justify-between items-start mb-2\">\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary\">Sony Alpha A7 IV Mirrorless Camera</h3>\n<button class=\"text-outline hover:text-error transition-colors\">\n<span class=\"material-symbols-outlined\" data-icon=\"delete\">delete</span>\n</button>\n</div>\n<div class=\"flex items-center gap-2 mb-4\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant\">Sold by:</span>\n<span class=\"font-ui-label text-ui-label text-primary-container\">Nairobi Digital Hub</span>\n<div class=\"inline-flex items-center gap-1 bg-[#22C55E] text-white px-2 py-0.5 rounded-full\">\n<span class=\"material-symbols-outlined text-[12px]\" data-icon=\"shield\">shield</span>\n<span class=\"font-ui-label text-[12px]\">Verified</span>\n</div>\n</div>\n</div>\n<div class=\"flex justify-between items-end\">\n<div class=\"flex items-center border border-outline-variant rounded-DEFAULT overflow-hidden\">\n<button class=\"px-3 py-1 bg-surface-container-lowest hover:bg-surface-container text-on-surface transition-colors\">-</button>\n<span class=\"px-4 py-1 font-data-id text-data-id text-primary border-x border-outline-variant\">1</span>\n<button class=\"px-3 py-1 bg-surface-container-lowest hover:bg-surface-container text-on-surface transition-colors\">+</button>\n</div>\n<div class=\"font-data-price text-data-price text-primary\">KES 245,000</div>\n</div>\n</div>\n</div>\n<!-- Item 2 -->\n<div class=\"bg-surface-container-lowest rounded-xl shadow-sm p-gutter border border-transparent group-card-hover transition-all flex flex-col sm:flex-row gap-gutter\">\n<div class=\"w-full sm:w-48 h-32 bg-surface-container rounded-lg overflow-hidden flex-shrink-0\">\n<img class=\"w-full h-full object-cover\" data-alt=\"A sleek, modern laptop open on a clean desk, displaying a crisp, vibrant screen. The laptop features a minimalist silver chassis. The background is a bright, unfocused office environment, emphasizing a premium, professional tech workspace suitable for a fintech marketplace.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuCqqlp3hfRl0uUXyyoq-8_Rl4w60pe0DIiQTG3QclH731XZZyaxK6UgdLWsQ_NqlDp7BsqkKhuHJlIErL1HImbaQ0dq9BIdkcPNm2iHt2VNz0Bgjxb3JzSQLqBO0FBPNh8ibNn1ZFXF90PN5rrbPtjiYhjnxx9L-ktpGq4iBlJv3brvaEI16_BlDq-u7NE0l47BFBLLVvyVcOEbWUQWqSMyZD1oUEvx8nEOkOjIF-50lBjPyLJT4Ody_Q\"/>\n</div>\n<div class=\"flex-1 flex flex-col justify-between\">\n<div>\n<div class=\"flex justify-between items-start mb-2\">\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary\">MacBook Pro 16\" M2 Max (2023)</h3>\n<button class=\"text-outline hover:text-error transition-colors\">\n<span class=\"material-symbols-outlined\" data-icon=\"delete\">delete</span>\n</button>\n</div>\n<div class=\"flex items-center gap-2 mb-4\">\n<span class=\"font-ui-label text-ui-label text-on-surface-variant\">Sold by:</span>\n<span class=\"font-ui-label text-ui-label text-primary-container\">TechVillage Ke</span>\n<div class=\"inline-flex items-center gap-1 bg-[#22C55E] text-white px-2 py-0.5 rounded-full\">\n<span class=\"material-symbols-outlined text-[12px]\" data-icon=\"shield\">shield</span>\n<span class=\"font-ui-label text-[12px]\">Verified</span>\n</div>\n</div>\n</div>\n<div class=\"flex justify-between items-end\">\n<div class=\"flex items-center border border-outline-variant rounded-DEFAULT overflow-hidden\">\n<button class=\"px-3 py-1 bg-surface-container-lowest hover:bg-surface-container text-on-surface transition-colors\">-</button>\n<span class=\"px-4 py-1 font-data-id text-data-id text-primary border-x border-outline-variant\">1</span>\n<button class=\"px-3 py-1 bg-surface-container-lowest hover:bg-surface-container text-on-surface transition-colors\">+</button>\n</div>\n<div class=\"font-data-price text-data-price text-primary\">KES 410,000</div>\n</div>\n</div>\n</div>\n</div>\n<!-- Escrow Summary Sidebar -->\n<div class=\"lg:col-span-4\">\n<div class=\"bg-surface-container-lowest rounded-xl shadow-sm p-gutter sticky top-[88px] border border-surface-variant\">\n<h2 class=\"font-body-md-bold text-body-md-bold text-primary mb-4 flex items-center gap-2 border-b border-surface-container pb-4\">\n<span class=\"material-symbols-outlined text-secondary\" data-icon=\"lock\">lock</span>\n                        Float Escrow Summary\n                    </h2>\n<div class=\"bg-[#EEF2FF] rounded-lg p-4 mb-6 text-sm text-primary-container border border-[#adc6ff]\">\n<p class=\"font-body-md text-body-md flex items-start gap-2\">\n<span class=\"material-symbols-outlined text-[18px] mt-0.5\" data-icon=\"info\">info</span>\n<span>Your funds will be held securely in a TechTrust Escrow account. The vendor will only be paid once you confirm receipt and inspect the items.</span>\n</p>\n</div>\n<div class=\"space-y-3 mb-6 font-ui-label text-ui-label border-b border-surface-container pb-6\">\n<div class=\"flex justify-between text-on-surface-variant\">\n<span>Subtotal (2 items)</span>\n<span class=\"font-data-price text-[14px] text-primary\">KES 655,000</span>\n</div>\n<div class=\"flex justify-between text-on-surface-variant\">\n<span>Escrow Service Fee (1.5%)</span>\n<span class=\"font-data-price text-[14px] text-primary\">KES 9,825</span>\n</div>\n<div class=\"flex justify-between text-on-surface-variant\">\n<span>Estimated Shipping</span>\n<span class=\"font-data-price text-[14px] text-primary\">Calculated at checkout</span>\n</div>\n</div>\n<div class=\"flex justify-between items-end mb-8\">\n<span class=\"font-body-md-bold text-body-md-bold text-primary\">Total to Secure</span>\n<span class=\"font-data-price text-[24px] text-primary font-bold\">KES 664,825</span>\n</div>\n<button class=\"w-full bg-primary-container text-white font-ui-label text-ui-label py-3 rounded-lg hover:bg-[#0A2D6B] transition-colors flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined text-[18px]\" data-icon=\"verified_user\">verified_user</span>\n                        Proceed to Secure Checkout\n                    </button>\n<div class=\"mt-4 text-center\">\n<span class=\"font-data-id text-data-id text-outline flex items-center justify-center gap-1\">\n<span class=\"material-symbols-outlined text-[14px]\" data-icon=\"encrypted\">encrypted</span>\n                            256-bit Financial-Grade Encryption\n                        </span>\n</div>\n</div>\n</div>\n</div>\n</main>\n";
+interface CartItem {
+  id: string;
+  title: string;
+  price: number;
+  quantity: number;
+  image: string;
+  vendor: string;
+  vendorVerified: boolean;
+}
+
+const INITIAL_CART_ITEMS: CartItem[] = [
+  {
+    id: "cart-item-1",
+    title: "Sony Alpha A7 IV Mirrorless Camera Body",
+    price: 245000,
+    quantity: 1,
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAwA-kJTEPK10Wg_bRHBIlfZubG3UUaAFPmoHmXVIm-9rtv2eRoKoArIYISqtZcpPp3r1STnxKVfmWD7Z80g_LSUJ1G4MNGQDCfLs0tkRQWICZlUHHM0PYY0MZve16ya9YeB-3W9XU6VmkyqtrZO1_W73BQAJbvejNJy_dy1lpZ7I83PW_Nfp_LV2Fl1NbgDZ8cRqwMNciflmEqsRlOo0iaW3O_ATqICPDAvBUyrbJBoBTjzctqbm37TA",
+    vendor: "Nairobi Digital Hub",
+    vendorVerified: true,
+  },
+  {
+    id: "cart-item-2",
+    title: 'MacBook Pro 16" M2 Max (2023) - 32GB RAM, 1TB SSD',
+    price: 410000,
+    quantity: 1,
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCqqlp3hfRl0uUXyyoq-8_Rl4w60pe0DIiQTG3QclH731XZZyaxK6UgdLWsQ_NqlDp7BsqkKhuHJlIErL1HImbaQ0dq9BIdkcPNm2iHt2VNz0Bgjxb3JzSQLqBO0FBPNh8ibNn1ZFXF90PN5rrbPtjiYhjnxx9L-ktpGq4iBlJv3brvaEI16_BlDq-u7NE0l47BFBLLVvyVcOEbWUQWqSMyZD1oUEvx8nEOkOjIF-50lBjPyLJT4Ody_Q",
+    vendor: "TechVillage KE",
+    vendorVerified: true,
+  },
+];
 
 const Cart = () => {
+  const [items, setItems] = useState<CartItem[]>(INITIAL_CART_ITEMS);
+
   useEffect(() => {
-    document.title = "TechTrust Kenya - Shopping Cart";
-
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
-      );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
-
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+    document.title = "Shopping Cart | TechTrust Kenya";
   }, []);
 
-  return <div className="bg-background text-on-background font-body-md antialiased min-h-screen" dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+  const handleUpdateQuantity = (id: string, delta: number) => {
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          const newQty = Math.max(1, item.quantity + delta);
+          return { ...item, quantity: newQty };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleRemoveItem = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const escrowFee = Math.round(subtotal * 0.015);
+  const total = subtotal + escrowFee;
+
+  return (
+    <div className="bg-slate-50 text-[#0F172A] antialiased min-h-screen">
+      <main className="w-full max-w-container-max mx-auto px-6 md:px-12 py-8 md:py-12">
+        {/* Breadcrumb Navigation */}
+        <div className="flex items-center gap-2 text-xs md:text-sm text-[#64748B] mb-6">
+          <Link to="/" className="hover:text-[#0F3D8C]">Home</Link>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <Link to="/browse" className="hover:text-[#0F3D8C]">Marketplace</Link>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <span className="font-semibold text-[#0F172A]">Shopping Cart</span>
+        </div>
+
+        {/* Page Title & Back Button */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="font-display-h2 text-3xl md:text-4xl font-bold text-[#0F172A] flex items-center gap-3">
+              <span>Shopping Cart</span>
+              <span className="text-sm font-semibold bg-[#EEF2FF] text-[#0F3D8C] px-3 py-1 rounded-full border border-[#0F3D8C]/20">
+                {items.length} {items.length === 1 ? "item" : "items"}
+              </span>
+            </h1>
+            <p className="text-sm text-[#64748B] mt-1">
+              Review your items before securing your order with Float Escrow.
+            </p>
+          </div>
+          <Link
+            to="/browse"
+            className="inline-flex items-center gap-2 text-sm font-bold text-[#0F3D8C] hover:underline bg-white px-4 py-2 rounded-xl border border-[#CBD5E1] shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Continue Shopping</span>
+          </Link>
+        </div>
+
+        {items.length === 0 ? (
+          /* Empty Cart State */
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-lg mx-auto shadow-sm space-y-4">
+            <div className="w-16 h-16 bg-[#EEF2FF] rounded-2xl mx-auto flex items-center justify-center text-[#0F3D8C]">
+              <ShoppingBag className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-bold text-[#0F172A]">Your cart is empty</h2>
+            <p className="text-sm text-[#64748B]">
+              Browse Kenya's verified tech marketplace to add inspectable electronics to your cart.
+            </p>
+            <Link
+              to="/browse"
+              className="inline-block bg-[#0F3D8C] text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-[#0A2D6B] transition-all shadow-md mt-2"
+            >
+              Browse Verified Tech
+            </Link>
+          </div>
+        ) : (
+          /* Cart Content Layout */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
+            {/* Cart Items List */}
+            <div className="lg:col-span-8 space-y-4">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0] hover:shadow-md transition-all flex flex-col sm:flex-row gap-6 items-center sm:items-start"
+                >
+                  {/* Thumbnail */}
+                  <div className="w-full sm:w-44 h-32 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 relative border border-[#E2E8F0] flex items-center justify-center p-2">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex-1 w-full flex flex-col justify-between h-full space-y-4">
+                    <div>
+                      <div className="flex justify-between items-start gap-4 mb-2">
+                        <h3 className="font-bold text-base md:text-lg text-[#0F172A] leading-snug">
+                          {item.title}
+                        </h3>
+                        <button
+                          onClick={() => handleRemoveItem(item.id)}
+                          aria-label={`Remove ${item.title} from cart`}
+                          className="text-slate-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-[#64748B]">Sold by:</span>
+                        <span className="text-xs font-semibold text-[#0F3D8C]">{item.vendor}</span>
+                        {item.vendorVerified && (
+                          <div className="inline-flex items-center gap-1 bg-[#10B981]/10 text-[#10B981] px-2 py-0.5 rounded-full border border-[#10B981]/20">
+                            <CheckCircle2 className="h-3 w-3" />
+                            <span className="text-[11px] font-bold">Verified</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Quantity & Price */}
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                      <div className="flex items-center border border-[#CBD5E1] rounded-lg overflow-hidden bg-slate-50">
+                        <button
+                          onClick={() => handleUpdateQuantity(item.id, -1)}
+                          className="px-3 py-1.5 bg-white hover:bg-slate-100 text-[#0F172A] font-bold text-sm transition-colors border-r border-[#CBD5E1]"
+                        >
+                          -
+                        </button>
+                        <span className="px-4 py-1.5 font-mono text-sm font-bold text-[#0F172A]">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => handleUpdateQuantity(item.id, 1)}
+                          className="px-3 py-1.5 bg-white hover:bg-slate-100 text-[#0F172A] font-bold text-sm transition-colors border-l border-[#CBD5E1]"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      <div className="font-mono text-xl font-bold text-[#0F172A] text-price font-data-price">
+                        KES {(item.price * item.quantity).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Escrow Summary Sidebar */}
+            <div className="lg:col-span-4 sticky top-24">
+              <div className="bg-white rounded-2xl p-6 shadow-md border border-[#E2E8F0] space-y-6">
+                <h2 className="text-lg font-bold text-[#0F172A] pb-4 border-b border-[#E2E8F0] flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-[#0F3D8C]" />
+                  <span>Float Escrow Summary</span>
+                </h2>
+
+                {/* Security Guarantee Notice */}
+                <div className="bg-[#EEF2FF] border border-[#0F3D8C]/20 rounded-xl p-4 text-xs text-[#0F3D8C] space-y-2">
+                  <div className="flex items-start gap-2.5">
+                    <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <p className="leading-relaxed font-medium">
+                      Your funds will be safely held in a <strong>TechTrust Float Escrow</strong> account. The vendor is only paid after you receive and inspect your items.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pricing Line Items */}
+                <div className="space-y-3 text-sm border-b border-[#E2E8F0] pb-6">
+                  <div className="flex justify-between text-[#64748B]">
+                    <span>Subtotal ({items.length} items)</span>
+                    <span className="font-mono text-[#0F172A] font-bold text-price">
+                      KES {subtotal.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[#64748B]">
+                    <span>Float Escrow Fee (1.5%)</span>
+                    <span className="font-mono text-[#0F172A] font-bold">
+                      KES {escrowFee.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[#64748B]">
+                    <span>Estimated Shipping</span>
+                    <span className="text-[#10B981] font-semibold">Calculated at checkout</span>
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="flex justify-between items-end pt-1">
+                  <div>
+                    <span className="text-base font-bold text-[#0F172A] block">Total to Secure</span>
+                    <span className="text-xs text-[#64748B]">Includes Float protection</span>
+                  </div>
+                  <span className="font-mono text-2xl font-bold text-[#0F3D8C] text-price font-data-price">
+                    KES {total.toLocaleString()}
+                  </span>
+                </div>
+
+                {/* Checkout CTA */}
+                <Link
+                  to="/checkout"
+                  className="w-full bg-[#0F3D8C] text-white py-3.5 rounded-xl font-bold text-base hover:bg-[#0A2D6B] transition-all shadow-md flex items-center justify-center gap-2 text-center"
+                >
+                  <ShieldCheck className="h-5 w-5 text-[#10B981]" />
+                  <span>Proceed to Secure Checkout</span>
+                </Link>
+
+                <div className="text-center pt-2">
+                  <span className="text-xs text-[#64748B] inline-flex items-center gap-1.5">
+                    <Shield className="h-3.5 w-3.5 text-[#10B981]" />
+                    <span>256-bit Financial-Grade Encryption</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
 };
 
 export default Cart;

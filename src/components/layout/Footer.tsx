@@ -11,10 +11,7 @@ export const Footer = () => {
         <div className="grid gap-8 md:grid-cols-4">
           <div>
             <Link to="/" className="flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-accent" strokeWidth={2.5} />
-              <span className="text-base font-bold tracking-tight font-display">
-                Tech<span className="text-accent">Trust</span>
-              </span>
+              <img src="/logo.jpg" alt="TechTrust" className="h-6 w-auto object-contain rounded-sm" />
             </Link>
             <p className="mt-3 text-sm text-muted-foreground max-w-xs">
               Kenya's verified marketplace for buying, selling, and repairing laptops and smartphones.
@@ -25,24 +22,25 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/browse" className="hover:text-accent transition-smooth">Browse Products</Link></li>
               <li><Link to="/repairs" className="hover:text-accent transition-smooth">Repair Services</Link></li>
-              <li><Link to="/vendor/register" className="hover:text-accent transition-smooth">Become a Vendor</Link></li>
+              <li><Link to="/vendor/onboarding" className="hover:text-accent transition-smooth">Become a Vendor</Link></li>
+              <li><Link to="/seller-guidelines" className="hover:text-accent transition-smooth">Seller Guidelines</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="text-sm font-semibold mb-3">Trust & Safety</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/how-it-works" className="hover:text-accent transition-smooth">How Float Works</Link></li>
-              <li><Link to="/how-it-works" className="hover:text-accent transition-smooth">Vendor Verification</Link></li>
-              <li><Link to="/how-it-works" className="hover:text-accent transition-smooth">Dispute Resolution</Link></li>
+              <li><Link to="/verification" className="hover:text-accent transition-smooth">Vendor Verification</Link></li>
+              <li><Link to="/disputes" className="hover:text-accent transition-smooth">Dispute Resolution</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="text-sm font-semibold mb-3">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><span className="text-muted-foreground">About</span></li>
+              <li><Link to="/how-it-works" className="hover:text-accent transition-smooth">About</Link></li>
               <li><a href="mailto:support@techtrust.co.ke" className="hover:text-accent transition-smooth">Contact</a></li>
-              <li><Link to="/terms" className="hover:text-accent transition-smooth">Terms</Link></li>
-              <li><span className="text-muted-foreground">Privacy</span></li>
+              <li><Link to="/terms" className="hover:text-accent transition-smooth">Terms of Service</Link></li>
+              <li><Link to="/privacy" className="hover:text-accent transition-smooth">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>

@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { CountUp } from "@/components/ui/count-up";
+import { SAMPLE_PRODUCTS } from "@/data/products";
 
 const Index = () => {
   useEffect(() => {
@@ -23,65 +25,68 @@ const Index = () => {
     <div className="bg-background text-on-background font-body-md antialiased overflow-x-hidden">
       <main className="flex flex-col gap-12 md:gap-20">
         {/* Hero Section - Matched to landing.PNG */}
-        <section className="relative w-full overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-surface-container-low to-background pt-12 md:pt-20 pb-20 md:pb-28">
-          <div className="max-w-container-max mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center relative z-10">
+        <section className="relative w-full overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-surface-container-low to-background pt-6 md:pt-10 pb-10 md:pb-14">
+          <div className="max-w-container-max mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-4 items-center relative z-10">
             {/* Left Content */}
-            <div className="flex flex-col gap-6 md:gap-8">
-              <span className="font-ui-label text-xs md:text-sm text-[#0F3D8C] uppercase tracking-wider font-bold">
-                Kenya's Verified Tech Marketplace
-              </span>
-              <h1 className="font-display-h1-mobile md:font-display-h1 text-4xl md:text-5xl font-bold text-[#0F172A] leading-tight">
+            <div className="flex flex-col">
+              <div className="inline-flex items-center gap-2 bg-[#EEF2FF] border border-[#0F3D8C]/20 px-3.5 py-1 rounded-full w-fit mb-2.5 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-[#0F3D8C] animate-pulse"></span>
+                <span className="font-ui-label text-xs md:text-sm text-[#0F3D8C] uppercase tracking-wider font-bold">
+                  Kenya's Verified Tech Marketplace
+                </span>
+              </div>
+              <h1 className="font-display-h1-mobile md:font-display-h1 text-3xl md:text-4xl font-bold text-[#0F172A] leading-tight mb-2.5">
                 Buy and Sell Tech You Can Actually{" "}
                 <span className="text-[#0F3D8C] relative inline-block whitespace-nowrap">
                   Trust
-                  <svg className="absolute w-full h-3 -bottom-1 left-0 text-[#10B981]" preserveAspectRatio="none" viewBox="0 0 100 20">
+                  <svg className="absolute w-full h-2.5 -bottom-0.5 left-0 text-[#10B981]" preserveAspectRatio="none" viewBox="0 0 100 20">
                     <path d="M0,10 Q50,20 100,10" fill="none" stroke="currentColor" strokeWidth="4"></path>
                   </svg>
                 </span>
               </h1>
-              <p className="font-body-lg text-base md:text-lg text-[#475569] max-w-lg leading-relaxed">
+              <p className="font-body-lg text-sm md:text-base text-[#475569] max-w-lg leading-snug mb-3.5">
                 Every vendor is physically inspected. Every payment is held in Float until you confirm delivery. No risk. No Suprises.
               </p>
-              <div className="flex flex-wrap gap-3.5 mt-1">
-                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-[#E2E8F0]">
-                  <span className="material-symbols-outlined text-[18px] text-[#0F3D8C]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <div className="flex flex-wrap gap-2.5 mb-4">
+                <div className="flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-full shadow-sm border border-[#E2E8F0]">
+                  <span className="material-symbols-outlined text-[16px] text-[#0F3D8C]" style={{ fontVariationSettings: "'FILL' 1" }}>
                     security
                   </span>
-                  <span className="font-ui-label text-sm text-[#1E293B] font-medium">Float-protected</span>
+                  <span className="font-ui-label text-xs text-[#1E293B] font-medium">Float-protected</span>
                 </div>
-                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-[#E2E8F0]">
-                  <span className="material-symbols-outlined text-[18px] text-[#10B981]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                <div className="flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-full shadow-sm border border-[#E2E8F0]">
+                  <span className="material-symbols-outlined text-[16px] text-[#10B981]" style={{ fontVariationSettings: "'FILL' 1" }}>
                     check_circle
                   </span>
-                  <span className="font-ui-label text-sm text-[#1E293B] font-medium">Verified vendors</span>
+                  <span className="font-ui-label text-xs text-[#1E293B] font-medium">Verified vendors</span>
                 </div>
-                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-[#E2E8F0]">
-                  <span className="material-symbols-outlined text-[18px] text-[#0284C7]">
+                <div className="flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-full shadow-sm border border-[#E2E8F0]">
+                  <span className="material-symbols-outlined text-[16px] text-[#0284C7]">
                     sell
                   </span>
-                  <span className="font-ui-label text-sm text-[#1E293B] font-medium">Dispute resolution</span>
+                  <span className="font-ui-label text-xs text-[#1E293B] font-medium">Dispute resolution</span>
                 </div>
               </div>
-              <div className="mt-4 flex gap-4">
-                <Link to="/browse" className="bg-[#0F3D8C] text-white px-8 py-3.5 rounded-lg font-body-md-bold text-base hover:bg-[#0A2D6B] transition-all duration-200 shadow-md inline-block">
-                  Start Browsing
+              <div className="flex flex-wrap gap-3 items-center">
+                <Link to="/browse" className="bg-[#0F3D8C] text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-[#0A2D6B] transition-all duration-200 shadow-sm inline-flex items-center justify-center gap-2">
+                  Browse Verified Tech
                 </Link>
-                <Link to="/vendor/register" className="border-2 border-[#0F3D8C] text-[#0F3D8C] px-8 py-3.5 rounded-lg font-body-md-bold text-base hover:bg-[#0F3D8C] hover:text-white transition-all duration-200 inline-block">
+                <Link to="/vendor/onboarding" className="border-2 border-[#0F3D8C] text-[#0F3D8C] px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-[#0F3D8C] hover:text-white transition-all duration-200 inline-flex items-center justify-center gap-2">
                   List Your Shop
                 </Link>
               </div>
             </div>
             {/* Right Visual */}
-            <div className="relative flex justify-center md:justify-end mt-4 md:mt-0">
-              <div className="relative bg-white rounded-2xl p-6 shadow-xl border border-[#E2E8F0] max-w-md w-full transform rotate-1 hover:rotate-0 transition-transform duration-500 md:-translate-x-4">
+            <div className="relative flex justify-center md:justify-start lg:ml-12 mt-8 md:mt-0 w-full">
+              <div className="relative bg-white rounded-3xl p-6 md:p-8 shadow-2xl border border-[#E2E8F0] max-w-lg w-full transform rotate-1 hover:rotate-0 transition-transform duration-500">
                 {/* Green Verified Listing Badge */}
-                <div className="absolute -top-4 -left-4 z-20 bg-[#10B981] text-white px-4 py-2 rounded-xl shadow-md flex items-center gap-2 font-bold text-xs">
+                <div className="absolute -top-4 -left-4 z-20 bg-[#10B981] text-white px-4 py-2 rounded-xl shadow-md flex items-center gap-2 font-bold text-sm">
                   <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                     shield
                   </span>
                   <span>Verified Listing</span>
                 </div>
-                <div className="rounded-xl overflow-hidden bg-slate-100 aspect-[4/3] relative">
+                <div className="rounded-2xl overflow-hidden bg-slate-100 aspect-[16/10] relative shadow-inner">
                   <div
                     className="absolute inset-0 bg-cover bg-center w-full h-full"
                     style={{
@@ -90,14 +95,14 @@ const Index = () => {
                     }}
                   ></div>
                 </div>
-                <div className="mt-5 flex justify-between items-start">
+                <div className="mt-6 flex justify-between items-start">
                   <div>
-                    <h3 className="font-body-md-bold text-lg text-[#0F172A] font-bold">MacBook Pro 14" M2</h3>
-                    <p className="font-body-md text-sm text-[#64748B] mt-0.5">
-                      Vendor: <span className="text-[#0F3D8C] font-semibold">Nairobi Tech Hub</span>
+                    <h3 className="font-body-md-bold text-xl md:text-2xl text-[#0F172A] font-extrabold tracking-tight">MacBook Pro 14" M2</h3>
+                    <p className="font-body-md text-base text-[#64748B] mt-1.5">
+                      Vendor: <span className="text-[#0F3D8C] font-bold">Nairobi Tech Hub</span>
                     </p>
                   </div>
-                  <span className="font-mono text-xl text-[#0F172A] font-bold">KSh 185,000</span>
+                  <span className="font-mono text-xl md:text-2xl text-[#0F172A] font-extrabold tracking-tight">KSh 185,000</span>
                 </div>
               </div>
             </div>
@@ -109,21 +114,27 @@ const Index = () => {
           <div className="max-w-container-max mx-auto px-6 md:px-12">
             <div className="flex flex-col md:flex-row justify-center items-center gap-10 md:gap-24 text-center">
               <div className="flex flex-col items-center gap-1">
-                <div className="font-data-price text-4xl md:text-5xl font-bold text-[#0F3D8C] mb-1">12+</div>
+                <div className="font-data-price text-4xl md:text-5xl font-bold text-[#0F3D8C] mb-1">
+                  <CountUp end={12} suffix="+" duration={2500} />
+                </div>
                 <div className="font-ui-label text-xs uppercase tracking-wider text-[#64748B] font-semibold">
                   Verified Vendors
                 </div>
               </div>
               <div className="hidden md:block w-px h-16 bg-[#E2E8F0]"></div>
               <div className="flex flex-col items-center gap-1">
-                <div className="font-data-price text-4xl md:text-5xl font-bold text-[#0F3D8C] mb-1">121+</div>
+                <div className="font-data-price text-4xl md:text-5xl font-bold text-[#0F3D8C] mb-1">
+                  <CountUp end={121} suffix="+" duration={2800} />
+                </div>
                 <div className="font-ui-label text-xs uppercase tracking-wider text-[#64748B] font-semibold">
                   Products Listed
                 </div>
               </div>
               <div className="hidden md:block w-px h-16 bg-[#E2E8F0]"></div>
               <div className="flex flex-col items-center gap-1">
-                <div className="font-data-price text-4xl md:text-5xl font-bold text-[#0F3D8C] mb-1">8,902+</div>
+                <div className="font-data-price text-4xl md:text-5xl font-bold text-[#0F3D8C] mb-1">
+                  <CountUp end={8902} suffix="+" duration={3200} />
+                </div>
                 <div className="font-ui-label text-xs uppercase tracking-wider text-[#64748B] font-semibold">
                   Safe Transactions
                 </div>
@@ -153,15 +164,15 @@ const Index = () => {
         </section>
 
         {/* How It Works */}
-        <section className="py-20 md:py-28 bg-background">
+        <section className="py-12 md:py-16 bg-background">
           <div className="max-w-container-max mx-auto px-6 md:px-12">
-            <div className="text-center mb-16 md:mb-20">
+            <div className="text-center mb-10 md:mb-12">
               <h2 className="font-display-h2 text-3xl md:text-4xl text-[#0F172A] font-bold mb-4">Secure trading in 3 steps</h2>
               <p className="font-body-lg text-base md:text-lg text-[#64748B] max-w-2xl mx-auto">
                 We've removed the risk from buying electronics online.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
               {/* Step 1 */}
               <div className="flex flex-col items-center text-center p-8 md:p-10 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all">
                 <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-[#0F3D8C] mb-8">
@@ -199,9 +210,9 @@ const Index = () => {
         </section>
 
         {/* Product Preview Grid */}
-        <section className="py-20 md:py-28 bg-white border-t border-[#E2E8F0]">
+        <section className="py-12 md:py-16 bg-white border-t border-[#E2E8F0]">
           <div className="max-w-container-max mx-auto px-6 md:px-12">
-            <div className="flex justify-between items-end mb-12">
+            <div className="flex justify-between items-end mb-8 md:mb-10">
               <div>
                 <h2 className="font-display-h2 text-3xl md:text-4xl text-[#0F172A] font-bold mb-2">Recently Listed</h2>
                 <p className="font-body-md text-[#64748B]">All items backed by Float protection.</p>
@@ -214,129 +225,37 @@ const Index = () => {
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Card 1 */}
-              <div className="group bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
-                <div className="aspect-square bg-slate-50 relative overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center w-full h-full group-hover:scale-105 transition-transform duration-500"
-                    style={{
-                      backgroundImage:
-                        "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBdhrRGXHbRXPN-L86ppaitJv80VCBifa_ZbT98SAOGMJszWAuJCPJznoAHRKLcb5YSBOCWNxN23utz56npO8QsomqeLrtGOJsTvOokDKiaOg13F1sJzixUDikLQkWDKrocsse9cK62yucx5aLjTLVszSpegeyJlTLgNBzjDNlAdtCycoee5JmZXYhHwnb_wBDMqrx2K8oq-OOS6DJvtPwXl0B_kb9OEjIhG73IB6T1YEVVz4FwrcXI3g')",
-                    }}
-                  ></div>
-                </div>
-                <div className="p-6 flex flex-col flex-grow gap-3">
-                  <div className="flex justify-between items-start">
-                    <span className="font-ui-label text-xs text-[#64748B] uppercase font-semibold tracking-wider">Smartphones</span>
-                    <span className="flex items-center gap-1 text-xs font-semibold text-[#10B981] bg-[#10B981]/10 px-2 py-0.5 rounded">
-                      <span className="material-symbols-outlined text-[14px]">verified</span>
-                    </span>
+              {SAMPLE_PRODUCTS.filter(p => ["prod-4", "prod-13", "prod-6", "prod-14"].includes(p.id)).map(product => (
+                <div key={product.id} className="group bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
+                  <div className="aspect-square bg-slate-50 relative overflow-hidden flex items-center justify-center p-4">
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    />
                   </div>
-                  <h3 className="font-body-md-bold text-base text-[#0F172A] font-bold line-clamp-1">Samsung Galaxy S23 Ultra</h3>
-                  <div className="mt-auto pt-4 border-t border-[#E2E8F0] flex flex-col gap-3">
-                    <span className="font-mono text-xl font-bold text-[#0F172A]">KSh 145,000</span>
-                    <Link
-                      to="/browse"
-                      className="w-full text-center py-2.5 bg-[#EEF2FF] text-[#0F3D8C] hover:bg-[#0F3D8C] hover:text-white border border-[#0F3D8C]/20 rounded-xl font-body-md-bold text-sm transition-all block font-semibold"
-                    >
-                      Buy with Float
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2 */}
-              <div className="group bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
-                <div className="aspect-square bg-slate-50 relative overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center w-full h-full group-hover:scale-105 transition-transform duration-500"
-                    style={{
-                      backgroundImage:
-                        "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCoVEcfhWGo2okdJQ6WkKbOCCftiAQT-aNoBeaIfKeQtmpwxggnl745y6tSWtVlQwIqg7M5NCMNqtYEqbMbqLY6GJQX2btPigttK4BtrTpM0ucR1pplF0j0cGoSaUe6FOeee_IRlElFdNFI9qOZXmDS7g8OvnNqpOqHBH6cvPYhKTE83aMILOI-emQXf_94jGuvGLu_SzP4tJVIUKc1k9-W_LNtrCn83S-YfSqwAKbttUcXh2oTHdnZ7g')",
-                    }}
-                  ></div>
-                </div>
-                <div className="p-6 flex flex-col flex-grow gap-3">
-                  <div className="flex justify-between items-start">
-                    <span className="font-ui-label text-xs text-[#64748B] uppercase font-semibold tracking-wider">Cameras</span>
-                    <span className="flex items-center gap-1 text-xs font-semibold text-[#10B981] bg-[#10B981]/10 px-2 py-0.5 rounded">
-                      <span className="material-symbols-outlined text-[14px]">verified</span>
-                    </span>
-                  </div>
-                  <h3 className="font-body-md-bold text-base text-[#0F172A] font-bold line-clamp-1">Sony A7 IV Body Only</h3>
-                  <div className="mt-auto pt-4 border-t border-[#E2E8F0] flex flex-col gap-3">
-                    <span className="font-mono text-xl font-bold text-[#0F172A]">KSh 320,000</span>
-                    <Link
-                      to="/browse"
-                      className="w-full text-center py-2.5 bg-[#EEF2FF] text-[#0F3D8C] hover:bg-[#0F3D8C] hover:text-white border border-[#0F3D8C]/20 rounded-xl font-body-md-bold text-sm transition-all block font-semibold"
-                    >
-                      Buy with Float
-                    </Link>
+                  <div className="p-6 flex flex-col flex-grow gap-3">
+                    <div className="flex justify-between items-start">
+                      <span className="font-ui-label text-xs text-[#64748B] uppercase font-semibold tracking-wider">{product.category}</span>
+                      {product.vendorVerified && (
+                        <span className="flex items-center gap-1 text-xs font-semibold text-[#10B981] bg-[#10B981]/10 px-2 py-0.5 rounded">
+                          <span className="material-symbols-outlined text-[14px]">verified</span>
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-body-md-bold text-base text-[#0F172A] font-bold line-clamp-1">{product.title}</h3>
+                    <div className="mt-auto pt-4 border-t border-[#E2E8F0] flex flex-col gap-3">
+                      <span className="font-mono text-xl font-bold text-[#0F172A]">KSh {product.price.toLocaleString()}</span>
+                      <Link
+                        to={`/product/${product.id}`}
+                        className="w-full text-center py-2.5 bg-[#EEF2FF] text-[#0F3D8C] hover:bg-[#0F3D8C] hover:text-white border border-[#0F3D8C]/20 rounded-xl font-body-md-bold text-sm transition-all block font-semibold"
+                      >
+                        Buy with Float
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Card 3 */}
-              <div className="group bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
-                <div className="aspect-square bg-slate-50 relative overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center w-full h-full group-hover:scale-105 transition-transform duration-500"
-                    style={{
-                      backgroundImage:
-                        "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCGrQg9voAWYfnwRbHdyCc1WlJ6yt42k4HrGpbcfmMBkqqWsf1t8UYU6BhNwnnUORD0Ovvdcs-cVFhC5dN6khxoenX-qXr056Mi1-i4WGGg9LL4Urp7bhTsAHtOl8cvTNBqHSV-T-wCPAEPsLx3y6Yf0wLCKmZEdWJe9J4uZ9dEiYJ-ZtN0g1R4R3LukPvIrd_FZV0jYck0B9lzOkVwJeOTMOcU1yKxP12wSM7Kqq6Od9k7o5I5JUPqBQ')",
-                    }}
-                  ></div>
-                </div>
-                <div className="p-6 flex flex-col flex-grow gap-3">
-                  <div className="flex justify-between items-start">
-                    <span className="font-ui-label text-xs text-[#64748B] uppercase font-semibold tracking-wider">Audio</span>
-                    <span className="flex items-center gap-1 text-xs font-semibold text-[#10B981] bg-[#10B981]/10 px-2 py-0.5 rounded">
-                      <span className="material-symbols-outlined text-[14px]">verified</span>
-                    </span>
-                  </div>
-                  <h3 className="font-body-md-bold text-base text-[#0F172A] font-bold line-clamp-1">Sony WH-1000XM5</h3>
-                  <div className="mt-auto pt-4 border-t border-[#E2E8F0] flex flex-col gap-3">
-                    <span className="font-mono text-xl font-bold text-[#0F172A]">KSh 45,000</span>
-                    <Link
-                      to="/browse"
-                      className="w-full text-center py-2.5 bg-[#EEF2FF] text-[#0F3D8C] hover:bg-[#0F3D8C] hover:text-white border border-[#0F3D8C]/20 rounded-xl font-body-md-bold text-sm transition-all block font-semibold"
-                    >
-                      Buy with Float
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 4 */}
-              <div className="group bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
-                <div className="aspect-square bg-slate-50 relative overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center w-full h-full group-hover:scale-105 transition-transform duration-500"
-                    style={{
-                      backgroundImage:
-                        "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAD6GY2WscPbhDGU9htCuFVUOrLTqW0wsRRdeZSLFgGIdieuDB5bfCo9PDDyGIkdjJgvuxvlb-vSg4uCGiVUcVZqgPc8lQCJlDPw0DbrtadLsM8T1YdJ04fTU6vuEBrsXYnTNdgLnPTYUhB8nWToEP0zOUwUW2v4jHRgA1HwtRhgh5onzkmvWkmihSwtH6cFfzFMtDCbgf1341gsy07eNrE2EheAZSE_agibsEa3NwR3OhRwoSqS2drag')",
-                    }}
-                  ></div>
-                </div>
-                <div className="p-6 flex flex-col flex-grow gap-3">
-                  <div className="flex justify-between items-start">
-                    <span className="font-ui-label text-xs text-[#64748B] uppercase font-semibold tracking-wider">Wearables</span>
-                    <span className="flex items-center gap-1 text-xs font-semibold text-[#10B981] bg-[#10B981]/10 px-2 py-0.5 rounded">
-                      <span className="material-symbols-outlined text-[14px]">verified</span>
-                    </span>
-                  </div>
-                  <h3 className="font-body-md-bold text-base text-[#0F172A] font-bold line-clamp-1">Apple Watch Series 8</h3>
-                  <div className="mt-auto pt-4 border-t border-[#E2E8F0] flex flex-col gap-3">
-                    <span className="font-mono text-xl font-bold text-[#0F172A]">KSh 62,500</span>
-                    <Link
-                      to="/browse"
-                      className="w-full text-center py-2.5 bg-[#EEF2FF] text-[#0F3D8C] hover:bg-[#0F3D8C] hover:text-white border border-[#0F3D8C]/20 rounded-xl font-body-md-bold text-sm transition-all block font-semibold"
-                    >
-                      Buy with Float
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
             <div className="mt-10 text-center md:hidden">
               <Link

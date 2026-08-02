@@ -1,26 +1,139 @@
 import { useEffect } from "react";
-
-const pageHtml = "\n<!-- Actions -->\n<div class=\"flex items-center gap-4\">\n<div class=\"flex gap-2\">\n<button class=\"text-on-surface-variant hover:text-secondary transition-colors opacity-80 hover:opacity-100\">\n<span class=\"material-symbols-outlined\">shopping_cart</span>\n</button>\n<button class=\"text-secondary dark:text-secondary-fixed border-b-2 border-secondary pb-1 opacity-80 hover:opacity-100\">\n<span class=\"material-symbols-outlined\">account_circle</span>\n</button>\n</div>\n</div>\n</div>\n</header>\n<!-- Main Content -->\n<main class=\"flex-grow pt-[104px] pb-margin-desktop px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full\">\n<!-- Page Header -->\n<div class=\"mb-gutter flex flex-col md:flex-row md:items-end justify-between gap-4\">\n<div>\n<h1 class=\"font-display-h1 text-display-h1-mobile md:text-display-h1 text-on-background mb-2\">Order History</h1>\n<p class=\"font-body-lg text-body-lg text-on-surface-variant\">Track and manage your secured electronics purchases.</p>\n</div>\n<!-- Filters (Simplified for visual) -->\n<div class=\"flex gap-2\">\n<button class=\"bg-surface border border-outline-variant rounded px-4 py-2 font-ui-label text-ui-label text-on-surface flex items-center gap-2 hover:border-primary-container transition-colors\">\n<span class=\"material-symbols-outlined text-[18px]\">filter_list</span> Filter\n                </button>\n<div class=\"relative\">\n<span class=\"material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]\">search</span>\n<input class=\"bg-surface border border-outline-variant rounded pl-9 pr-4 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container w-full md:w-64 transition-colors\" placeholder=\"Search orders...\" type=\"text\"/>\n</div>\n</div>\n</div>\n<!-- Order List (Bento-style Cards instead of standard table for modern look) -->\n<div class=\"grid grid-cols-1 gap-4\">\n<!-- Order Card 1: Funds Held -->\n<div class=\"bg-surface rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200 group\">\n<div class=\"flex flex-col lg:flex-row lg:items-center justify-between gap-6\">\n<!-- Meta & ID -->\n<div class=\"flex flex-col gap-1 min-w-[200px]\">\n<div class=\"flex items-center gap-2\">\n<span class=\"font-data-id text-data-id text-on-surface-variant uppercase tracking-wider\">#ORD-2024-892A</span>\n<span class=\"w-1.5 h-1.5 rounded-full bg-outline-variant\"></span>\n<span class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Oct 24, 2024</span>\n</div>\n<div class=\"flex items-center gap-2 mt-2\">\n<div class=\"w-8 h-8 rounded-full bg-surface-container flex items-center justify-center\">\n<span class=\"material-symbols-outlined text-primary text-[16px]\">store</span>\n</div>\n<span class=\"font-body-md-bold text-body-md-bold text-on-surface\">Nairobi Tech Hub</span>\n<span class=\"bg-[#22C55E] text-white rounded-full px-2 py-0.5 flex items-center gap-1 font-ui-label text-[10px]\">\n<span class=\"material-symbols-outlined text-[10px]\" style=\"font-variation-settings: 'FILL' 1;\">shield</span> Verified\n                            </span>\n</div>\n</div>\n<!-- Item Details -->\n<div class=\"flex-grow\">\n<div class=\"flex gap-4 items-start\">\n<div class=\"w-16 h-16 rounded bg-surface-container flex-shrink-0 relative overflow-hidden\" data-alt=\"A pristine, high-end laptop sitting on a clean, modern white desk in a minimalist office setting. Soft, natural daylight illuminates the sleek silver chassis. The aesthetic is corporate modern and secure.\">\n<img alt=\"Product\" class=\"w-full h-full object-cover\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuAGFGl-X0PYNyfNaJOSb3CmC4DwjSTlBQmQllM0eYeUwylZIqg9t89y24rMtDDtvPZRs-E4wMAOuWFDzHRI9IJioMimlYBVKQs50N-yEdLF1vgw7YzhetPHf85ylixZg8ClM95hwV-Wewy6LB1ClwgFNoLvsrSZJREzUc9Atn_nKcri15Vyd73EuMe9ZfzySX6CTBOymIO63fvfcFNRlNOfgATYWZfwcKmV-RzCBvVllCz4Azl9ivQKTw\"/>\n</div>\n<div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">MacBook Pro 16\" M3 Max</h3>\n<p class=\"font-body-md text-body-md text-on-surface-variant text-sm line-clamp-1\">Space Black, 36GB RAM, 1TB SSD. Condition: Brand New.</p>\n</div>\n</div>\n</div>\n<!-- Price & Status -->\n<div class=\"flex flex-col lg:items-end gap-2 min-w-[150px]\">\n<span class=\"font-data-price text-data-price text-on-surface font-semibold\">KES 450,000</span>\n<!-- Float Indicator: Funds Held (Blue) -->\n<div class=\"flex items-center gap-2 bg-[#EEF2FF] text-[#0F3D8C] px-3 py-1 rounded-full\">\n<span class=\"w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse\"></span>\n<span class=\"font-ui-label text-ui-label text-xs font-semibold\">Funds in Escrow</span>\n</div>\n</div>\n<!-- Actions -->\n<div class=\"flex flex-row lg:flex-col gap-2 min-w-[140px] mt-4 lg:mt-0\">\n<button class=\"flex-1 bg-[#0F3D8C] hover:bg-[#0A2D6B] text-white font-ui-label text-ui-label py-2 px-4 rounded-[8px] transition-colors flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined text-[18px]\">local_shipping</span> Track\n                        </button>\n<button class=\"flex-1 bg-surface-container hover:bg-surface-container-high text-on-surface font-ui-label text-ui-label py-2 px-4 rounded-[8px] transition-colors flex items-center justify-center gap-2\">\n                            Dispute\n                        </button>\n</div>\n</div>\n</div>\n<!-- Order Card 2: Released -->\n<div class=\"bg-surface rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:border-[#EEF2FF] border border-transparent transition-all duration-200\">\n<div class=\"flex flex-col lg:flex-row lg:items-center justify-between gap-6\">\n<!-- Meta & ID -->\n<div class=\"flex flex-col gap-1 min-w-[200px]\">\n<div class=\"flex items-center gap-2\">\n<span class=\"font-data-id text-data-id text-on-surface-variant uppercase tracking-wider\">#ORD-2024-710B</span>\n<span class=\"w-1.5 h-1.5 rounded-full bg-outline-variant\"></span>\n<span class=\"font-body-md text-body-md text-on-surface-variant text-sm\">Oct 15, 2024</span>\n</div>\n<div class=\"flex items-center gap-2 mt-2\">\n<div class=\"w-8 h-8 rounded-full bg-surface-container flex items-center justify-center\">\n<span class=\"material-symbols-outlined text-primary text-[16px]\">store</span>\n</div>\n<span class=\"font-body-md-bold text-body-md-bold text-on-surface\">ElectroWorld KE</span>\n</div>\n</div>\n<!-- Item Details -->\n<div class=\"flex-grow\">\n<div class=\"flex gap-4 items-start\">\n<div class=\"w-16 h-16 rounded bg-surface-container flex-shrink-0 relative overflow-hidden\" data-alt=\"A sleek new smartphone displaying a security lock icon on screen, resting on a stark white pedestal against a minimal gray background. Lighting is sharp and professional.\">\n<img alt=\"Product\" class=\"w-full h-full object-cover grayscale opacity-80\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuDePp9S0hmi4CpjM6IPRv_ktt-1DZw4M3iOB2tjVw4D269KxXb4tnq22ATwSu5ryENYRyRd8v6l2C47Oez8mhZqRKKKNlaTDIj0lVB8VEANt-srVxoIF_FFvtW53KEv0-PiZ06ASfo_RTKh3wB9NFJXcm_oQXeD-VUYmw6r6qXREdEV-uC6XHtw5BQzsbhWRNDuivVlhpie3fSGunQAaNbL0if1b1EpPhqO6YkbGr0IgmUuJ-BN6f2X1g\"/>\n</div>\n<div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface\">iPhone 15 Pro Max</h3>\n<p class=\"font-body-md text-body-md text-on-surface-variant text-sm line-clamp-1\">Natural Titanium, 256GB. Condition: Refurbished.</p>\n</div>\n</div>\n</div>\n<!-- Price & Status -->\n<div class=\"flex flex-col lg:items-end gap-2 min-w-[150px]\">\n<span class=\"font-data-price text-data-price text-on-surface font-semibold text-outline\">KES 185,000</span>\n<!-- Float Indicator: Released (Green) -->\n<div class=\"flex items-center gap-2 bg-[#F0FDF4] text-[#166534] px-3 py-1 rounded-full border border-[#DCFCE7]\">\n<span class=\"material-symbols-outlined text-[#22C55E] text-[14px]\">check_circle</span>\n<span class=\"font-ui-label text-ui-label text-xs font-semibold\">Funds Released</span>\n</div>\n</div>\n<!-- Actions -->\n<div class=\"flex flex-row lg:flex-col gap-2 min-w-[140px] mt-4 lg:mt-0\">\n<button class=\"flex-1 bg-surface-container hover:bg-surface-container-high text-on-surface font-ui-label text-ui-label py-2 px-4 rounded-[8px] transition-colors flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined text-[18px]\">receipt_long</span> Receipt\n                        </button>\n</div>\n</div>\n</div>\n</div>\n</main>\n";
+import { Link } from "react-router-dom";
+import { Search, Filter, Store, Shield, CheckCircle, Package, Receipt } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Orders = () => {
   useEffect(() => {
     document.title = "Order History - TechTrust Kenya";
-
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
-      );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
-
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
   }, []);
 
-  return <div className="bg-[#F8FAFC] text-on-surface antialiased min-h-screen flex flex-col" dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+  return (
+    <div className="bg-background min-h-screen">
+      <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 max-w-5xl">
+        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-display font-bold text-foreground mb-2">Order History</h1>
+            <p className="text-muted-foreground text-lg">Track and manage your secured electronics purchases.</p>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" /> Filter
+            </Button>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input 
+                className="bg-background border border-input rounded-md pl-9 pr-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-full md:w-64 transition-colors" 
+                placeholder="Search orders..." 
+                type="text"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6">
+          {/* Order Card 1: Funds Held */}
+          <div className="bg-card rounded-xl shadow-sm hover:shadow-md border border-border transition-all duration-200 p-6 group">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              
+              <div className="flex flex-col gap-2 min-w-[200px]">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm text-muted-foreground uppercase tracking-wider">#ORD-2024-892A</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-border"></span>
+                  <span className="text-sm text-muted-foreground">Oct 24, 2024</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Store className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-semibold text-foreground">Nairobi Tech Hub</span>
+                  <span className="bg-green-500 text-white rounded-full px-2 py-0.5 flex items-center gap-1 text-[10px] font-medium">
+                    <Shield className="h-3 w-3" /> Verified
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex-grow">
+                <div className="flex gap-4 items-start">
+                  <div className="w-16 h-16 rounded-md bg-secondary flex-shrink-0 overflow-hidden border border-border">
+                    <img alt="MacBook Pro" className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">MacBook Pro 16" M3 Max</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-1 mt-1">Space Black, 36GB RAM, 1TB SSD. Condition: Brand New.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col lg:items-end gap-2 min-w-[150px]">
+                <span className="font-semibold text-foreground">KES 450,000</span>
+                <div className="flex items-center gap-2 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                  <span className="text-xs font-semibold">Funds in Escrow</span>
+                </div>
+              </div>
+
+              <div className="flex flex-row lg:flex-col gap-2 min-w-[140px] mt-2 lg:mt-0">
+                <Button className="flex-1 flex items-center justify-center gap-2">
+                  <Package className="h-4 w-4" /> Track
+                </Button>
+                <Button variant="secondary" className="flex-1 flex items-center justify-center gap-2">
+                  Dispute
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Card 2: Released */}
+          <div className="bg-card rounded-xl shadow-sm hover:shadow-md border border-border transition-all duration-200 p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              
+              <div className="flex flex-col gap-2 min-w-[200px]">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm text-muted-foreground uppercase tracking-wider">#ORD-2024-710B</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-border"></span>
+                  <span className="text-sm text-muted-foreground">Oct 15, 2024</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Store className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-semibold text-foreground">ElectroWorld KE</span>
+                </div>
+              </div>
+
+              <div className="flex-grow">
+                <div className="flex gap-4 items-start">
+                  <div className="w-16 h-16 rounded-md bg-secondary flex-shrink-0 overflow-hidden border border-border">
+                    <img alt="iPhone 15 Pro Max" className="w-full h-full object-cover grayscale opacity-80" src="https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=800" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">iPhone 15 Pro Max</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-1 mt-1">Natural Titanium, 256GB. Condition: Refurbished.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col lg:items-end gap-2 min-w-[150px]">
+                <span className="font-semibold text-foreground">KES 185,000</span>
+                <div className="flex items-center gap-2 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 px-3 py-1 rounded-full border border-green-100 dark:border-green-800">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span className="text-xs font-semibold">Funds Released</span>
+                </div>
+              </div>
+
+              <div className="flex flex-row lg:flex-col gap-2 min-w-[140px] mt-2 lg:mt-0">
+                <Button variant="outline" className="flex-1 flex items-center justify-center gap-2">
+                  <Receipt className="h-4 w-4" /> Receipt
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 };
 
 export default Orders;

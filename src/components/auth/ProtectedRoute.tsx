@@ -47,6 +47,9 @@ export const ProtectedRoute = ({ children, roles, requireApprovedVendor, loginPa
   if (!user) return <Navigate to={loginPath} state={{ from: location.pathname }} replace />;
 
   if (roles && !roles.some((r) => userRoles.includes(r))) {
+    if (roles.includes("admin")) {
+      return <Navigate to="/admin/login" replace />;
+    }
     return <Navigate to="/" replace />;
   }
 

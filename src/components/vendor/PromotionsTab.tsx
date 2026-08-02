@@ -202,7 +202,7 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
               <div className="space-y-1.5">
                 <Label>M-Pesa Phone Number</Label>
                 <Input
-                  placeholder="07XXXXXXXX or 2547XXXXXXXX"
+                  placeholder="712 345 678"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />

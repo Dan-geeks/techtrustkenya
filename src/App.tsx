@@ -13,12 +13,18 @@ import Browse from "./pages/Browse.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
 import ShopPage from "./pages/ShopPage.tsx";
 import Auth from "./pages/Auth.tsx";
+import AuthCallback from "./pages/AuthCallback.tsx";
 import Welcome from "./pages/Welcome.tsx";
 import HowItWorks from "./pages/HowItWorks.tsx";
 import Terms from "./pages/Terms.tsx";
+import Privacy from "./pages/Privacy.tsx";
+import VendorVerification from "./pages/VendorVerification.tsx";
+import DisputePolicy from "./pages/DisputePolicy.tsx";
+import SellerGuidelines from "./pages/SellerGuidelines.tsx";
 import Repairs from "./pages/Repairs.tsx";
+import BookRepair from "./pages/BookRepair.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import VendorRegister from "./pages/vendor/VendorRegister.tsx";
+
 import VendorOnboarding from "./pages/vendor/VendorOnboarding.tsx";
 import VendorPending from "./pages/vendor/VendorPending.tsx";
 import VendorSuspended from "./pages/vendor/VendorSuspended.tsx";
@@ -47,22 +53,46 @@ const App = () => (
             <CookieConsent />
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/vendor/register" element={<VendorRegister />} />
+
               <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
               <Route path="/vendor/pending" element={<VendorPending />} />
               <Route path="/vendor/suspended" element={<VendorSuspended />} />
               <Route path="/vendor/rejected" element={<VendorRejected />} />
+
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
                 <Route path="/browse" element={<Browse />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/shop/:vendorId" element={<ShopPage />} />
                 <Route path="/repairs" element={<Repairs />} />
+                <Route path="/book-repair" element={<BookRepair />} />
                 <Route path="/how-it-works" element={<HowItWorks />} />
                 <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/verification" element={<VendorVerification />} />
+                <Route path="/disputes" element={<DisputePolicy />} />
+                <Route path="/seller-guidelines" element={<SellerGuidelines />} />
                 <Route
                   path="/cart"
                   element={
@@ -84,6 +114,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <OrderDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/checkout"
+                  element={
+                    <ProtectedRoute>
+                      <Checkout />
                     </ProtectedRoute>
                   }
                 />
@@ -116,22 +154,6 @@ const App = () => (
                   element={
                     <ProtectedRoute roles={["vendor"]} requireApprovedVendor>
                       <VendorDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/dashboard"
-                  element={
-                    <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
-                      <AdminDashboard />
                     </ProtectedRoute>
                   }
                 />

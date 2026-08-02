@@ -1,26 +1,201 @@
-import { useEffect } from "react";
-
-const pageHtml = "\n<!-- Main Content -->\n<main class=\"max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-[104px] pb-margin-desktop\">\n<div class=\"mb-gutter flex items-center gap-unit\">\n<h1 class=\"font-display-h1-mobile md:font-display-h1 text-display-h1-mobile md:text-display-h1 text-on-surface\">Account Settings</h1>\n<div class=\"bg-[#22C55E] text-white px-2 py-1 rounded flex items-center gap-1 font-ui-label text-ui-label\">\n<span class=\"material-symbols-outlined text-[16px]\">verified_user</span>\n                Profile Verified\n            </div>\n</div>\n<div class=\"grid grid-cols-1 lg:grid-cols-12 gap-gutter\">\n<!-- Sidebar Navigation -->\n<aside class=\"lg:col-span-3\">\n<div class=\"bg-surface-container-lowest rounded-xl shadow-sm p-unit\">\n\n</div>\n</aside>\n<!-- Settings Content -->\n<div class=\"lg:col-span-9 flex flex-col gap-gutter\">\n<!-- Personal Info Card -->\n<section class=\"bg-surface-container-lowest rounded-xl shadow-sm p-gutter hover:shadow-md hover:border hover:border-[#EEF2FF] transition-all border border-transparent\">\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-[24px]\">Personal Information</h2>\n<form class=\"grid grid-cols-1 md:grid-cols-2 gap-[24px]\">\n<div class=\"flex flex-col gap-1\">\n<label class=\"font-ui-label text-ui-label text-on-surface-variant\">First Name</label>\n<input class=\"bg-surface-container-lowest border border-[#94A3B8] rounded-[4px] px-[12px] py-[8px] focus:outline-none focus:border-primary-container focus:ring-0 font-body-md text-body-md text-on-surface\" type=\"text\" value=\"Kipchoge\"/>\n</div>\n<div class=\"flex flex-col gap-1\">\n<label class=\"font-ui-label text-ui-label text-on-surface-variant\">Last Name</label>\n<input class=\"bg-surface-container-lowest border border-[#94A3B8] rounded-[4px] px-[12px] py-[8px] focus:outline-none focus:border-primary-container focus:ring-0 font-body-md text-body-md text-on-surface\" type=\"text\" value=\"Keino\"/>\n</div>\n<div class=\"flex flex-col gap-1 md:col-span-2\">\n<label class=\"font-ui-label text-ui-label text-on-surface-variant\">Email Address</label>\n<input class=\"bg-surface-container-lowest border border-[#94A3B8] rounded-[4px] px-[12px] py-[8px] focus:outline-none focus:border-primary-container focus:ring-0 font-body-md text-body-md text-on-surface\" disabled=\"\" type=\"email\" value=\"k.keino@example.com\"/>\n<p class=\"font-data-id text-data-id text-outline mt-1\">To change your email, please contact support.</p>\n</div>\n<div class=\"md:col-span-2 flex justify-end mt-unit\">\n<button class=\"bg-primary-container text-on-primary font-ui-label text-ui-label px-[16px] py-[8px] rounded hover:bg-[#0A2D6B] transition-colors\" type=\"button\">Save Changes</button>\n</div>\n</form>\n</section>\n<!-- M-Pesa Integration Card -->\n<section class=\"bg-surface-container-lowest rounded-xl shadow-sm p-gutter hover:shadow-md hover:border hover:border-[#EEF2FF] transition-all border border-transparent\">\n<div class=\"flex justify-between items-start mb-[24px]\">\n<div>\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-surface\">M-Pesa Integration</h2>\n<p class=\"font-body-md text-body-md text-on-surface-variant mt-1\">Manage the number used for escrows and payouts.</p>\n</div>\n<span class=\"bg-[#3B82F6] text-white px-2 py-1 rounded font-data-id text-data-id uppercase tracking-[0.05em]\">Active</span>\n</div>\n<div class=\"bg-surface-container-low p-unit rounded-lg flex items-center justify-between mb-[16px]\">\n<div class=\"flex items-center gap-unit\">\n<span class=\"material-symbols-outlined text-primary\">phone_iphone</span>\n<div>\n<p class=\"font-body-md text-body-md text-on-surface\">+254 712 345 678</p>\n<p class=\"font-data-id text-data-id text-on-surface-variant\">Primary Number</p>\n</div>\n</div>\n<button class=\"bg-[#EEF2FF] text-primary font-ui-label text-ui-label px-[12px] py-[6px] rounded hover:bg-surface-variant transition-colors\">Update</button>\n</div>\n</section>\n<!-- Security / 2FA Card -->\n<section class=\"bg-surface-container-lowest rounded-xl shadow-sm p-gutter hover:shadow-md hover:border hover:border-[#EEF2FF] transition-all border border-transparent\">\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-[24px]\">Security</h2>\n<div class=\"border-b border-outline-variant pb-[16px] mb-[16px] flex justify-between items-center\">\n<div>\n<h3 class=\"font-ui-label text-ui-label text-on-surface\">Password</h3>\n<p class=\"font-data-id text-data-id text-on-surface-variant\">Last changed 45 days ago</p>\n</div>\n<button class=\"bg-[#EEF2FF] text-primary font-ui-label text-ui-label px-[12px] py-[6px] rounded hover:bg-surface-variant transition-colors\">Change Password</button>\n</div>\n<div class=\"flex justify-between items-center\">\n<div>\n<h3 class=\"font-ui-label text-ui-label text-on-surface flex items-center gap-1\">\n                                Two-Factor Authentication (2FA)\n                                <span class=\"bg-[#22C55E] w-2 h-2 rounded-full inline-block\"></span>\n</h3>\n<p class=\"font-data-id text-data-id text-on-surface-variant\">Securing your account via SMS code.</p>\n</div>\n<button class=\"text-on-surface-variant hover:text-error font-ui-label text-ui-label px-[12px] py-[6px] transition-colors\">Disable</button>\n</div>\n</section>\n<!-- Shipping Address Card -->\n<section class=\"bg-surface-container-lowest rounded-xl shadow-sm p-gutter hover:shadow-md hover:border hover:border-[#EEF2FF] transition-all border border-transparent\">\n<div class=\"flex justify-between items-center mb-[24px]\">\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-surface\">Shipping Addresses</h2>\n<button class=\"bg-[#EEF2FF] text-primary font-ui-label text-ui-label px-[12px] py-[6px] rounded hover:bg-surface-variant transition-colors flex items-center gap-1\">\n<span class=\"material-symbols-outlined text-[16px]\">add</span> Add New\n                        </button>\n</div>\n<div class=\"grid grid-cols-1 md:grid-cols-2 gap-unit\">\n<div class=\"border border-primary-container rounded-lg p-unit relative\">\n<span class=\"absolute top-unit right-unit bg-primary-container text-white px-2 py-0.5 rounded font-data-id text-data-id\">Default</span>\n<h3 class=\"font-ui-label text-ui-label text-on-surface mb-1\">Work</h3>\n<p class=\"font-body-md text-body-md text-on-surface-variant\">Westlands, Nairobi</p>\n<p class=\"font-body-md text-body-md text-on-surface-variant\">P.O Box 12345</p>\n<div class=\"mt-unit flex gap-unit\">\n<button class=\"text-primary font-ui-label text-ui-label hover:underline\">Edit</button>\n</div>\n</div>\n<div class=\"border border-outline-variant rounded-lg p-unit\">\n<h3 class=\"font-ui-label text-ui-label text-on-surface mb-1\">Home</h3>\n<p class=\"font-body-md text-body-md text-on-surface-variant\">Kilimani, Nairobi</p>\n<p class=\"font-body-md text-body-md text-on-surface-variant\">Apt 4B, Argwings Kodhek Rd</p>\n<div class=\"mt-unit flex gap-unit\">\n<button class=\"text-primary font-ui-label text-ui-label hover:underline\">Edit</button>\n<button class=\"text-error font-ui-label text-ui-label hover:underline\">Remove</button>\n</div>\n</div>\n</div>\n</section>\n</div>\n</div>\n</main>\n";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ShieldCheck, Copy, Check, Gift, Wallet, User, Phone, Mail, MapPin, Key, Shield, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 const Profile = () => {
+  const [copied, setCopied] = useState(false);
+  const [fullName, setFullName] = useState("Kipchoge Keino");
+  const [email] = useState("k.keino@example.com");
+  const [phone, setPhone] = useState("712345678");
+  const referralCode = "TECH500";
+  const shareLink = `https://techtrustkenya.web.app/auth?mode=signup&ref=${referralCode}`;
+
   useEffect(() => {
-    document.title = "TechTrust Kenya - Profile Settings";
-
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
-      );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
-
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+    document.title = "Profile & Referral Wallet | TechTrust Kenya";
   }, []);
 
-  return <div className="font-body-md text-body-md text-on-surface antialiased bg-[#F8FAFC] min-h-screen" dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareLink);
+    setCopied(true);
+    toast.success("Referral link copied to clipboard!");
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success("Profile details updated successfully!");
+  };
+
+  return (
+    <div className="bg-[#F8FAFC] text-[#0F172A] antialiased min-h-screen">
+      <main className="w-full max-w-container-max mx-auto px-6 md:px-12 py-8 md:py-12">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <h1 className="font-display-h2 text-3xl md:text-4xl font-bold text-[#0F172A]">Account Settings</h1>
+            <div className="bg-[#10B981]/10 text-[#10B981] px-3 py-1 rounded-full border border-[#10B981]/20 text-xs font-bold flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4" />
+              <span>Verified Buyer</span>
+            </div>
+          </div>
+          <Link
+            to="/browse"
+            className="inline-flex items-center gap-2 text-sm font-bold text-[#0F3D8C] hover:underline bg-white px-4 py-2 rounded-xl border border-[#CBD5E1]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Marketplace</span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Personal Details & M-Pesa */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Personal Information */}
+            <section className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0] space-y-6">
+              <h2 className="text-lg font-bold text-[#0F172A] pb-3 border-b border-slate-100 flex items-center gap-2">
+                <User className="h-5 w-5 text-[#0F3D8C]" />
+                <span>Personal Details</span>
+              </h2>
+
+              <form onSubmit={handleSaveProfile} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-[#0F172A]">Full Name</label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:border-[#0F3D8C] text-[#0F172A]"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-[#0F172A]">Email Address</label>
+                    <input
+                      type="email"
+                      disabled
+                      value={email}
+                      className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#0F172A]">Primary M-Pesa Phone</label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-slate-300 bg-slate-100 text-[#64748B] text-xs font-mono font-semibold">
+                      +254
+                    </span>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full rounded-r-xl border border-slate-300 py-2.5 px-3.5 text-sm bg-slate-50 focus:bg-white focus:border-[#0F3D8C] text-[#0F172A] font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="submit"
+                    className="bg-[#0F3D8C] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#0A2D6B] transition-all shadow-sm"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            {/* Saved Shipping Addresses */}
+            <section className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0] space-y-4">
+              <h2 className="text-lg font-bold text-[#0F172A] pb-3 border-b border-slate-100 flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-[#0F3D8C]" />
+                <span>Shipping Addresses</span>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border-2 border-[#0F3D8C] bg-[#EEF2FF] rounded-xl p-4 relative">
+                  <span className="absolute top-3 right-3 bg-[#0F3D8C] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    Default
+                  </span>
+                  <h3 className="font-bold text-sm text-[#0F172A]">Office / Work</h3>
+                  <p className="text-xs text-[#64748B] mt-1">Westlands Commercial Center, Nairobi</p>
+                  <p className="text-xs text-[#64748B]">Building B, 3rd Floor</p>
+                </div>
+                <div className="border border-slate-200 rounded-xl p-4 bg-slate-50">
+                  <h3 className="font-bold text-sm text-[#0F172A]">Home</h3>
+                  <p className="text-xs text-[#64748B] mt-1">Kilimani, Argwings Kodhek Rd</p>
+                  <p className="text-xs text-[#64748B]">Apt 4B</p>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Right Column: Referral Program & Wallet Balance */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Referral Program Card */}
+            <section className="bg-white rounded-2xl p-6 shadow-md border border-[#E2E8F0] space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-[#10B981]/10 text-[#10B981] flex items-center justify-center flex-shrink-0">
+                  <Gift className="h-6 w-6" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-base text-[#0F172A]">Referral Program</h2>
+                  <p className="text-xs text-[#64748B]">Earn KES 500 per friend</p>
+                </div>
+              </div>
+
+              {/* Wallet Balance Display */}
+              <div className="bg-[#EEF2FF] border border-[#0F3D8C]/20 rounded-xl p-4 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-[#0F3D8C]" />
+                  <span className="text-xs font-bold text-[#0F3D8C]">Wallet Bonus</span>
+                </div>
+                <span className="font-mono text-xl font-bold text-[#0F3D8C] text-price font-data-price">
+                  KES 500
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-[#0F172A]">Your Unique Referral Code</label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-slate-100 border border-slate-300 rounded-xl px-4 py-2.5 font-mono text-base font-bold text-[#0F3D8C] tracking-wider text-data-id">
+                    {referralCode}
+                  </div>
+                  <button
+                    onClick={handleCopyLink}
+                    className="bg-[#0F3D8C] hover:bg-[#0A2D6B] text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5"
+                  >
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    <span>{copied ? "Copied!" : "Copy Link"}</span>
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-xs text-[#64748B] leading-relaxed border-t border-slate-100 pt-4">
+                Give friends your referral link. When they register and place their first order, both of you get <strong>KES 500</strong> credited directly to your TechTrust wallet balance!
+              </p>
+            </section>
+
+            {/* Security Status */}
+            <section className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0] space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#0F172A] flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-[#10B981]" />
+                  <span>2FA Security Status</span>
+                </span>
+                <span className="text-[11px] font-bold bg-[#10B981]/10 text-[#10B981] px-2 py-0.5 rounded-full border border-[#10B981]/20">
+                  Active
+                </span>
+              </div>
+              <p className="text-xs text-[#64748B]">
+                Your account is protected with SMS 2FA verification on M-Pesa transactions.
+              </p>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 };
 
 export default Profile;

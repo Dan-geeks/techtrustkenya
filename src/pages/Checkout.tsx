@@ -1,26 +1,280 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { ShieldCheck, Lock, Smartphone, Receipt, Store, CreditCard, ArrowLeft, CheckCircle2, Loader2, Info, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
+import { SAMPLE_PRODUCTS } from "@/data/products";
 
-const pageHtml = "<header class=\"bg-surface-container-lowest w-full py-6 px-margin-mobile md:px-margin-desktop flex justify-between items-center shadow-sm\">\n<div class=\"font-display-h2 text-display-h2 font-bold text-primary\">TechTrust</div>\n<div class=\"flex items-center gap-2 text-on-surface-variant font-ui-label text-ui-label\">\n<span class=\"material-symbols-outlined text-[18px]\">lock</span>\n            Secure Checkout\n        </div>\n</header>\n<main class=\"flex-grow w-full max-w-[1024px] mx-auto px-margin-mobile md:px-margin-desktop py-[40px] md:py-[64px]\">\n<div class=\"grid grid-cols-1 md:grid-cols-12 gap-gutter\">\n<!-- Left Column: Order Summary & Escrow -->\n<div class=\"md:col-span-7 flex flex-col gap-6\">\n<!-- Order Summary -->\n<section class=\"bg-surface-container-lowest rounded-lg shadow-sm border border-outline-variant/30 overflow-hidden\">\n<div class=\"p-6 border-b border-outline-variant/30\">\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-background\">Order Summary</h2>\n</div>\n<div class=\"p-6 flex flex-col gap-6\">\n<!-- Item -->\n<div class=\"flex items-start gap-4\">\n<div class=\"w-16 h-16 bg-surface-container-low rounded-lg overflow-hidden flex-shrink-0 border border-outline-variant/20\">\n<img alt=\"Product Image\" class=\"w-full h-full object-cover\" data-alt=\"A sleek, professional product shot of a high-end commercial drone against a pure white background. The lighting is studio-quality, emphasizing the metallic finish and sophisticated camera array. The mood is premium and technical, fitting a high-trust electronics marketplace.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuDW8xQHbgxQmBd-8dAib8KiDG-ZT7jQoqTyOgV5WwmIx-gMmEFkL7q-YlKLaMMVazXjgfD_vjXLFfB8UeAJQbHLMAtRK-13vpDWjjM2aS3Fo_THeBLgoUFn9rX6qAzTptPEl5cXVhfSXEHzQh8dbKjGYr5ogvrDf4pQAK-oFa6EAqWqrm4XfgapPHKG5PYO_3OfhjckTwoMMGH-yHe1-63NBYxl6uR5325_1rBxwunaCD2sDu4V2ObRUQ\"/>\n</div>\n<div class=\"flex-grow flex justify-between items-start\">\n<div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-background\">DJI Mavic 3 Pro</h3>\n<p class=\"font-ui-label text-ui-label text-on-surface-variant mt-1\">Condition: Like New</p>\n<p class=\"font-ui-label text-ui-label text-on-surface-variant\">Seller: TechHaven Nairobi</p>\n</div>\n<div class=\"text-right\">\n<p class=\"font-data-price text-data-price text-on-background\">44,500</p>\n</div>\n</div>\n</div>\n<hr class=\"border-outline-variant/30\"/>\n<!-- Totals -->\n<div class=\"flex flex-col gap-3\">\n<div class=\"flex justify-between items-center text-on-surface-variant font-ui-label text-ui-label\">\n<span>Subtotal</span>\n<span class=\"font-data-price text-data-price\">44,500</span>\n</div>\n<div class=\"flex justify-between items-center text-on-surface-variant font-ui-label text-ui-label\">\n<span>Escrow Fee (1.5%)</span>\n<span class=\"font-data-price text-data-price\">500</span>\n</div>\n<div class=\"flex justify-between items-center pt-3 border-t border-outline-variant/30\">\n<span class=\"font-body-md-bold text-body-md-bold text-on-background\">Total Due</span>\n<span class=\"font-data-price text-data-price text-primary\">KES 45,000</span>\n</div>\n</div>\n</div>\n</section>\n<!-- Escrow Explainer -->\n<section class=\"bg-surface-container-low rounded-lg p-6 border border-primary-fixed-dim/50 flex gap-4 items-start\">\n<div class=\"w-10 h-10 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0 text-on-primary shadow-sm\">\n<span class=\"material-symbols-outlined icon-fill\">verified_user</span>\n</div>\n<div>\n<h3 class=\"font-body-md-bold text-body-md-bold text-primary mb-1\">Float Escrow Protection</h3>\n<p class=\"font-ui-label text-ui-label text-on-surface-variant leading-relaxed\">\n                            Your money is held safely in an independent escrow account. Funds will only be released to the seller after you receive and verify the item matches its description. Full refunds are guaranteed for undisclosed defects.\n                        </p>\n</div>\n</section>\n</div>\n<!-- Right Column: Payment Method -->\n<div class=\"md:col-span-5\">\n<section class=\"bg-surface-container-lowest rounded-lg shadow-sm border border-outline-variant/30 p-6 sticky top-8\">\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-background mb-6\">Payment Method</h2>\n<!-- M-Pesa Selection -->\n<div class=\"mb-6\">\n<label class=\"flex items-center justify-between p-4 rounded-lg border-2 border-primary bg-primary-fixed/20 cursor-pointer transition-colors\">\n<div class=\"flex items-center gap-3\">\n<div class=\"w-5 h-5 rounded-full border-4 border-primary flex items-center justify-center\"></div>\n<span class=\"font-body-md-bold text-body-md-bold text-on-background\">M-Pesa</span>\n</div>\n<div class=\"w-12 h-8 bg-surface-container rounded flex items-center justify-center border border-outline-variant/30 overflow-hidden\">\n<img alt=\"M-Pesa Logo\" class=\"w-full h-full object-cover\" data-alt=\"A clean, minimalist vector rendering of a mobile money icon, featuring a simplified phone silhouette with a currency symbol. The design uses flat colors, specifically a crisp green accent, set against a pristine white background. The style is highly professional and suitable for a fintech payment portal.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuBkNFW_gBQ6QJfQUsLx1DnqskMbDrqWHiOLCkbe1D048z8PVzKrWsl89R2QsQgqCE1ykQToMNEaAthtWzcrjCPDcDGo_XlexgL1hpX4XJPWR707hxpfbx7RrwsTh3wC6jBDCEDdD_8Lk9D2i0Y3IZtUMpHhO-G3tiR6sHgE3DigP4oQj83Xea9m53K1UNXKasdo8yaze6VRwBkysQunR-26vTaJycNL978wPwwSzwCuxRML2ZDydevasQ\"/>\n</div>\n</label>\n</div>\n<!-- Phone Input -->\n<div class=\"mb-8 flex flex-col gap-2\">\n<label class=\"font-ui-label text-ui-label text-on-surface-variant\" for=\"phone\">M-Pesa Mobile Number</label>\n<div class=\"relative\">\n<div class=\"absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none\">\n<span class=\"font-data-price text-data-price text-on-surface-variant\">+254</span>\n</div>\n<input class=\"w-full pl-16 pr-4 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-background font-data-price text-data-price focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder-outline-variant/50\" id=\"phone\" name=\"phone\" placeholder=\"7XX XXX XXX\" type=\"tel\"/>\n</div>\n<p class=\"font-data-id text-data-id text-on-surface-variant mt-1\">A payment prompt will be sent to this number.</p>\n</div>\n<!-- Pay Button -->\n<button class=\"w-full bg-on-tertiary-container hover:bg-[#1fae53] text-on-primary font-body-md-bold text-body-md-bold py-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-sm active:scale-[0.98]\">\n<span class=\"material-symbols-outlined text-[20px]\">lock</span>\n                        Pay KES 45,000 with M-Pesa\n                    </button>\n<!-- Trust Caption -->\n<div class=\"mt-6 flex items-center justify-center gap-2 text-on-surface-variant\">\n<span class=\"material-symbols-outlined text-[16px]\">security</span>\n<span class=\"font-ui-label text-ui-label\">Secured by Float Escrow</span>\n</div>\n</section>\n</div>\n</div>\n</main>";
+type PaymentMethodType = "express" | "paybill" | "till" | "mobile_money";
 
 const Checkout = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const productId = searchParams.get("product");
+  const product = SAMPLE_PRODUCTS.find(p => p.id === productId) || {
+    id: "default",
+    title: "DJI Mavic 3 Pro Drone",
+    price: 44500,
+    condition: "Refurbished - Grade A",
+    vendor: "TechHaven Nairobi",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDW8xQHbgxQmBd-8dAib8KiDG-ZT7jQoqTyOgV5WwmIx-gMmEFkL7q-YlKLaMMVazXjgfD_vjXLFfB8UeAJQbHLMAtRK-13vpDWjjM2aS3Fo_THeBLgoUFn9rX6qAzTptPEl5cXVhfSXEHzQh8dbKjGYr5ogvrDf4pQAK-oFa6EAqWqrm4XfgapPHKG5PYO_3OfhjckTwoMMGH-yHe1-63NBYxl6uR5325_1rBxwunaCD2sDu4V2ObRUQ"
+  };
+
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("express");
+  const [phoneNumber, setPhoneNumber] = useState("712345678");
+  const [paybillNumber, setPaybillNumber] = useState("400200");
+  const [accountNumber, setAccountNumber] = useState("TT-8492-MK2");
+  const [tillNumber, setTillNumber] = useState("890123");
+  const [processing, setProcessing] = useState(false);
+  const [stkModalOpen, setStkModalOpen] = useState(false);
+  
+  const subtotal = product.price;
+  const escrowFee = Math.round(subtotal * 0.015);
+  const totalDue = subtotal + escrowFee;
+
   useEffect(() => {
-    document.title = "Checkout | TechTrust";
-
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
-      );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
-
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+    document.title = "Secure Escrow Checkout | TechTrust Kenya";
   }, []);
 
-  return <div dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+  const handlePaySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneNumber) {
+      toast.error("Please enter a valid mobile number for payment confirmation.");
+      return;
+    }
+    if (paymentMethod === "paybill" && (!paybillNumber || !accountNumber)) {
+      toast.error("Please fill in both Paybill Number and Account Number.");
+      return;
+    }
+    if (paymentMethod === "till" && !tillNumber) {
+      toast.error("Please fill in the Till Number.");
+      return;
+    }
+
+    setProcessing(true);
+    setStkModalOpen(true);
+
+    // Simulate M-Pesa STK Push process
+    setTimeout(() => {
+      setProcessing(false);
+      toast.success("M-Pesa STK Push prompt sent to your phone!");
+      setTimeout(() => {
+        toast.success("Payment Received & Escrow Locked! Redirecting to Order Tracker...");
+        navigate("/orders/3469010c-a1a9-437a-9b72-f75dc5c5949f");
+      }, 2000);
+    }, 2500);
+  };
+
+  return (
+    <div className="bg-[#F8FAFC] text-[#0F172A] antialiased min-h-screen">
+
+      <main className="w-full max-w-container-max mx-auto px-6 md:px-12 py-8 md:py-12">
+        {/* Breadcrumb Navigation */}
+        <div className="flex items-center gap-2 text-xs md:text-sm text-[#64748B] mb-6">
+          <Link to="/" className="hover:text-[#0F3D8C]">Home</Link>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <Link to="/cart" className="hover:text-[#0F3D8C]">Cart</Link>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <span className="font-semibold text-[#0F172A]">Checkout</span>
+        </div>
+
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="font-display-h2 text-3xl md:text-4xl font-bold text-[#0F172A]">Checkout &amp; Secure Payment</h1>
+          <Link
+            to="/cart"
+            className="inline-flex items-center gap-2 text-xs md:text-sm font-bold text-[#0F3D8C] hover:underline bg-white px-4 py-2 rounded-xl border border-[#CBD5E1]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Cart</span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
+          {/* Left Column: Order Breakdown & Escrow Explanation */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Order Items Summary */}
+            <section className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0] space-y-6">
+              <h2 className="text-lg font-bold text-[#0F172A] pb-3 border-b border-slate-100">
+                Order Summary
+              </h2>
+
+              <div className="flex items-start gap-4">
+                <div className="w-20 h-20 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200 p-2 flex items-center justify-center">
+                  <img
+                    src={product.image}
+                    alt={product.title}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+                <div className="flex-1 flex justify-between items-start">
+                  <div>
+                    <h3 className="font-bold text-base text-[#0F172A]">{product.title}</h3>
+                    <p className="text-xs text-[#64748B] mt-0.5">Condition: {product.condition}</p>
+                    <p className="text-xs text-[#0F3D8C] font-semibold">Seller: {product.vendor}</p>
+                  </div>
+                  <div className="font-mono text-base font-bold text-[#0F172A] text-price font-data-price">
+                    KES {product.price.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-4 space-y-3 text-sm">
+                <div className="flex justify-between text-[#64748B]">
+                  <span>Subtotal</span>
+                  <span className="font-mono text-[#0F172A] font-bold text-price">KES {subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-[#64748B]">
+                  <span>Float Escrow Fee (1.5%)</span>
+                  <span className="font-mono text-[#0F172A] font-bold text-price">KES {escrowFee.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center pt-3 border-t border-slate-200">
+                  <span className="font-bold text-[#0F172A] text-base">Total Due</span>
+                  <span className="font-mono text-2xl font-bold text-[#0F3D8C] text-price font-data-price">
+                    KES {totalDue.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            {/* Float Escrow Protection Card */}
+            <section className="bg-[#EEF2FF] rounded-2xl p-6 border border-[#0F3D8C]/20 flex gap-4 items-start">
+              <div className="w-10 h-10 rounded-xl bg-[#0F3D8C] flex items-center justify-center flex-shrink-0 text-white shadow-sm">
+                <ShieldCheck className="h-6 w-6 text-[#10B981]" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-[#0F3D8C] text-base">Float Escrow Protection Active</h3>
+                <p className="text-xs text-[#64748B] leading-relaxed">
+                  Your funds will be held in a secure, independent <strong>Float Escrow</strong> account. Payment is only released to {product.vendor} after you inspect and accept your delivery.
+                </p>
+              </div>
+            </section>
+          </div>
+
+          {/* Right Column: Payment Method Options & Form */}
+          <div className="lg:col-span-5">
+            <section className="bg-white rounded-2xl p-6 shadow-md border border-[#E2E8F0] space-y-6 sticky top-24">
+              <h2 className="text-lg font-bold text-[#0F172A] pb-3 border-b border-slate-100">
+                Select Payment Method
+              </h2>
+
+              <form onSubmit={handlePaySubmit} className="space-y-6">
+                {/* Method Options Radio Grid */}
+                <div className="space-y-3">
+                  {/* Option 1: M-Pesa Express / STK Push */}
+                  <label
+                    onClick={() => setPaymentMethod("express")}
+                    className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                      paymentMethod === "express"
+                        ? "border-[#0F3D8C] bg-[#EEF2FF]"
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                          paymentMethod === "express"
+                            ? "border-[#0F3D8C] bg-[#0F3D8C]"
+                            : "border-slate-300"
+                        }`}
+                      >
+                        {paymentMethod === "express" && <div className="w-1.5 h-1.5 rounded-full bg-white"></div>}
+                      </div>
+                      <div>
+                        <span className="font-bold text-sm text-[#0F172A] block">M-Pesa STK Push (Express)</span>
+                        <span className="text-[11px] text-[#64748B]">Instant prompt sent to your phone</span>
+                      </div>
+                    </div>
+                    <Smartphone className="h-5 w-5 text-[#10B981]" />
+                  </label>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  {/* Mobile Number Field (Required for STK Push) */}
+                  <div>
+                    <label className="block text-xs font-bold text-[#0F172A] mb-1">
+                      M-Pesa Phone Number *
+                    </label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-slate-300 bg-slate-100 text-[#64748B] text-xs font-mono font-semibold">
+                        +254
+                      </span>
+                      <input
+                        type="tel"
+                        required
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="712 345 678"
+                        className="w-full rounded-r-xl border border-slate-300 py-2.5 px-3.5 text-sm font-mono bg-slate-50 focus:bg-white focus:border-[#0F3D8C] text-[#0F172A]"
+                      />
+                    </div>
+                    <p className="text-[11px] text-[#64748B] mt-1">
+                      An M-Pesa PIN prompt will appear automatically on this handset.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Submit Pay Button */}
+                <button
+                  type="submit"
+                  disabled={processing}
+                  className="w-full bg-[#10B981] hover:bg-[#059669] text-white py-3.5 rounded-xl font-bold text-base transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Sending M-Pesa Prompt...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4" />
+                      <span>Pay KES {totalDue.toLocaleString()} with M-Pesa</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="text-center pt-1">
+                  <span className="text-xs text-[#64748B] inline-flex items-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5 text-[#10B981]" />
+                    <span>Protected by M-Pesa Escrow Float Engine</span>
+                  </span>
+                </div>
+              </form>
+            </section>
+          </div>
+        </div>
+      </main>
+
+      {/* Simulated STK Push Modal */}
+      {stkModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center space-y-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95">
+            <div className="w-16 h-16 bg-[#EEF2FF] text-[#0F3D8C] rounded-2xl mx-auto flex items-center justify-center">
+              <Smartphone className="w-8 h-8 animate-bounce" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-[#0F172A]">Check Your Phone</h3>
+              <p className="text-xs text-[#64748B] leading-relaxed">
+                An M-Pesa STK Push prompt for <strong>KES {totalDue.toLocaleString()}</strong> has been dispatched to <strong>+254 {phoneNumber}</strong>.
+              </p>
+            </div>
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs font-mono text-[#0F3D8C] space-y-1">
+              <div className="flex justify-between">
+                <span>Amount:</span>
+                <span className="font-bold text-price">KES {totalDue.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Escrow Ref:</span>
+                <span className="font-bold">TT-8492-MK2</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-xs text-[#10B981] font-bold">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Awaiting M-Pesa PIN confirmation...</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Checkout;

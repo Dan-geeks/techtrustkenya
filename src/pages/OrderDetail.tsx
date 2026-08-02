@@ -1,26 +1,281 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ShieldCheck, Truck, MapPin, CheckCircle2, AlertTriangle, ChevronRight, ArrowLeft, Clock, Shield, RefreshCw, Navigation, Phone } from "lucide-react";
+import { toast } from "sonner";
 
-const pageHtml = "\n<!-- Main Content Canvas -->\n<main class=\"flex-grow mt-20 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full\">\n<div class=\"mb-8\">\n<h1 class=\"font-display-h1-mobile md:font-display-h1 text-display-h1-mobile md:text-display-h1 text-on-background mb-2\">Order Tracker</h1>\n<p class=\"font-body-lg text-body-lg text-on-surface-variant\">Order <span class=\"font-data-id text-data-id text-primary\">#TT-8492-MK2</span></p>\n</div>\n<div class=\"grid grid-cols-1 lg:grid-cols-3 gap-gutter\">\n<!-- Left Column: Tracker & Details -->\n<div class=\"lg:col-span-2 flex flex-col gap-unit\">\n<!-- Status Banner -->\n<div class=\"bg-surface-container-lowest rounded-xl flat-shadow p-6 mb-6\">\n<div class=\"flex flex-col md:flex-row justify-between items-start md:items-center gap-4\">\n<div>\n<h2 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-1\">Status: In Transit</h2>\n<p class=\"font-body-md text-body-md text-on-surface-variant\">Your order is on the way. Estimated delivery today by 5:00 PM.</p>\n</div>\n<div class=\"bg-[#3B82F6] text-white px-6 py-3 rounded-full flex items-center gap-2 shadow-sm whitespace-nowrap\">\n<span class=\"material-symbols-outlined\" style=\"font-variation-settings: 'FILL' 1;\">shield</span>\n<span class=\"font-data-price text-data-price\">Float: Holding KES 45,000</span>\n</div>\n</div>\n</div>\n<!-- Stepper Component -->\n<div class=\"bg-surface-container-lowest rounded-xl flat-shadow p-8 mb-6 overflow-x-auto\">\n<div class=\"min-w-[600px]\">\n<div class=\"flex items-center justify-between relative\">\n<!-- Progress Line Background -->\n<div class=\"absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-surface-variant rounded-full z-0\"></div>\n<!-- Active Progress Line -->\n<div class=\"absolute left-0 top-1/2 transform -translate-y-1/2 w-[60%] h-1 bg-primary-container rounded-full z-0 transition-all duration-500\"></div>\n<!-- Step 1: Payment Held -->\n<div class=\"relative z-10 flex flex-col items-center\">\n<div class=\"w-8 h-8 rounded-full bg-[#22C55E] flex items-center justify-center text-white mb-2 shadow-sm\">\n<span class=\"material-symbols-outlined text-sm\" style=\"font-variation-settings: 'FILL' 1;\">check</span>\n</div>\n<span class=\"font-ui-label text-ui-label text-on-surface text-center whitespace-nowrap\">Payment Held</span>\n</div>\n<!-- Step 2: Order Confirmed -->\n<div class=\"relative z-10 flex flex-col items-center\">\n<div class=\"w-8 h-8 rounded-full bg-[#22C55E] flex items-center justify-center text-white mb-2 shadow-sm\">\n<span class=\"material-symbols-outlined text-sm\" style=\"font-variation-settings: 'FILL' 1;\">check</span>\n</div>\n<span class=\"font-ui-label text-ui-label text-on-surface text-center whitespace-nowrap\">Order Confirmed</span>\n</div>\n<!-- Step 3: Being Prepared -->\n<div class=\"relative z-10 flex flex-col items-center\">\n<div class=\"w-8 h-8 rounded-full bg-[#22C55E] flex items-center justify-center text-white mb-2 shadow-sm\">\n<span class=\"material-symbols-outlined text-sm\" style=\"font-variation-settings: 'FILL' 1;\">check</span>\n</div>\n<span class=\"font-ui-label text-ui-label text-on-surface text-center whitespace-nowrap\">Being Prepared</span>\n</div>\n<!-- Step 4: Delivered (Current) -->\n<div class=\"relative z-10 flex flex-col items-center\">\n<div class=\"w-8 h-8 rounded-full bg-primary-container pulse-ring flex items-center justify-center text-white mb-2 shadow-sm\">\n<div class=\"w-3 h-3 bg-white rounded-full\"></div>\n</div>\n<span class=\"font-ui-label text-ui-label text-primary font-semibold text-center whitespace-nowrap\">Delivered</span>\n</div>\n<!-- Step 5: Complete -->\n<div class=\"relative z-10 flex flex-col items-center\">\n<div class=\"w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-outline mb-2 border-2 border-surface-variant\">\n</div>\n<span class=\"font-ui-label text-ui-label text-on-surface-variant text-center whitespace-nowrap\">Complete</span>\n</div>\n</div>\n</div>\n</div>\n<!-- Product Details -->\n<div class=\"bg-surface-container-lowest rounded-xl flat-shadow p-6\">\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-4\">Order Items</h3>\n<div class=\"flex items-center gap-4 py-4 border-b border-outline-variant/30\">\n<img class=\"w-20 h-20 rounded-lg object-cover bg-surface-variant\" data-alt=\"A sleek, high-end laptop with a silver aluminum chassis, shown partially open on a pristine white desk. The lighting is bright and even, highlighting the premium finish of the electronics. The setting is minimal and professional, fitting for a corporate marketplace.\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuC-ofAM4B9rnndVlhGPX9ZSbahK-a-P3pGy2SIwEa7bZLbfdNf_8zj0-VIu9-2H9snQDd5N9ow4oZUZkdatMWTn43NT3CSzG0huAyIPiY0DJL3wjNQcoTpY27xoITrl0MAO-VPUOyAomQwkxSNq-QUfKCpmshYeUPQCiXckgPuu9gCqVXWH5YblZ887SQdxfpWGQ-lhXbTHaEWeVhQXt4rsxMOWmexB37ulGVynQvPwDB21GyLLg6T0uQ\"/>\n<div class=\"flex-grow\">\n<p class=\"font-body-md-bold text-body-md-bold text-on-surface\">MacBook Pro 14\" M2 Pro</p>\n<p class=\"font-body-md text-body-md text-on-surface-variant\">Space Gray, 16GB RAM, 512GB SSD</p>\n</div>\n<p class=\"font-data-price text-data-price text-primary\">KES 45,000</p>\n</div>\n<div class=\"flex justify-between items-center pt-4\">\n<span class=\"font-body-md text-body-md text-on-surface-variant\">Sold by: TechHub Nairobi</span>\n<div class=\"bg-[#22C55E] text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1\">\n<span class=\"material-symbols-outlined text-[14px]\">verified_user</span>\n                            Verified Partner\n                        </div>\n</div>\n</div>\n</div>\n<!-- Right Column: Map & Actions -->\n<div class=\"flex flex-col gap-unit\">\n<!-- Map View -->\n<div class=\"bg-surface-container-lowest rounded-xl flat-shadow overflow-hidden h-64 relative group transition-all hover:elevated-shadow\">\n<img class=\"w-full h-full object-cover\" data-alt=\"A clean, highly legible map view interface centered on Nairobi. The map style is minimal, using light grays and subtle blue tones typical of a professional logistics dashboard. A distinct blue route line connects a starting point to a destination pin. The design is modern, bright, and uncluttered.\" data-location=\"Nairobi\" src=\"https://lh3.googleusercontent.com/aida-public/AB6AXuC6zKlha1kD3kyhd43k9DhJQIn3XOa77wDwKy0XNb0glF8tlu8LnksnCs2jpJzaGa5DUWzAqsR_wAyixie8bPfT4dX1Vm157ifFgCq-RfM0DXswxNF9-5VdUx571KPPatUh0ZzC2hYlIzushLl-CPK1XTRDjEDpnIjKVVaNkoefKSBe_Tl0EoDGOnHdde3MWc9Xr37F5z1hDeKVDCmTdOvSyRnWNtmlCe38Txs-TN0uQVgu5cDijcqP2w\"/>\n<div class=\"absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent flex items-end p-4\">\n<div class=\"bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm w-full flex items-center gap-3\">\n<span class=\"material-symbols-outlined text-primary-container\">local_shipping</span>\n<div>\n<p class=\"font-body-md-bold text-body-md-bold text-on-surface text-sm\">Delivery Partner</p>\n<p class=\"font-ui-label text-ui-label text-on-surface-variant\">John Doe (KAA 123X)</p>\n</div>\n</div>\n</div>\n</div>\n<!-- Actions -->\n<div class=\"bg-surface-container-lowest rounded-xl flat-shadow p-6 flex flex-col gap-4 mt-6\">\n<h3 class=\"font-body-md-bold text-body-md-bold text-on-surface mb-2\">Finalize Transaction</h3>\n<p class=\"font-body-md text-body-md text-on-surface-variant mb-4\">Please inspect your item before confirming delivery. Funds are secure in escrow.</p>\n<button class=\"w-full bg-[#22C55E] hover:bg-[#16a34a] text-white font-body-md-bold text-body-md-bold py-3 px-4 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined\" style=\"font-variation-settings: 'FILL' 1;\">check_circle</span>\n                        Confirm Delivery\n                    </button>\n<button class=\"w-full bg-transparent border border-[#ba1a1a] text-[#ba1a1a] hover:bg-[#ffdad6] font-body-md-bold text-body-md-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2\">\n<span class=\"material-symbols-outlined\">warning</span>\n                        Open Dispute\n                    </button>\n</div>\n</div>\n</div>\n</main>\n";
+interface OrderDetailData {
+  id: string;
+  orderNumber: string;
+  status: "held" | "confirmed" | "prepared" | "in_transit" | "delivered" | "discharged";
+  estimatedDelivery: string;
+  escrowAmount: number;
+  item: {
+    title: string;
+    specs: string;
+    price: number;
+    image: string;
+    vendor: string;
+    vendorVerified: boolean;
+  };
+  courier: {
+    name: string;
+    phone: string;
+    vehicle: string;
+    locationName: string;
+  };
+}
+
+const SAMPLE_ORDER: OrderDetailData = {
+  id: "3469010c-a1a9-437a-9b72-f75dc5c5949f",
+  orderNumber: "TT-8492-MK2",
+  status: "in_transit",
+  estimatedDelivery: "Today by 5:00 PM",
+  escrowAmount: 45000,
+  item: {
+    title: 'MacBook Pro 14" M2 Pro',
+    specs: "Space Gray, 16GB RAM, 512GB SSD",
+    price: 45000,
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC-ofAM4B9rnndVlhGPX9ZSbahK-a-P3pGy2SIwEa7bZLbfdNf_8zj0-VIu9-2H9snQDd5N9ow4oZUZkdatMWTn43NT3CSzG0huAyIPiY0DJL3wjNQcoTpY27xoITrl0MAO-VPUOyAomQwkxSNq-QUfKCpmshYeUPQCiXckgPuu9gCqVXWH5YblZ887SQdxfpWGQ-lhXbTHaEWeVhQXt4rsxMOWmexB37ulGVynQvPwDB21GyLLg6T0uQ",
+    vendor: "TechHub Nairobi",
+    vendorVerified: true,
+  },
+  courier: {
+    name: "John Mwangi",
+    phone: "+254 712 345 678",
+    vehicle: "M-Post Courier (KAA 123X)",
+    locationName: "En route along Waiyaki Way, Nairobi",
+  },
+};
 
 const OrderDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const [order, setOrder] = useState<OrderDetailData>(SAMPLE_ORDER);
+  const [confirmed, setConfirmed] = useState(false);
+
   useEffect(() => {
-    document.title = "TechTrust - Order Tracker";
+    document.title = `Order #${order.orderNumber} | TechTrust Kenya`;
+  }, [order]);
 
-    const ensureStylesheet = (href: string) => {
-      const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(
-        (link) => link.getAttribute("href") === href,
-      );
-      if (exists) return;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      document.head.appendChild(el);
-    };
+  const handleConfirmDelivery = () => {
+    setConfirmed(true);
+    setOrder((prev) => ({ ...prev, status: "discharged" }));
+    toast.success("Delivery Confirmed! Escrow funds have been released to the vendor.");
+  };
 
-    ensureStylesheet("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-  }, []);
+  return (
+    <div className="bg-[#F8FAFC] text-[#0F172A] antialiased min-h-screen">
+      <main className="w-full max-w-container-max mx-auto px-6 md:px-12 py-8 md:py-12">
+        {/* Breadcrumb Navigation */}
+        <div className="flex items-center gap-2 text-xs md:text-sm text-[#64748B] mb-6">
+          <Link to="/" className="hover:text-[#0F3D8C]">Home</Link>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <Link to="/orders" className="hover:text-[#0F3D8C]">My Orders</Link>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <span className="font-semibold text-[#0F172A]">Order #{id ? id.slice(0, 8) : order.orderNumber}</span>
+        </div>
 
-  return <div dangerouslySetInnerHTML={{ __html: pageHtml }} />;
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="font-display-h2 text-3xl md:text-4xl font-bold text-[#0F172A]">Order Tracker</h1>
+            <p className="text-sm text-[#64748B] mt-1">
+              Order Reference: <span className="font-mono text-[#0F3D8C] font-bold">#{order.orderNumber}</span>
+            </p>
+          </div>
+          <Link
+            to="/orders"
+            className="inline-flex items-center gap-2 text-sm font-bold text-[#0F3D8C] hover:underline bg-white px-4 py-2 rounded-xl border border-[#CBD5E1] shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Orders</span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Progress & Order Details */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Escrow Status Banner */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#3B82F6] animate-pulse"></span>
+                  <h2 className="font-bold text-lg text-[#0F172A]">
+                    {confirmed ? "Status: Delivery Complete" : "Status: In Transit"}
+                  </h2>
+                </div>
+                <p className="text-sm text-[#64748B]">
+                  {confirmed
+                    ? "Escrow funds have been successfully released to TechHub Nairobi."
+                    : `Your order is on the way. Estimated delivery: ${order.estimatedDelivery}`}
+                </p>
+              </div>
+              <div className="bg-[#3B82F6] text-white px-5 py-2.5 rounded-full flex items-center gap-2 shadow-sm font-semibold text-sm whitespace-nowrap">
+                <Shield className="h-4 w-4" />
+                <span className="font-mono text-price">
+                  Float: Holding KES {order.escrowAmount.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Stepper Component */}
+            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-[#E2E8F0] overflow-x-auto">
+              <div className="min-w-[600px]">
+                <div className="flex items-center justify-between relative">
+                  {/* Background Progress Line */}
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-100 z-0"></div>
+                  {/* Active Progress Line */}
+                  <div
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-[#10B981] transition-all duration-500 z-0"
+                    style={{ width: confirmed ? "100%" : "75%" }}
+                  ></div>
+
+                  {/* Step 1: Payment Held */}
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-[#10B981] text-white flex items-center justify-center mb-2 shadow-sm">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
+                    <span className="text-xs font-bold text-[#0F172A]">Payment Held</span>
+                  </div>
+
+                  {/* Step 2: Order Confirmed */}
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-[#10B981] text-white flex items-center justify-center mb-2 shadow-sm">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
+                    <span className="text-xs font-bold text-[#0F172A]">Order Confirmed</span>
+                  </div>
+
+                  {/* Step 3: Being Prepared */}
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-[#10B981] text-white flex items-center justify-center mb-2 shadow-sm">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
+                    <span className="text-xs font-bold text-[#0F172A]">Being Prepared</span>
+                  </div>
+
+                  {/* Step 4: In Transit */}
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className={`w-8 h-8 rounded-full ${confirmed ? "bg-[#10B981] text-white" : "bg-[#0F3D8C] text-white animate-pulse"} flex items-center justify-center mb-2 shadow-sm`}>
+                      {confirmed ? <CheckCircle2 className="h-4 w-4" /> : <Truck className="h-4 w-4" />}
+                    </div>
+                    <span className="text-xs font-bold text-[#0F3D8C]">In Transit</span>
+                  </div>
+
+                  {/* Step 5: Delivered & Complete */}
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className={`w-8 h-8 rounded-full ${confirmed ? "bg-[#10B981] text-white" : "bg-slate-200 text-slate-500"} flex items-center justify-center mb-2`}>
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
+                    <span className={`text-xs font-bold ${confirmed ? "text-[#10B981]" : "text-slate-400"}`}>Complete</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Product Details Card */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0] space-y-4">
+              <h3 className="text-base font-bold text-[#0F172A] border-b border-slate-100 pb-3">Order Items</h3>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 py-2">
+                <img
+                  src={order.item.image}
+                  alt={order.item.title}
+                  className="w-20 h-20 rounded-xl object-contain bg-slate-50 border border-slate-200 p-2 flex-shrink-0"
+                />
+                <div className="flex-grow">
+                  <h4 className="font-bold text-base text-[#0F172A]">{order.item.title}</h4>
+                  <p className="text-xs text-[#64748B] mt-0.5">{order.item.specs}</p>
+                </div>
+                <div className="font-mono text-lg font-bold text-[#0F172A] text-price font-data-price">
+                  KES {order.item.price.toLocaleString()}
+                </div>
+              </div>
+              <div className="flex justify-between items-center pt-3 border-t border-slate-100 text-xs">
+                <span className="text-[#64748B]">Sold by: <strong className="text-[#0F3D8C]">{order.item.vendor}</strong></span>
+                <div className="inline-flex items-center gap-1 bg-[#10B981]/10 text-[#10B981] px-2.5 py-1 rounded-full border border-[#10B981]/20 font-bold">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  <span>Verified Partner</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Live Map & Delivery Actions */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Real Interactive OpenStreetMap View */}
+            <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden flex flex-col">
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div className="flex items-center gap-2">
+                  <Navigation className="h-4 w-4 text-[#0F3D8C]" />
+                  <h3 className="font-bold text-sm text-[#0F172A]">Live Delivery Map</h3>
+                </div>
+                <span className="text-[11px] font-semibold bg-[#10B981]/10 text-[#10B981] px-2 py-0.5 rounded-full border border-[#10B981]/20">
+                  GPS Active
+                </span>
+              </div>
+
+              {/* Embed Real OpenStreetMap centered on Nairobi CBD / Waiyaki Way */}
+              <div className="h-64 w-full relative bg-slate-100">
+                <iframe
+                  title="Nairobi Live Delivery GPS Map"
+                  className="w-full h-full border-0"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=36.78%2C-1.32%2C36.85%2C-1.25&layer=mapnik&marker=-1.286389%2C36.817223"
+                  loading="lazy"
+                ></iframe>
+                <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur p-3 rounded-xl shadow-md border border-slate-200 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-[#0F3D8C] flex-shrink-0" />
+                    <span className="font-semibold text-[#0F172A] truncate max-w-[200px]">
+                      {order.courier.locationName}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Courier Info */}
+              <div className="p-4 bg-white flex items-center justify-between border-t border-slate-100 text-xs">
+                <div>
+                  <p className="font-bold text-[#0F172A]">{order.courier.name}</p>
+                  <p className="text-[#64748B]">{order.courier.vehicle}</p>
+                </div>
+                <a
+                  href={`tel:${order.courier.phone}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EEF2FF] text-[#0F3D8C] font-bold rounded-lg hover:bg-[#0F3D8C] hover:text-white transition-colors border border-[#0F3D8C]/20"
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                  <span>Call</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Escrow Actions */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E2E8F0] space-y-4">
+              <h3 className="font-bold text-base text-[#0F172A]">Finalize Transaction</h3>
+              <p className="text-xs text-[#64748B] leading-relaxed">
+                Inspect your item upon arrival. Clicking <strong>Confirm Delivery</strong> releases the held Float Escrow funds directly to the merchant.
+              </p>
+
+              <button
+                onClick={handleConfirmDelivery}
+                disabled={confirmed}
+                className="w-full bg-[#10B981] hover:bg-[#059669] disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <CheckCircle2 className="h-5 w-5" />
+                <span>{confirmed ? "Delivery Confirmed!" : "Confirm Delivery (Release Escrow)"}</span>
+              </button>
+
+              <Link
+                to="/disputes"
+                className="w-full bg-white border border-red-300 text-red-600 hover:bg-red-50 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs text-center block"
+              >
+                <AlertTriangle className="h-4 w-4" />
+                <span>Open Dispute / Report Issue</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 };
 
 export default OrderDetail;

@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Search, ShieldCheck, User as UserIcon, LogOut, Store, Package, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ import { CartIcon } from "@/components/cart/CartIcon";
 export const TopNav = () => {
   const { user, roles, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [query, setQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
@@ -40,10 +41,7 @@ export const TopNav = () => {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-lg">
       <div className="container flex h-16 items-center gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <ShieldCheck className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="text-base font-bold tracking-tight font-display">
-            Tech<span className="text-accent">Trust</span>
-          </span>
+          <img src="/logo.jpg" alt="TechTrust" className="h-7 w-auto object-contain rounded-md" />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6 ml-6">
@@ -108,7 +106,7 @@ export const TopNav = () => {
                       <Store className="mr-2 h-4 w-4" /> Vendor Dashboard
                     </DropdownMenuItem>
                   ) : (
-                    <DropdownMenuItem onClick={() => navigate("/vendor/register", { state: { role: "vendor" } })}>
+                    <DropdownMenuItem onClick={() => navigate("/vendor/onboarding", { state: { role: "vendor" } })}>
                       <Store className="mr-2 h-4 w-4" /> Become a Vendor
                     </DropdownMenuItem>
                   )}
@@ -127,10 +125,10 @@ export const TopNav = () => {
           ) : (
             <>
               <Button variant="ghost" asChild className="hidden sm:inline-flex">
-                <Link to="/auth">Sign In</Link>
+                <Link to="/auth" state={{ from: location.pathname }}>Sign In</Link>
               </Button>
               <Button variant="accent" asChild>
-                <Link to="/vendor/register">List Your Shop</Link>
+                <Link to="/vendor/onboarding">List Your Shop</Link>
               </Button>
             </>
           )}
