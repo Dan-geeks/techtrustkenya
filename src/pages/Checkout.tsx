@@ -1,19 +1,22 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ShieldCheck, Lock, Smartphone, Receipt, Store, CreditCard, ArrowLeft, CheckCircle2, Loader2, Info, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { SAMPLE_PRODUCTS } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 type PaymentMethodType = "express" | "paybill" | "till" | "mobile_money";
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const productId = searchParams.get("product") || searchParams.get("id");
   
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("express");
   const [phoneNumber, setPhoneNumber] = useState("0712345678");
@@ -45,7 +48,7 @@ const Checkout = () => {
           condition,
           price_ksh,
           image_urls,
-          vendor_profiles ( business_name )
+          vendor_profiles ( id, business_name, user_id )
         `)
         .eq("id", productId)
         .maybeSingle();
@@ -57,6 +60,8 @@ const Checkout = () => {
           price: data.price_ksh,
           condition: data.condition,
           vendor: data.vendor_profiles?.business_name || "Verified Vendor",
+          vendorProfileId: data.vendor_profiles?.id,
+          vendorUserId: data.vendor_profiles?.user_id,
           image: data.image_urls?.[0] || "/placeholder.svg"
         });
       } else {
@@ -76,17 +81,17 @@ const Checkout = () => {
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
-    if (stkModalOpen) {
+    if (stkModalOpen && activeOrderId) {
       intervalId = setInterval(async () => {
         const { data } = await supabase
           .from("orders")
           .select("payment_status")
-          .eq("id", "3469010c-a1a9-437a-9b72-f75dc5c5949f")
+          .eq("id", activeOrderId)
           .maybeSingle();
 
         if (data && (data.payment_status === "paid_float" || data.payment_status === "paid")) {
           toast.success("Payment Received & Escrow Locked!");
-          navigate("/orders/3469010c-a1a9-437a-9b72-f75dc5c5949f");
+          navigate(`/orders/${activeOrderId}`);
         }
       }, 3000);
     }
@@ -94,9 +99,9 @@ const Checkout = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [stkModalOpen, navigate]);
+  }, [stkModalOpen, navigate, activeOrderId]);
 
-  const triggerLiveStkPush = async (phone: string) => {
+  const triggerLiveStkPush = async (phone: string, orderId: string, amount: number) => {
     const digits = String(phone ?? "").replace(/^\+/, "").replace(/\D/g, "");
     let formattedPhone = digits;
     if (/^0[71]\d{8}$/.test(digits)) formattedPhone = `254${digits.slice(1)}`;
@@ -116,7 +121,7 @@ const Checkout = () => {
         method: "POST",
         headers,
         body: JSON.stringify({
-          order_id: "3469010c-a1a9-437a-9b72-f75dc5c5949f",
+          order_id: orderId,
           phone: formattedPhone,
           amount_ksh: 2,
           amountKsh: 2,
@@ -128,7 +133,7 @@ const Checkout = () => {
     }
   };
 
-  const handlePaySubmit = (e: React.FormEvent) => {
+  const handlePaySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phoneNumber) {
       toast.error("Please enter a valid mobile number for payment confirmation.");
@@ -142,12 +147,54 @@ const Checkout = () => {
       toast.error("Please fill in the Till Number.");
       return;
     }
+    if (!user) {
+      toast.error("You must be logged in to complete checkout.");
+      return;
+    }
 
     setProcessing(true);
+    
+    // 1. Create real order
+    const { data: orderData, error: orderErr } = await supabase.from("orders").insert({
+      customer_id: user.id,
+      vendor_id: product.vendorProfileId,
+      product_id: product.id,
+      quantity: 1,
+      total_amount_ksh: totalDue,
+      platform_fee_ksh: Math.floor(totalDue * 0.05),
+      vendor_payout_ksh: totalDue - Math.floor(totalDue * 0.05),
+      status: "pending_payment"
+    }).select("id").single();
+
+    if (orderErr || !orderData) {
+      toast.error("Failed to create order: " + (orderErr?.message || "Unknown error"));
+      setProcessing(false);
+      return;
+    }
+
+    const newOrderId = orderData.id;
+    setActiveOrderId(newOrderId);
+
+    // 2. Notify the vendor!
+    if (product.vendorUserId) {
+      await supabase.from("notifications").insert({
+        user_id: product.vendorUserId,
+        title: "New Order Pending Payment!",
+        message: `A customer has initiated checkout for ${product.title}.`,
+        type: "new_order",
+        reference_id: newOrderId
+      });
+      await supabase.from("messages").insert({
+        sender_id: user.id,
+        receiver_id: product.vendorUserId,
+        content: `Hello! I have just placed an order for your ${product.title}. Order #${newOrderId.slice(0, 8).toUpperCase()}. Waiting for Escrow payment to lock in!`
+      });
+    }
+
     setStkModalOpen(true);
 
     // Trigger real M-Pesa STK Push prompt (charged 1 Bob to phone, displaying full order price on site)
-    triggerLiveStkPush(phoneNumber);
+    triggerLiveStkPush(phoneNumber, newOrderId, totalDue);
 
     setTimeout(() => {
       setProcessing(false);
@@ -157,7 +204,7 @@ const Checkout = () => {
 
   const handleConfirmPaymentReceived = () => {
     toast.success("Payment Received & Escrow Locked! Redirecting to Order Tracker...");
-    navigate("/orders/3469010c-a1a9-437a-9b72-f75dc5c5949f");
+    navigate(`/orders/${activeOrderId || "3469010c-a1a9-437a-9b72-f75dc5c5949f"}`);
   };
 
   if (loading) {
