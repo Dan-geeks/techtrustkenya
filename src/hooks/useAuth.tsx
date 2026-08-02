@@ -46,11 +46,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    void supabase.auth.getSession().then(({ data: { session: existing } }) => {
-      void handleSession(existing).finally(() => {
+    void supabase.auth.getSession()
+      .then(({ data: { session: existing } }) => {
+        void handleSession(existing).finally(() => {
+          if (mounted) setLoading(false);
+        });
+      })
+      .catch((err) => {
+        console.warn("Auth session fetch warning:", err);
         if (mounted) setLoading(false);
       });
-    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       void handleSession(newSession);
