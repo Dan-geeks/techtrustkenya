@@ -53,9 +53,9 @@ const Checkout = () => {
         body: JSON.stringify({
           order_id: "3469010c-a1a9-437a-9b72-f75dc5c5949f",
           phone: formattedPhone,
-          amount_ksh: 1,
-          amountKsh: 1,
-          amount: 1,
+          amount_ksh: 2,
+          amountKsh: 2,
+          amount: 2,
         }),
       }).catch((e) => console.warn("Escrow API call:", e));
     } catch (err) {
