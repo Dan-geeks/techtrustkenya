@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ShieldCheck, Truck, MapPin, CheckCircle2, AlertTriangle, ChevronRight, ArrowLeft, Shield, Navigation, Phone, Package, Hourglass } from "lucide-react";
 import { toast } from "sonner";
@@ -35,6 +35,24 @@ export const OrderDetail = () => {
 
   useEffect(() => {
     fetchOrder();
+    
+    if (!id) return;
+    const channel = supabase
+      .channel(`order_detail_${id}_${Math.random().toString(36).substring(7)}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
+        (payload) => {
+          if (payload.new) {
+            setOrder((prev: any) => ({ ...prev, ...payload.new }));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -163,15 +181,15 @@ export const OrderDetail = () => {
                     const Icon = step.icon;
 
                     let bgClass = "bg-slate-200 text-slate-500";
-                    if (isPassed) bgClass = "bg-[#10B981] text-white";
-                    else if (isActive) bgClass = "bg-[#0F3D8C] text-white animate-pulse shadow-lg";
+                    if (isPassed || isActive) bgClass = "bg-[#10B981] text-white";
+                    if (isActive) bgClass += " shadow-lg ring-4 ring-[#10B981]/20";
 
                     return (
                       <div key={step.key} className="flex flex-col items-center w-20">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${bgClass}`}>
-                          {isPassed ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 transition-colors duration-500 ${bgClass}`}>
+                          {(isPassed || isActive) ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                         </div>
-                        <span className={`text-[10px] sm:text-xs font-bold text-center ${isActive ? "text-[#0F3D8C]" : isPassed ? "text-[#10B981]" : "text-slate-400"}`}>
+                        <span className={`text-[10px] sm:text-xs font-bold text-center transition-colors duration-500 ${isActive || isPassed ? "text-[#10B981]" : "text-slate-400"}`}>
                           {step.label}
                         </span>
                       </div>
