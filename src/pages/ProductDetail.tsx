@@ -41,7 +41,7 @@ const ProductDetail = () => {
           category: data.category,
           condition: data.condition,
           vendor: data.vendor_profiles?.business_name || "Unknown Vendor",
-          vendor_id: data.vendor_profiles?.id,
+          vendor_id: data.vendor_id,
           vendorVerified: data.vendor_profiles?.verification_status === "approved",
           location: "Nairobi", // Default or fetch if location exists
           gallery: data.image_urls || [data.image_urls?.[0] || "/placeholder.svg"],
