@@ -14,8 +14,8 @@ interface Product {
   location: string;
   badge?: string;
 }
-
 import { SAMPLE_PRODUCTS } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
 
 const CATEGORIES = ["Laptops", "Smartphones", "Tablets", "Components & Accessories", "Cameras", "Wearables"];
 const CONDITIONS = ["Brand New", "Refurbished - Grade A", "Used - Good"];
@@ -35,6 +35,31 @@ const Browse = () => {
   const [sortBy, setSortBy] = useState<string>("Recommended");
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [dbProducts, setDbProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data } = await supabase
+        .from("products")
+        .select(`
+          id,
+          brand,
+          model_name,
+          category,
+          condition,
+          price_ksh,
+          image_urls,
+          vendor_profiles ( business_name, verification_status )
+        `)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (data) {
+        setDbProducts(data);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     document.title = "Browse Verified Marketplace | TechTrust Kenya";
@@ -95,7 +120,31 @@ const Browse = () => {
 
   // Filter & Sort Products
   const filteredProducts = useMemo(() => {
-    let result = [...SAMPLE_PRODUCTS];
+    const mappedDb = dbProducts.map((p) => {
+      // Map category
+      let cat = "Laptops";
+      if (p.category === "smartphone") cat = "Smartphones";
+      else if (p.category === "accessory" || p.category === "spare_part") cat = "Components & Accessories";
+      
+      // Map condition
+      let cond = "Brand New";
+      if (p.condition === "refurbished") cond = "Refurbished - Grade A";
+      else if (p.condition === "used") cond = "Used - Good";
+
+      return {
+        id: p.id,
+        title: `${p.brand} ${p.model_name}`,
+        category: cat,
+        condition: cond,
+        price: p.price_ksh,
+        image: p.image_urls?.[0] || "/placeholder.svg",
+        vendor: p.vendor_profiles?.business_name || "Unknown Vendor",
+        vendorVerified: p.vendor_profiles?.verification_status === "verified",
+        location: "Nairobi",
+      };
+    });
+
+    let result = [...mappedDb, ...SAMPLE_PRODUCTS];
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();

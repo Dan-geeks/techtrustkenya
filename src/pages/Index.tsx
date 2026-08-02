@@ -2,8 +2,52 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { CountUp } from "@/components/ui/count-up";
 import { SAMPLE_PRODUCTS } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 const Index = () => {
+  const [dbProducts, setDbProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data } = await supabase
+        .from("products")
+        .select(`
+          id, brand, model_name, category, condition, price_ksh, image_urls,
+          vendor_profiles ( business_name, verification_status )
+        `)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(4);
+
+      if (data) {
+        const mappedDb = data.map((p) => {
+          let cat = "Laptops";
+          if (p.category === "smartphone") cat = "Smartphones";
+          else if (p.category === "accessory" || p.category === "spare_part") cat = "Components & Accessories";
+          
+          let cond = "Brand New";
+          if (p.condition === "refurbished") cond = "Refurbished - Grade A";
+          else if (p.condition === "used") cond = "Used - Good";
+
+          return {
+            id: p.id,
+            title: `${p.brand} ${p.model_name}`,
+            category: cat,
+            condition: cond,
+            price: p.price_ksh,
+            image: p.image_urls?.[0] || "/placeholder.svg",
+            vendor: p.vendor_profiles?.business_name || "Unknown Vendor",
+            vendorVerified: p.vendor_profiles?.verification_status === "verified",
+            location: "Nairobi",
+          };
+        });
+        setDbProducts(mappedDb);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   useEffect(() => {
     document.title = "TechTrust - Verified Tech Marketplace";
 
@@ -227,7 +271,7 @@ const Index = () => {
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {SAMPLE_PRODUCTS.slice(0, 4).map((p) => {
+              {[...dbProducts, ...SAMPLE_PRODUCTS].slice(0, 4).map((p) => {
                 const imgUrl = p.image || p.gallery?.[0] || (p as any).images?.[0] || (p as any).image_urls?.[0] || "/placeholder.svg";
                 return (
                   <div
