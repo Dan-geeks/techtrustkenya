@@ -82,7 +82,7 @@ const AdminLogin = () => {
     <div className="grid min-h-screen place-items-center bg-primary px-4">
       <div className="w-full max-w-sm">
         <Link to="/" className="mb-8 flex items-center justify-center gap-2">
-          <img src="/logo.jpg" alt="TechTrust" className="h-8 w-auto object-contain rounded-md shadow-sm" />
+          <img src="/logo.png" alt="TechTrust" className="h-8 w-auto object-contain rounded-md shadow-sm" />
         </Link>
 
         <div className="rounded-2xl border border-white/10 bg-card p-6 shadow-elegant md:p-8">

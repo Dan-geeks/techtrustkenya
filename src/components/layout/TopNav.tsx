@@ -42,7 +42,7 @@ export const TopNav = () => {
       <div className="max-w-[1280px] mx-auto px-6 md:px-12 flex justify-between items-center h-20 w-full">
         {/* Brand: logo image followed by "TechTrust" text */}
         <Link to="/" className="font-display-h2 text-2xl md:text-3xl font-bold text-[#002766] tracking-tight shrink-0 flex items-center gap-2.5">
-          <img src="/logo.jpg" alt="TechTrust Logo" className="h-14 md:h-16 w-auto object-contain rounded-md shadow-sm" />
+          <img src="/logo.png" alt="TechTrust Logo" className="h-14 md:h-16 w-auto object-contain rounded-md shadow-sm" />
           <span>TechTrust</span>
         </Link>
 

@@ -491,12 +491,20 @@ const Browse = () => {
                         </span>
                         Protected by Float
                       </div>
-                      <Link
-                        to={`/product/${product.id}`}
-                        className="mt-2 w-full text-center py-2.5 bg-[#EEF2FF] hover:bg-[#0F3D8C] hover:text-white text-[#0F3D8C] font-bold text-sm rounded-xl transition-all border border-[#0F3D8C]/20 block"
-                      >
-                        Buy with Float
-                      </Link>
+                      <div className="flex gap-2 mt-2 w-full">
+                        <Link
+                          to={`/product/${product.id}`}
+                          className="flex-1 text-center py-2.5 bg-white hover:bg-slate-50 text-[#0F172A] font-bold text-sm rounded-xl transition-all border border-[#E2E8F0] block shadow-sm"
+                        >
+                          View Description
+                        </Link>
+                        <Link
+                          to={`/checkout?product=${product.id}`}
+                          className="flex-1 text-center py-2.5 bg-[#EEF2FF] hover:bg-[#0F3D8C] hover:text-white text-[#0F3D8C] font-bold text-sm rounded-xl transition-all border border-[#0F3D8C]/20 block"
+                        >
+                          Buy with Float
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>

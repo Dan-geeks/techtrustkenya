@@ -89,7 +89,7 @@ const Welcome = () => {
       <div className="w-full max-w-lg mt-8">
         <Link to="/" className="flex items-center justify-center gap-3 mb-8">
           <span className="font-display-h2 text-3xl md:text-4xl font-bold text-[#0F3D8C]">TechTrust</span>
-          <img src="/logo.jpg" alt="TechTrust Logo" className="h-12 md:h-14 w-auto object-contain rounded-lg shadow-md" />
+          <img src="/logo.png" alt="TechTrust Logo" className="h-12 md:h-14 w-auto object-contain rounded-lg shadow-md" />
         </Link>
 
         <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card text-center">
