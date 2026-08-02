@@ -19,7 +19,9 @@ export async function getPostLoginPath(userId: string): Promise<string> {
 
   const roleSet = new Set((roles ?? []).map((r) => r.role));
 
-  if (roleSet.has("admin")) return "/admin/dashboard";
+  // Admins should not be forced to the admin dashboard on login;
+  // they can navigate there manually when they want to.
+  // if (roleSet.has("admin")) return "/admin/dashboard";
 
   if (roleSet.has("vendor")) {
     const { data: vp } = await supabase
