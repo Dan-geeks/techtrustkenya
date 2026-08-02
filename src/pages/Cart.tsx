@@ -57,8 +57,7 @@ const Cart = () => {
   };
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const escrowFee = Math.round(subtotal * 0.05);
-  const total = subtotal + escrowFee;
+  const total = subtotal;
 
   return (
     <div className="bg-slate-50 text-[#0F172A] antialiased min-h-screen">
@@ -214,9 +213,9 @@ const Cart = () => {
                     </span>
                   </div>
                   <div className="flex justify-between text-[#64748B]">
-                    <span>Float Escrow Fee (5%)</span>
-                    <span className="font-mono text-[#0F172A] font-bold">
-                      KES {escrowFee.toLocaleString()}
+                    <span>Buyer Protection Fee</span>
+                    <span className="font-mono text-[#10B981] font-bold">
+                      FREE
                     </span>
                   </div>
                   <div className="flex justify-between text-[#64748B]">

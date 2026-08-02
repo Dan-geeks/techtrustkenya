@@ -71,8 +71,7 @@ const Checkout = () => {
   }, [productId]);
 
   const subtotal = product?.price || 0;
-  const escrowFee = Math.round(subtotal * 0.05);
-  const totalDue = subtotal + escrowFee;
+  const totalDue = subtotal;
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -235,8 +234,8 @@ const Checkout = () => {
                   <span className="font-mono text-[#0F172A] font-bold text-price">KES {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[#64748B]">
-                  <span>Float Escrow Fee (5%)</span>
-                  <span className="font-mono text-[#0F172A] font-bold text-price">KES {escrowFee.toLocaleString()}</span>
+                  <span>Buyer Protection Fee</span>
+                  <span className="font-mono text-[#10B981] font-bold text-price">FREE</span>
                 </div>
                 <div className="flex justify-between items-center pt-3 border-t border-slate-200">
                   <span className="font-bold text-[#0F172A] text-base">Total Due</span>

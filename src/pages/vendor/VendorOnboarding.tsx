@@ -250,9 +250,11 @@ const VendorOnboarding = () => {
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src="/logo-transparent.png" alt="TechTrust" className="h-12 w-auto object-contain " />
-            <span className="font-display-h2 font-bold text-2xl text-white">TechTrust</span>
+          <Link to="/" className="flex items-center gap-3 bg-white/10 px-3 py-1.5 rounded-2xl hover:bg-white/20 transition-colors">
+            <div className="bg-white p-1.5 rounded-xl shadow-sm">
+              <img src="/logo-transparent.png" alt="TechTrust" className="h-14 w-auto object-contain" />
+            </div>
+            <span className="font-display-h2 font-bold text-2xl text-white drop-shadow-sm">TechTrust</span>
           </Link>
           <div className="w-[72px]" /> {/* Spacer for centering */}
         </div>

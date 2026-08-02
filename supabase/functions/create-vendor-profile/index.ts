@@ -38,7 +38,7 @@ serve(async (req) => {
 
     const { error: profileError } = await supabase
       .from("vendor_profiles")
-      .insert({
+      .upsert({
         user_id: userId,
         business_name: businessName,
         owner_name: ownerName,
@@ -58,7 +58,7 @@ serve(async (req) => {
         verification_status: "pending",
         average_rating: 0,
         completed_transactions_count: 0,
-      });
+      }, { onConflict: "user_id" });
 
     if (profileError) {
       return new Response(
@@ -71,7 +71,8 @@ serve(async (req) => {
       .from("user_roles")
       .insert({ user_id: userId, role: "vendor" });
 
-    if (roleError) {
+    // Ignore error if the role already exists (e.g. code 23505 unique violation)
+    if (roleError && roleError.code !== '23505' && !roleError.message?.includes('duplicate key value')) {
       return new Response(
         JSON.stringify({ success: false, error: roleError.message }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
