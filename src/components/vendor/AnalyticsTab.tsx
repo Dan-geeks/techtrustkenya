@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKsh } from "@/lib/format";
@@ -64,7 +64,7 @@ export const AnalyticsTab = ({ vendor }: { vendor: any }) => {
             {data.topProducts.map((p: any, i: number) => (
               <li key={i} className="py-2 flex items-center justify-between text-sm">
                 <span>{p.name}</span>
-                <span className="text-muted-foreground"><span className="text-stat">{p.count}</span> sold · <span className="text-price">{formatKsh(p.revenue)}</span></span>
+                <span className="text-muted-foreground"><span className="text-stat">{p.count}</span> sold Â· <span className="text-price">{formatKsh(p.revenue)}</span></span>
               </li>
             ))}
           </ul>

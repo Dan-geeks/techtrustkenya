@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Lock, CheckCircle2, Clock, RotateCcw, AlertTriangle, ArrowRight, Store, Wrench } from "lucide-react";
 
@@ -268,7 +268,7 @@ const HowItWorks = () => {
               Start Shopping <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              to="/vendor/register"
+              to="/vendor/onboarding"
               className="bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors px-6 py-3 rounded-lg font-semibold text-sm inline-flex items-center gap-2 border border-border"
             >
               Become a Vendor <Store className="w-4 h-4" />

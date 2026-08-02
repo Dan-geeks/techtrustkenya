@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Footer = () => {
@@ -106,7 +106,7 @@ export const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-on-surface-variant">
-          <p>© {new Date().getFullYear()} TechTrust Kenya. All rights reserved.</p>
+          <p>Â© {new Date().getFullYear()} TechTrust Kenya. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="mailto:johnmwangimegwe@gmail.com" className="text-primary-container underline hover:text-primary transition-colors">
               johnmwangimegwe@gmail.com

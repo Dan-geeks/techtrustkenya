@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2, ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ const ResetPassword = () => {
           }
         });
     } else {
-      // No tokens — maybe user navigated here directly. Check if they already have a session.
+      // No tokens â€” maybe user navigated here directly. Check if they already have a session.
       supabase.auth.getSession().then(({ data }) => {
         if (data.session) setReady(true);
         else setLinkError("This password reset link has expired or is invalid. Please request a new one.");
@@ -91,7 +91,7 @@ const ResetPassword = () => {
                 <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>Your password has been updated successfully. You can now sign in with your new password.</span>
               </div>
-              <p className="text-xs text-muted-foreground text-center">Redirecting to sign in…</p>
+              <p className="text-xs text-muted-foreground text-center">Redirecting to sign inâ€¦</p>
             </div>
           ) : !ready ? (
             <div className="grid place-items-center py-8">
@@ -115,7 +115,7 @@ const ResetPassword = () => {
                 </div>
               )}
               <Button type="submit" variant="hero" size="lg" className="w-full" disabled={submitting}>
-                {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : "Save New Password"}
+                {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Savingâ€¦</> : "Save New Password"}
               </Button>
             </form>
           )}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Store, Package, ShoppingBag, Settings as SettingsIcon, ShieldCheck, Loader2 } from "lucide-react";
 import { SettingsTab } from "@/components/vendor/SettingsTab";
 import { ProductsTab } from "@/components/vendor/ProductsTab";

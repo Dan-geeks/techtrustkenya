@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,10 +85,10 @@ export const OrdersTab = ({ vendor }: { vendor: any }) => {
                     <div className="min-w-0">
                       <div className="font-medium truncate">{o.product?.brand} {o.product?.model_name}</div>
                       <div className="text-xs text-muted-foreground">
-                        <span className="text-data-id">#{o.id.slice(0, 8).toUpperCase()}</span> · Qty <span className="text-stat">{o.quantity}</span> · {formatDate(o.created_at)}
+                        <span className="text-data-id">#{o.id.slice(0, 8).toUpperCase()}</span> Â· Qty <span className="text-stat">{o.quantity}</span> Â· {formatDate(o.created_at)}
                       </div>
                       <div className="text-xs mt-1">
-                        Customer: {o.customer?.full_name ?? "—"} · {o.customer?.phone_number ?? "—"}
+                        Customer: {o.customer?.full_name ?? "â€”"} Â· {o.customer?.phone_number ?? "â€”"}
                       </div>
                     </div>
                     <div className="text-right shrink-0">

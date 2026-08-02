@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TopNav } from "@/components/layout/TopNav";
 import { Card } from "@/components/ui/card";
@@ -24,7 +24,7 @@ import {
 
 const AdminDashboard = () => {
   useEffect(() => {
-    document.title = "Admin Dashboard — TechTrust";
+    document.title = "Admin Dashboard â€” TechTrust";
   }, []);
 
   return (
@@ -331,7 +331,7 @@ const AdminVendors = () => {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{v.business_name}</div>
                   <div className="text-xs text-muted-foreground truncate">
-                    {v.owner_name ?? "—"} · Applied {formatDate(v.created_at)}
+                    {v.owner_name ?? "â€”"} Â· Applied {formatDate(v.created_at)}
                   </div>
                 </div>
                 <VendorStatusBadge status={v.verification_status} />
@@ -351,7 +351,7 @@ const AdminVendors = () => {
                 <div className="flex items-start gap-1.5 text-muted-foreground">
                   <MapPin className="h-3 w-3 mt-0.5 shrink-0" />
                   <span className="truncate">
-                    {v.county ?? v.city ?? "—"}{v.sub_county ? `, ${v.sub_county}` : ""}{v.physical_address ? ` · ${v.physical_address}` : ""}
+                    {v.county ?? v.city ?? "â€”"}{v.sub_county ? `, ${v.sub_county}` : ""}{v.physical_address ? ` Â· ${v.physical_address}` : ""}
                   </span>
                 </div>
                 {v.google_maps_link && (
@@ -509,7 +509,7 @@ const AdminVendors = () => {
                 {!reasonAction && active.verification_status === "pending" && (
                   <div className="space-y-1.5 border-t pt-3">
                     <Label className="text-xs text-muted-foreground">Internal admin notes (optional)</Label>
-                    <Textarea rows={2} value={adminNote} onChange={(e) => setAdminNote(e.target.value)} placeholder="Notes for the verification team…" />
+                    <Textarea rows={2} value={adminNote} onChange={(e) => setAdminNote(e.target.value)} placeholder="Notes for the verification teamâ€¦" />
                   </div>
                 )}
               </div>
@@ -520,11 +520,11 @@ const AdminVendors = () => {
                     <Button className="gap-1.5" onClick={() => updateStatus(active.id, "approved", { rejection_reason: null })}>
                       <CheckCircle2 className="h-4 w-4" /> Approve
                     </Button>
-                    <Button variant="outline" onClick={() => setReasonAction("reject")}>Reject…</Button>
+                    <Button variant="outline" onClick={() => setReasonAction("reject")}>Rejectâ€¦</Button>
                   </>
                 )}
                 {(active.verification_status === "approved" || active.verification_status === "verified") && !reasonAction && (
-                  <Button variant="outline" className="text-destructive" onClick={() => setReasonAction("suspend")}>Suspend…</Button>
+                  <Button variant="outline" className="text-destructive" onClick={() => setReasonAction("suspend")}>Suspendâ€¦</Button>
                 )}
                 {active.verification_status === "suspended" && !reasonAction && (
                   <Button onClick={() => updateStatus(active.id, "approved", { suspension_reason: null })}>Reinstate</Button>
@@ -558,7 +558,7 @@ const AdminVendors = () => {
 const Row = ({ k, v }: { k: string; v: React.ReactNode }) => (
   <div className="flex justify-between gap-3 border-b pb-1">
     <span className="text-muted-foreground shrink-0">{k}</span>
-    <span className="text-right">{v ?? "—"}</span>
+    <span className="text-right">{v ?? "â€”"}</span>
   </div>
 );
 
@@ -647,7 +647,7 @@ const AdminDisputes = () => {
                 <div className="text-xs text-muted-foreground">{o.vendor?.business_name}</div>
               </td>
               <td className="px-4 py-3">
-                <div>{o.customer?.full_name ?? "—"}</div>
+                <div>{o.customer?.full_name ?? "â€”"}</div>
                 <div className="text-xs text-muted-foreground">{o.customer?.phone_number}</div>
               </td>
               <td className="px-4 py-3 font-medium">{formatKsh(o.total_amount_ksh)}</td>
@@ -655,7 +655,7 @@ const AdminDisputes = () => {
                 {o.dispute_reason ? (
                   <p className="text-sm bg-red-50 text-red-800 border border-red-200 rounded px-2 py-1 line-clamp-2">{o.dispute_reason}</p>
                 ) : (
-                  <span className="text-muted-foreground">—</span>
+                  <span className="text-muted-foreground">â€”</span>
                 )}
               </td>
               <td className="px-4 py-3">
@@ -734,7 +734,7 @@ const AdminUsers = () => {
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by name, email, phone…"
+          placeholder="Search by name, email, phoneâ€¦"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           className="pl-9"
@@ -759,8 +759,8 @@ const AdminUsers = () => {
               {filtered.map((u) => (
                 <tr key={u.id} className="hover:bg-muted/25 transition-colors">
                   <td className="px-4 py-3 font-medium">{u.full_name ?? "Unnamed"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{u.email ?? "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{u.phone_number ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{u.email ?? "â€”"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{u.phone_number ?? "â€”"}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1 flex-wrap">
                       {(u.user_roles ?? []).map((r) => (
@@ -824,7 +824,7 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
 };
 
 const ProviderBadge = ({ provider }: { provider: string | null }) => {
-  if (!provider) return <span className="text-muted-foreground text-xs">—</span>;
+  if (!provider) return <span className="text-muted-foreground text-xs">â€”</span>;
   const isKcb = provider.toLowerCase().includes("kcb");
   return (
     <Badge variant="outline" className={`text-xs ${isKcb ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200"}`}>
@@ -934,17 +934,17 @@ const AdminPayments = () => {
                 {pageItems.map((o) => (
                   <tr key={o.id} className="hover:bg-muted/25 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs">#{o.id.slice(0, 8).toUpperCase()}</td>
-                    <td className="px-4 py-3">{o.customer?.full_name ?? "—"}</td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">{o.customer?.phone_number ?? "—"}</td>
+                    <td className="px-4 py-3">{o.customer?.full_name ?? "â€”"}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{o.customer?.phone_number ?? "â€”"}</td>
                     <td className="px-4 py-3 text-right font-medium">{formatKsh(o.total_amount_ksh)}</td>
                     <td className="px-4 py-3"><ProviderBadge provider={o.payment_provider} /></td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{o.mpesa_receipt_number ?? "—"}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{o.mpesa_receipt_number ?? "â€”"}</td>
                     <td className="px-4 py-3"><PaymentStatusBadge status={o.payment_status} /></td>
                     <td className="px-4 py-3">
                       {o.payout_status ? (
                         <Badge variant="outline" className="text-xs capitalize">{o.payout_status}</Badge>
                       ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
+                        <span className="text-muted-foreground text-xs">â€”</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(o.created_at)}</td>
@@ -957,7 +957,7 @@ const AdminPayments = () => {
           {totalPages > 1 && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
+                Showing {page * PAGE_SIZE + 1}â€“{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
               </span>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>

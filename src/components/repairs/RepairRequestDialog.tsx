@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -106,11 +106,11 @@ export const RepairRequestDialog = ({ open, onOpenChange, service }: Props) => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Brand</Label>
-              <Input value={brand} onChange={(e) => setBrand(e.target.value)} className="mt-1.5" placeholder="HP, Apple, Samsung…" />
+              <Input value={brand} onChange={(e) => setBrand(e.target.value)} className="mt-1.5" placeholder="HP, Apple, Samsungâ€¦" />
             </div>
             <div>
               <Label>Model</Label>
-              <Input value={model} onChange={(e) => setModel(e.target.value)} className="mt-1.5" placeholder="EliteBook 840, iPhone 13…" />
+              <Input value={model} onChange={(e) => setModel(e.target.value)} className="mt-1.5" placeholder="EliteBook 840, iPhone 13â€¦" />
             </div>
           </div>
           <div>

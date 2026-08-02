@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Store, AlertTriangle, ShieldCheck, CheckCircle2, FileText, XCircle } from "lucide-react";
 
@@ -84,7 +84,7 @@ const SellerGuidelines = () => {
           <p className="text-xs text-muted-foreground mb-4">
             Agree to our seller guidelines and start selling to thousands of protected buyers.
           </p>
-          <Link to="/vendor/register" className="bg-primary text-primary-foreground font-semibold text-xs px-5 py-2.5 rounded-lg inline-block shadow-xs">
+          <Link to="/vendor/onboarding" className="bg-primary text-primary-foreground font-semibold text-xs px-5 py-2.5 rounded-lg inline-block shadow-xs">
             Start Vendor Registration
           </Link>
         </div>

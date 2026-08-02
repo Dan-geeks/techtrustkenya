@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+﻿import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck, Package, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatKsh } from "@/lib/format";

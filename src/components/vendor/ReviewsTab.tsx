@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDate } from "@/lib/format";
@@ -63,12 +63,12 @@ export const ReviewsTab = ({ vendor }: { vendor: any }) => {
                   <div>
                     <div className="font-medium text-sm">{r.customer?.full_name ?? "Anonymous"}</div>
                     <div className="text-xs text-muted-foreground">
-                      {r.product?.brand} {r.product?.model_name} · {formatDate(r.created_at)}
+                      {r.product?.brand} {r.product?.model_name} Â· {formatDate(r.created_at)}
                     </div>
                   </div>
                   <div className="text-xs text-right">
-                    <div>Product: {"★".repeat(r.product_rating)}</div>
-                    <div>Service: {"★".repeat(r.service_rating)}</div>
+                    <div>Product: {"â˜…".repeat(r.product_rating)}</div>
+                    <div>Service: {"â˜…".repeat(r.service_rating)}</div>
                   </div>
                 </div>
                 {r.comment && <p className="text-sm mt-2">{r.comment}</p>}

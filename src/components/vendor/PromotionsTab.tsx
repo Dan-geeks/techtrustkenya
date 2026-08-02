@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -129,7 +129,7 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
               <div>
                 <div className="font-medium capitalize">{p.promotion_type.replace(/_/g, " ")}</div>
                 <div className="text-xs text-muted-foreground">
-                  {p.product ? `${p.product.brand} ${p.product.model_name}` : "Shop-wide"} · Expires {formatDate(p.expires_at)}
+                  {p.product ? `${p.product.brand} ${p.product.model_name}` : "Shop-wide"} Â· Expires {formatDate(p.expires_at)}
                 </div>
               </div>
               <div className="text-right">
@@ -153,9 +153,9 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="featured_homepage">Featured on homepage — KES 2,000/wk</SelectItem>
-                  <SelectItem value="top_search">Top of search — KES 1,500/wk</SelectItem>
-                  <SelectItem value="trending_carousel">Trending carousel — KES 1,000/wk</SelectItem>
+                  <SelectItem value="featured_homepage">Featured on homepage â€” KES 2,000/wk</SelectItem>
+                  <SelectItem value="top_search">Top of search â€” KES 1,500/wk</SelectItem>
+                  <SelectItem value="trending_carousel">Trending carousel â€” KES 1,000/wk</SelectItem>
                 </SelectContent>
               </Select>
             </div>

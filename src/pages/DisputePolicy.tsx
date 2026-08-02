@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AlertTriangle, ShieldCheck, Scale, Clock, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 
@@ -67,7 +67,7 @@ const DisputePolicy = () => {
             <li><strong>Repair Services:</strong> Opens when technician marks repair ready for pickup.</li>
           </ul>
           <p className="text-xs text-amber-600 font-medium mt-3">
-            ⚠️ Once a dispute is opened, Float escrow funds are frozen immediately. Neither party can withdraw or auto-release funds until TechTrust issues a decision.
+            âš ï¸ Once a dispute is opened, Float escrow funds are frozen immediately. Neither party can withdraw or auto-release funds until TechTrust issues a decision.
           </p>
         </section>
 

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+﻿import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import Auth from "../pages/Auth";
@@ -103,7 +103,7 @@ describe("Auth Page Component", () => {
     fireEvent.change(screen.getByPlaceholderText("merchant@example.com"), {
       target: { value: "USER@EXAMPLE.COM " },
     });
-    fireEvent.change(screen.getByPlaceholderText("••••••••"), {
+    fireEvent.change(screen.getByPlaceholderText("â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"), {
       target: { value: "secret123" },
     });
 
@@ -159,6 +159,6 @@ describe("AuthCallback Component", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Authenticating with Google…")).toBeInTheDocument();
+    expect(screen.getByText("Authenticating with Googleâ€¦")).toBeInTheDocument();
   });
 });

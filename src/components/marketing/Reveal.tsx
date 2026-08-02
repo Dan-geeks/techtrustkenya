@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, ReactNode } from "react";
+﻿import { useEffect, useRef, useState, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /** Fades + slides a section in once it scrolls into view. Animates once, then stays put. */

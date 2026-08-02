@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+﻿import { useEffect, useState, useMemo } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Search, MapPin, Store, Star, ArrowRight, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

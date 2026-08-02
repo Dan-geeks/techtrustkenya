@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKsh, formatDate } from "@/lib/format";
@@ -60,7 +60,7 @@ export const OverviewTab = ({ vendor, onSelectTab }: Props) => {
     })();
   }, [vendor]);
 
-  if (loading) return <div className="text-muted-foreground">Loading…</div>;
+  if (loading) return <div className="text-muted-foreground">Loadingâ€¦</div>;
 
   return (
     <div className="space-y-6">
@@ -144,7 +144,7 @@ export const OverviewTab = ({ vendor, onSelectTab }: Props) => {
                     <td className="px-5 py-3 text-data-id text-muted-foreground">#{o.id.slice(0, 8).toUpperCase()}</td>
                     <td className="px-5 py-3 font-medium">
                       {o.product?.brand} {o.product?.model_name}
-                      <span className="ml-1 text-xs text-muted-foreground">×{o.quantity}</span>
+                      <span className="ml-1 text-xs text-muted-foreground">Ã—{o.quantity}</span>
                     </td>
                     <td className="px-5 py-3 text-right"><span className="text-price">{formatKsh(Number(o.total_amount_ksh))}</span></td>
                     <td className="px-5 py-3 text-xs text-muted-foreground">{formatDate(o.created_at)}</td>
@@ -186,7 +186,7 @@ const FloatStatusPill = ({ paymentStatus }: { paymentStatus: string }) => {
   }
   return (
     <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium capitalize text-muted-foreground">
-      {String(paymentStatus ?? "—").replace(/_/g, " ")}
+      {String(paymentStatus ?? "â€”").replace(/_/g, " ")}
     </span>
   );
 };

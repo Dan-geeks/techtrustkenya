@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Mail } from "lucide-react";
 
@@ -22,21 +22,21 @@ Contact for privacy matters: johnmwangimegwe@gmail.com / support@techtrust.co.ke
     content: `We collect only the data needed to operate the platform and provide our services:
 
 From all users:
-• Name, email address, phone number
-• Account login credentials (passwords are stored salted and hashed; never in readable form)
-• Device, IP, and usage information to ensure security
+â€¢ Name, email address, phone number
+â€¢ Account login credentials (passwords are stored salted and hashed; never in readable form)
+â€¢ Device, IP, and usage information to ensure security
 
 From buyers:
-• M-Pesa phone number used to process Float escrow payments
-• Delivery or collection address for orders
-• Order and transaction history, reviews, and dispute records
+â€¢ M-Pesa phone number used to process Float escrow payments
+â€¢ Delivery or collection address for orders
+â€¢ Order and transaction history, reviews, and dispute records
 
 From vendors and repair technicians:
-• National ID or Passport details for identity verification
-• KRA PIN certificate where required
-• Store location, GPS coordinates, and shop photographs (physical vendors)
-• M-Pesa / bank account details for payout releases
-• Refundable security deposit records (online sellers)`
+â€¢ National ID or Passport details for identity verification
+â€¢ KRA PIN certificate where required
+â€¢ Store location, GPS coordinates, and shop photographs (physical vendors)
+â€¢ M-Pesa / bank account details for payout releases
+â€¢ Refundable security deposit records (online sellers)`
   },
   {
     title: "4. Why We Collect Your Data (Lawful Basis)",
@@ -49,26 +49,26 @@ From vendors and repair technicians:
   {
     title: "5. How We Use Your Data",
     content: `We use your personal data to:
-• Create and manage your account.
-• Facilitate M-Pesa payments through Float escrow and release funds upon confirmed delivery.
-• Verify vendor identities and display appropriate physical/identity badges.
-• Investigate and resolve disputes between buyers and sellers.
-• Send order updates, delivery notifications, and security alerts.
-• Detect and prevent fraudulent listings, counterfeit items, and unauthorized account access.`
+â€¢ Create and manage your account.
+â€¢ Facilitate M-Pesa payments through Float escrow and release funds upon confirmed delivery.
+â€¢ Verify vendor identities and display appropriate physical/identity badges.
+â€¢ Investigate and resolve disputes between buyers and sellers.
+â€¢ Send order updates, delivery notifications, and security alerts.
+â€¢ Detect and prevent fraudulent listings, counterfeit items, and unauthorized account access.`
   },
   {
     title: "6. How We Share Your Data",
     content: `We do not sell your personal data to third parties. We share data only as necessary to operate TechTrust:
-• With counter-parties: A buyer's delivery address and phone number are shared with the vendor fulfilling the order. A vendor's business name and verified status are visible to buyers.
-• Service providers: Payment processors (Safaricom Daraja API for M-Pesa payouts), hosting services, and SMS notification gateways.
-• Legal and regulatory authorities: When required under Kenyan law, court order, or formal investigation by police or ODPC.`
+â€¢ With counter-parties: A buyer's delivery address and phone number are shared with the vendor fulfilling the order. A vendor's business name and verified status are visible to buyers.
+â€¢ Service providers: Payment processors (Safaricom Daraja API for M-Pesa payouts), hosting services, and SMS notification gateways.
+â€¢ Legal and regulatory authorities: When required under Kenyan law, court order, or formal investigation by police or ODPC.`
   },
   {
     title: "7. How We Protect Your Data",
     content: `We implement robust technical and organizational security measures:
-• Passwords and sensitive tokens are encrypted using industry-standard hashing algorithms.
-• All web traffic is encrypted via TLS/SSL (HTTPS).
-• Access to vendor verification documents and ID photos is restricted strictly to authorized administrators.`
+â€¢ Passwords and sensitive tokens are encrypted using industry-standard hashing algorithms.
+â€¢ All web traffic is encrypted via TLS/SSL (HTTPS).
+â€¢ Access to vendor verification documents and ID photos is restricted strictly to authorized administrators.`
   },
   {
     title: "8. How Long We Keep Your Data",
@@ -77,11 +77,11 @@ From vendors and repair technicians:
   {
     title: "9. Your Rights Under Kenyan Law",
     content: `Under the Data Protection Act 2019, you have the right to:
-• Be informed about how your data is collected and used.
-• Access personal data we hold about you.
-• Request correction of inaccurate or incomplete data.
-• Request deletion/erasure of your personal data where no legal ground requires its retention.
-• Object to direct marketing communications.
+â€¢ Be informed about how your data is collected and used.
+â€¢ Access personal data we hold about you.
+â€¢ Request correction of inaccurate or incomplete data.
+â€¢ Request deletion/erasure of your personal data where no legal ground requires its retention.
+â€¢ Object to direct marketing communications.
 To exercise any of these rights, contact us at support@techtrust.co.ke.`
   },
   {
