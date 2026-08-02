@@ -111,34 +111,34 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="border-y border-[#c4c6d3]/20 bg-white">
-          <div className="max-w-[1280px] mx-auto px-6 md:px-12 py-8">
-            <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-24 text-center">
+        {/* Stats Section - Matched to spacing.PNG */}
+        <section className="border-y border-[#c4c6d3]/30 bg-white py-8 md:py-10">
+          <div className="max-w-[1280px] mx-auto px-6 md:px-12">
+            <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-24 lg:gap-32 text-center">
               <div>
-                <div className="font-mono text-3xl md:text-4xl font-bold text-[#0f3d8c] mb-1">
+                <div className="font-display-h2 text-4xl md:text-5xl font-bold text-[#0f3d8c] mb-1.5 tracking-tight">
                   <CountUp end={12} suffix="+" />
                 </div>
-                <div className="font-ui-label text-xs md:text-sm text-[#434651] uppercase tracking-wide font-semibold">
-                  Verified Vendors
+                <div className="font-ui-label text-xs md:text-[13px] text-[#434651] uppercase tracking-wider font-semibold">
+                  VERIFIED VENDORS
                 </div>
               </div>
-              <div className="hidden md:block w-px h-12 bg-[#c4c6d3]/30"></div>
+              <div className="hidden md:block w-px h-14 bg-[#c4c6d3]/40"></div>
               <div>
-                <div className="font-mono text-3xl md:text-4xl font-bold text-[#0f3d8c] mb-1">
+                <div className="font-display-h2 text-4xl md:text-5xl font-bold text-[#0f3d8c] mb-1.5 tracking-tight">
                   <CountUp end={121} suffix="+" />
                 </div>
-                <div className="font-ui-label text-xs md:text-sm text-[#434651] uppercase tracking-wide font-semibold">
-                  Products Listed
+                <div className="font-ui-label text-xs md:text-[13px] text-[#434651] uppercase tracking-wider font-semibold">
+                  PRODUCTS LISTED
                 </div>
               </div>
-              <div className="hidden md:block w-px h-12 bg-[#c4c6d3]/30"></div>
+              <div className="hidden md:block w-px h-14 bg-[#c4c6d3]/40"></div>
               <div>
-                <div className="font-mono text-3xl md:text-4xl font-bold text-[#0f3d8c] mb-1">
+                <div className="font-display-h2 text-4xl md:text-5xl font-bold text-[#0f3d8c] mb-1.5 tracking-tight">
                   <CountUp end={8902} suffix="+" />
                 </div>
-                <div className="font-ui-label text-xs md:text-sm text-[#434651] uppercase tracking-wide font-semibold">
-                  Safe Transactions
+                <div className="font-ui-label text-xs md:text-[13px] text-[#434651] uppercase tracking-wider font-semibold">
+                  SAFE TRANSACTIONS
                 </div>
               </div>
             </div>
