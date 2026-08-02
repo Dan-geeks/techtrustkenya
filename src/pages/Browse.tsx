@@ -151,7 +151,7 @@ const Browse = () => {
 
   return (
     <div className="bg-background text-on-background antialiased min-h-screen">
-      <main className="flex-grow w-full max-w-container-max mx-auto px-6 md:px-12 pt-8 md:pt-12 pb-16 md:pb-24 flex flex-col md:flex-row gap-8 md:gap-12">
+      <main className="flex-grow w-full max-w-container-max mx-auto px-4 md:px-10 py-6 md:py-8 flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Filter Sidebar */}
         <aside className="w-full md:w-64 flex-shrink-0 flex flex-col gap-6">
           {/* Mobile Search & Filter Toggle */}
@@ -396,27 +396,27 @@ const Browse = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="group bg-white rounded-2xl shadow-sm border border-[#E2E8F0] flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300"
+                  className="group bg-white rounded-xl shadow-sm border border-[#E2E8F0] flex flex-col overflow-hidden relative hover:shadow-md transition-all duration-300"
                 >
-                  <div className="h-[220px] w-full bg-slate-50 relative overflow-hidden flex items-center justify-center p-4">
+                  <div className="h-[200px] w-full bg-[#f2f3ff]/60 relative overflow-hidden flex items-center justify-center p-4 rounded-t-xl">
                     <img
                       alt={product.title}
-                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                      className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
                       src={product.image}
                     />
                     {product.badge && (
-                      <div className="absolute top-3 right-3 flex gap-1">
-                        <span className="px-2.5 py-1 bg-white/90 backdrop-blur text-[#0F3D8C] font-mono text-xs font-bold rounded-md shadow-sm border border-[#E2E8F0]">
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <span className="px-2 py-0.5 bg-white/90 backdrop-blur text-[#0F3D8C] font-mono text-xs font-bold rounded shadow-sm border border-[#E2E8F0]">
                           {product.badge}
                         </span>
                       </div>
                     )}
                   </div>
-                  <div className="p-6 flex flex-col gap-3 flex-grow">
+                  <div className="p-4 flex flex-col gap-3 flex-grow">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs text-[#64748B] font-medium">{product.vendor}</span>
                       <span
