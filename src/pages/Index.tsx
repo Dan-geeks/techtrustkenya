@@ -234,11 +234,11 @@ const Index = () => {
                     key={p.id}
                     className="group bg-white rounded-xl border border-[#c4c6d3]/30 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
                   >
-                    <div className="aspect-square bg-slate-50 relative overflow-hidden">
+                    <div className="aspect-square bg-slate-50/80 relative overflow-hidden p-3 flex items-center justify-center">
                       <img
                         src={imgUrl}
                         alt={p.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                     <div className="p-4 flex flex-col flex-grow">

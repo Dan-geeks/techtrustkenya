@@ -78,14 +78,14 @@ export const ProductCard = ({
       )}
     >
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+      <div className="relative aspect-[4/3] overflow-hidden bg-slate-50/80 p-2.5 flex items-center justify-center">
         {showImage ? (
           <img
             src={firstImage}
             alt={`${brand} ${model_name}`}
             loading="lazy"
             onError={() => setImgFailed(true)}
-            className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+            className="h-full w-full object-contain group-hover:scale-[1.03] transition-transform duration-500"
           />
         ) : (
           <div className="h-full w-full grid place-items-center text-muted-foreground/30">
