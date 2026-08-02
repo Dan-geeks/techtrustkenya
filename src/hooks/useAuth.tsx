@@ -26,7 +26,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
     try {
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-      setRoles((data?.map((r) => r.role as Role)) ?? []);
+      let roleList = (data?.map((r) => r.role as Role)) ?? [];
+      
+      if (!roleList.includes("vendor")) {
+        const { data: vp } = await supabase.from("vendor_profiles").select("id").eq("user_id", user.id).maybeSingle();
+        if (vp) roleList.push("vendor");
+      }
+      
+      setRoles(roleList);
     } catch (e) {
       console.error(e);
     }
@@ -41,8 +48,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (nextSession?.user) {
         try {
           const { data } = await supabase.from("user_roles").select("role").eq("user_id", nextSession.user.id);
+          let roleList = (data?.map((r) => r.role as Role)) ?? [];
+          
+          if (!roleList.includes("vendor")) {
+            const { data: vp } = await supabase.from("vendor_profiles").select("id").eq("user_id", nextSession.user.id).maybeSingle();
+            if (vp) roleList.push("vendor");
+          }
+          
           if (mounted) {
-            setRoles((data?.map((r) => r.role as Role)) ?? []);
+            setRoles(roleList);
             setUser(nextSession.user);
           }
         } catch (e) {
