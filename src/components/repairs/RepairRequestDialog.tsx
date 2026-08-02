@@ -106,11 +106,11 @@ export const RepairRequestDialog = ({ open, onOpenChange, service }: Props) => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Brand</Label>
-              <Input value={brand} onChange={(e) => setBrand(e.target.value)} className="mt-1.5" placeholder="HP, Apple, Samsungâ€¦" />
+              <Input value={brand} onChange={(e) => setBrand(e.target.value)} className="mt-1.5" placeholder="HP, Apple, Samsung..." />
             </div>
             <div>
               <Label>Model</Label>
-              <Input value={model} onChange={(e) => setModel(e.target.value)} className="mt-1.5" placeholder="EliteBook 840, iPhone 13â€¦" />
+              <Input value={model} onChange={(e) => setModel(e.target.value)} className="mt-1.5" placeholder="EliteBook 840, iPhone 13..." />
             </div>
           </div>
           <div>

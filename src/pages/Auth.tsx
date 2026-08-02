@@ -546,7 +546,7 @@ export const Auth = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         type={showPassword ? "text" : "password"}
-                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                        placeholder="••••••••"
                         className={`w-full pl-11 py-3.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:border-[#0F3D8C] focus:ring-2 focus:ring-[#0F3D8C]/20 transition-all text-[#0F172A] ${mode === "signup" ? "pr-[120px]" : "pr-12"}`}
                       />
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-10">
@@ -626,7 +626,7 @@ export const Auth = () => {
                     >
                       {loading ? (
                         <>
-                          <Loader2 className="h-5 w-5 animate-spin" /> Processingâ€¦
+                          <Loader2 className="h-5 w-5 animate-spin" /> Processing...
                         </>
                       ) : (
                         <>

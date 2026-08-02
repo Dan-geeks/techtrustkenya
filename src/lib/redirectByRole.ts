@@ -23,12 +23,13 @@ export async function getPostLoginPath(userId: string): Promise<string> {
   // they can navigate there manually when they want to.
   // if (roleSet.has("admin")) return "/admin/dashboard";
 
-  if (roleSet.has("vendor")) {
-    const { data: vp } = await supabase
-      .from("vendor_profiles")
-      .select("verification_status")
-      .eq("user_id", userId)
-      .maybeSingle();
+  const { data: vp } = await supabase
+    .from("vendor_profiles")
+    .select("verification_status")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (vp || roleSet.has("vendor")) {
     const status = vp?.verification_status;
     if (status === "approved" || status === "verified") return "/vendor/dashboard";
     if (status === "suspended") return "/vendor/suspended";

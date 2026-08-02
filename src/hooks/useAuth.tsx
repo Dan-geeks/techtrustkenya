@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -10,6 +10,7 @@ interface AuthContextValue {
   session: Session | null;
   roles: Role[];
   loading: boolean;
+  refreshRoles: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -20,6 +21,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const refreshRoles = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      setRoles((data?.map((r) => r.role as Role)) ?? []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -73,12 +84,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, roles, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, roles, loading, refreshRoles, signOut }}>
       {loading ? (
         <div className="grid min-h-screen place-items-center bg-background px-4">
           <div className="flex items-center gap-3 text-muted-foreground">
             <Loader2 className="h-6 w-6 animate-spin text-accent" />
-            <span className="text-sm font-medium">Checking your sessionâ€¦</span>
+            <span className="text-sm font-medium">Checking your session...</span>
           </div>
         </div>
       ) : (

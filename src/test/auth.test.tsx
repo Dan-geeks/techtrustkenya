@@ -103,7 +103,7 @@ describe("Auth Page Component", () => {
     fireEvent.change(screen.getByPlaceholderText("merchant@example.com"), {
       target: { value: "USER@EXAMPLE.COM " },
     });
-    fireEvent.change(screen.getByPlaceholderText("â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"), {
+    fireEvent.change(screen.getByPlaceholderText("••••••••"), {
       target: { value: "secret123" },
     });
 
@@ -159,6 +159,6 @@ describe("AuthCallback Component", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Authenticating with Googleâ€¦")).toBeInTheDocument();
+    expect(screen.getByText("Authenticating with Google...")).toBeInTheDocument();
   });
 });

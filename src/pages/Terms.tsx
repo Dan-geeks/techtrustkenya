@@ -10,7 +10,7 @@ const sections = [
   {
     id: "definitions",
     title: "2. Definitions",
-    content: `â€¢ Platform â€” the TechTrust website, application, and related services.\nâ€¢ Buyer â€” a user who purchases products or repair services.\nâ€¢ Vendor â€” a verified seller who lists products for sale.\nâ€¢ Technician â€” a verified provider of repair services.\nâ€¢ Float escrow â€” TechTrust's escrow payment system that holds a buyer's payment until the buyer confirms receipt.\nâ€¢ Verified â€” a vendor or technician who has passed TechTrust's physical or identity verification process.\nâ€¢ Dispute â€” a formal complaint raised by a buyer about a transaction.`
+    content: `• Platform — the TechTrust website, application, and related services.\n• Buyer — a user who purchases products or repair services.\n• Vendor — a verified seller who lists products for sale.\n• Technician — a verified provider of repair services.\n• Float escrow — TechTrust's escrow payment system that holds a buyer's payment until the buyer confirms receipt.\n• Verified — a vendor or technician who has passed TechTrust's physical or identity verification process.\n• Dispute — a formal complaint raised by a buyer about a transaction.`
   },
   {
     id: "eligibility",
@@ -20,7 +20,7 @@ const sections = [
   {
     id: "accounts",
     title: "4. Accounts",
-    content: `â€¢ Account creation: You must register an account to transact on the platform, providing accurate and complete information.\nâ€¢ Account security: You are responsible for keeping your login details secure and for all activity that occurs under your account. Notify us immediately if you suspect unauthorized access.\nâ€¢ One account per user: You may not operate multiple accounts, or create a new account to circumvent a suspension, unless expressly permitted by TechTrust.\nâ€¢ Accurate information: You must keep your account information up to date. Providing false information is a breach of these Terms.`
+    content: `• Account creation: You must register an account to transact on the platform, providing accurate and complete information.\n• Account security: You are responsible for keeping your login details secure and for all activity that occurs under your account. Notify us immediately if you suspect unauthorized access.\n• One account per user: You may not operate multiple accounts, or create a new account to circumvent a suspension, unless expressly permitted by TechTrust.\n• Accurate information: You must keep your account information up to date. Providing false information is a breach of these Terms.`
   },
   {
     id: "role-of-techtrust",
@@ -30,17 +30,17 @@ const sections = [
   {
     id: "buyer-terms",
     title: "6. Buyer Terms",
-    content: `As a buyer, you agree to:\nâ€¢ Provide accurate delivery or collection information.\nâ€¢ Pay for orders through the Float escrow payment system.\nâ€¢ Inspect items on receipt and confirm the order, or raise a dispute, within the 48-hour confirmation window.\nâ€¢ Raise disputes honestly and only on valid grounds.\nâ€¢ Treat vendors and technicians respectfully.\nWhen you pay, your money is held in Float escrow and is only released to the vendor when you confirm receipt, or automatically after the 48-hour confirmation window closes with no dispute.`
+    content: `As a buyer, you agree to:\n• Provide accurate delivery or collection information.\n• Pay for orders through the Float escrow payment system.\n• Inspect items on receipt and confirm the order, or raise a dispute, within the 48-hour confirmation window.\n• Raise disputes honestly and only on valid grounds.\n• Treat vendors and technicians respectfully.\nWhen you pay, your money is held in Float escrow and is only released to the vendor when you confirm receipt, or automatically after the 48-hour confirmation window closes with no dispute.`
   },
   {
     id: "vendor-technician-terms",
     title: "7. Vendor and Technician Terms",
-    content: `As a vendor or technician, you agree to:\nâ€¢ Complete verification honestly before listing anything.\nâ€¢ List only genuine products and describe them accurately.\nâ€¢ Price fairly in KSH and not change agreed prices after payment.\nâ€¢ Fulfill orders and complete repairs promptly and honestly.\nâ€¢ Provide tracking for shipped orders where required.\nâ€¢ Accept and cooperate with the dispute resolution process.\nâ€¢ Comply with the Seller Guidelines and all platform policies.\nOnline sellers additionally agree to maintain a security deposit as a condition of selling, which may be forfeited in cases of fraud or non-delivery.`
+    content: `As a vendor or technician, you agree to:\n• Complete verification honestly before listing anything.\n• List only genuine products and describe them accurately.\n• Price fairly in KSH and not change agreed prices after payment.\n• Fulfill orders and complete repairs promptly and honestly.\n• Provide tracking for shipped orders where required.\n• Accept and cooperate with the dispute resolution process.\n• Comply with the Seller Guidelines and all platform policies.\nOnline sellers additionally agree to maintain a security deposit as a condition of selling, which may be forfeited in cases of fraud or non-delivery.`
   },
   {
     id: "payments-float-fees",
     title: "8. Payments, Float escrow, and Fees",
-    content: `â€¢ Float escrow: All payments are processed through Float escrow. TechTrust holds the buyer's payment until the buyer confirms receipt or the confirmation window closes.\nâ€¢ 10% Platform Fee / Commission: TechTrust charges a platform fee / commission of 10% on completed transactions, deducted automatically when Float escrow is released to the vendor. Vendors see the net amount they will receive before agreeing to a sale.\nâ€¢ Subscriptions & Promotions: Vendors may pay optional subscription and promotion fees as published on the platform.\nâ€¢ Payment method: Payments are processed via M-Pesa through the Safaricom Daraja API.\nâ€¢ Refunds: Refunds are issued through Float escrow in line with the Dispute Policy, where a dispute is resolved in the buyer's favor.`
+    content: `• Float escrow: All payments are processed through Float escrow. TechTrust holds the buyer's payment until the buyer confirms receipt or the confirmation window closes.\n• 10% Platform Fee / Commission: TechTrust charges a platform fee / commission of 10% on completed transactions, deducted automatically when Float escrow is released to the vendor. Vendors see the net amount they will receive before agreeing to a sale.\n• Subscriptions & Promotions: Vendors may pay optional subscription and promotion fees as published on the platform.\n• Payment method: Payments are processed via M-Pesa through the Safaricom Daraja API.\n• Refunds: Refunds are issued through Float escrow in line with the Dispute Policy, where a dispute is resolved in the buyer's favor.`
   },
   {
     id: "verification-trust",
@@ -55,7 +55,7 @@ const sections = [
   {
     id: "prohibited-conduct",
     title: "11. Prohibited Conduct",
-    content: `You must not:\nâ€¢ Provide false information or impersonate another person.\nâ€¢ List or sell counterfeit, stolen, or misrepresented goods.\nâ€¢ Manipulate prices, reviews, or ratings.\nâ€¢ Take transactions off the platform to avoid protection or 10% platform fees.\nâ€¢ Use the platform for fraud, money laundering, or any unlawful purpose.\nâ€¢ Attempt to interfere with, hack, or disrupt the platform.\nâ€¢ Harass, threaten, or abuse other users or staff.\nâ€¢ Operate duplicate accounts or evade a suspension.`
+    content: `You must not:\n• Provide false information or impersonate another person.\n• List or sell counterfeit, stolen, or misrepresented goods.\n• Manipulate prices, reviews, or ratings.\n• Take transactions off the platform to avoid protection or 10% platform fees.\n• Use the platform for fraud, money laundering, or any unlawful purpose.\n• Attempt to interfere with, hack, or disrupt the platform.\n• Harass, threaten, or abuse other users or staff.\n• Operate duplicate accounts or evade a suspension.`
   },
   {
     id: "suspension-termination",
@@ -70,7 +70,7 @@ const sections = [
   {
     id: "limitation-of-liability",
     title: "14. Limitation of Liability",
-    content: `To the fullest extent permitted by Kenyan law:\nâ€¢ TechTrust provides the platform on a reasonable-effort basis and does not guarantee uninterrupted or error-free operation.\nâ€¢ TechTrust's role is to operate the marketplace and administer Float escrow and disputes.\nâ€¢ TechTrust is not liable for indirect or consequential losses arising from use of the platform, except where such limitation is not permitted by law.`
+    content: `To the fullest extent permitted by Kenyan law:\n• TechTrust provides the platform on a reasonable-effort basis and does not guarantee uninterrupted or error-free operation.\n• TechTrust's role is to operate the marketplace and administer Float escrow and disputes.\n• TechTrust is not liable for indirect or consequential losses arising from use of the platform, except where such limitation is not permitted by law.`
   },
   {
     id: "privacy",

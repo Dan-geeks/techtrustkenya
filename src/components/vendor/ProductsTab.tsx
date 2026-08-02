@@ -270,7 +270,7 @@ export const ProductsTab = ({ vendor }: Props) => {
                       {p.brand} {p.model_name}
                     </div>
                     <div className="text-xs text-muted-foreground capitalize">
-                      {p.condition} Â· {p.category}
+                      {p.condition} · {p.category}
                     </div>
                   </div>
                   {stockBadge(p.quantity_in_stock)}
@@ -500,7 +500,7 @@ export const ProductsTab = ({ vendor }: Props) => {
                 <Upload className="h-6 w-6 text-muted-foreground" />
                 <p className="text-sm font-medium">Drag images here or click to browse</p>
                 <p className="text-xs text-muted-foreground">
-                  Max {MAX_IMAGES} images Â· JPG / PNG / WEBP
+                  Max {MAX_IMAGES} images · JPG / PNG / WEBP
                 </p>
               </div>
               <input

@@ -134,14 +134,14 @@ export const AuthCallback = () => {
             </div>
             <h2 className="text-xl font-bold text-slate-100">Authentication Error</h2>
             <p className="text-sm text-slate-400 leading-relaxed">{errorMsg}</p>
-            <p className="text-xs text-slate-500">Redirecting to sign in pageâ€¦</p>
+            <p className="text-xs text-slate-500">Redirecting to sign in page...</p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="flex justify-center">
               <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
             </div>
-            <h2 className="text-xl font-bold text-slate-100">Authenticating with Googleâ€¦</h2>
+            <h2 className="text-xl font-bold text-slate-100">Authenticating with Google...</h2>
             <p className="text-sm text-slate-400 leading-relaxed">
               Verifying your security credentials with TechTrust Escrow Engine.
             </p>

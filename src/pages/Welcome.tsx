@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 /**
- * One-time gate shown right after a brand-new Google sign-in â€” email/password
+ * One-time gate shown right after a brand-new Google sign-in — email/password
  * sign-ups already pick a role before the account exists, but Google never
  * asks. profiles.onboarding_complete flips to true once a choice is made, so
  * this page never appears again for that account.
@@ -95,7 +95,7 @@ const Welcome = () => {
         <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card text-center">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">Welcome to TechTrust</h1>
           <p className="text-sm text-muted-foreground mb-6">
-            One quick thing â€” what brings you here?
+            One quick thing — what brings you here?
           </p>
 
           <div className="mb-6 text-left">

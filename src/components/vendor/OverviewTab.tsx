@@ -60,7 +60,7 @@ export const OverviewTab = ({ vendor, onSelectTab }: Props) => {
     })();
   }, [vendor]);
 
-  if (loading) return <div className="text-muted-foreground">Loadingâ€¦</div>;
+  if (loading) return <div className="text-muted-foreground">Loading...</div>;
 
   return (
     <div className="space-y-6">
@@ -186,7 +186,7 @@ const FloatStatusPill = ({ paymentStatus }: { paymentStatus: string }) => {
   }
   return (
     <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium capitalize text-muted-foreground">
-      {String(paymentStatus ?? "â€”").replace(/_/g, " ")}
+      {String(paymentStatus ?? "—").replace(/_/g, " ")}
     </span>
   );
 };

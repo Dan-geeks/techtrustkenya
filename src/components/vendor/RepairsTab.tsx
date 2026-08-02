@@ -98,7 +98,7 @@ export const RepairsTab = ({ vendor }: { vendor: any }) => {
                     <span className="text-data-id text-xs text-muted-foreground">#{r.id.slice(0, 8).toUpperCase()}</span>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {r.customer?.full_name} Â· {r.customer?.phone_number} Â· {formatDate(r.created_at)}
+                    {r.customer?.full_name} · {r.customer?.phone_number} · {formatDate(r.created_at)}
                   </div>
                 </div>
                 <Badge variant="outline" className="capitalize">{r.status.replace(/_/g, " ")}</Badge>

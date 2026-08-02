@@ -63,7 +63,7 @@ export const ReviewsTab = ({ vendor }: { vendor: any }) => {
                   <div>
                     <div className="font-medium text-sm">{r.customer?.full_name ?? "Anonymous"}</div>
                     <div className="text-xs text-muted-foreground">
-                      {r.product?.brand} {r.product?.model_name} Â· {formatDate(r.created_at)}
+                      {r.product?.brand} {r.product?.model_name} · {formatDate(r.created_at)}
                     </div>
                   </div>
                   <div className="text-xs text-right">

@@ -132,7 +132,7 @@ const AdminLogin = () => {
               />
             </div>
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
-              {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Signing inâ€¦</> : "Sign in"}
+              {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Signing in...</> : "Sign in"}
             </Button>
           </form>
 
