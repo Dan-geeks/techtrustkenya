@@ -11,9 +11,9 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const productId = searchParams.get("product") || searchParams.get("id");
-  const product =
-    SAMPLE_PRODUCTS.find((p) => p.id === productId || p.id.toLowerCase() === productId?.toLowerCase()) ||
-    SAMPLE_PRODUCTS[0]; // Lenovo ThinkPad T14 Gen 2 - 16GB RAM, 512GB SSD
+  
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("express");
   const [phoneNumber, setPhoneNumber] = useState("0759898920");
@@ -22,14 +22,57 @@ const Checkout = () => {
   const [tillNumber, setTillNumber] = useState("890123");
   const [processing, setProcessing] = useState(false);
   const [stkModalOpen, setStkModalOpen] = useState(false);
-  
-  const subtotal = product.price;
-  const escrowFee = Math.round(subtotal * 0.05);
-  const totalDue = subtotal + escrowFee;
 
   useEffect(() => {
     document.title = "Secure Escrow Checkout | TechTrust Kenya";
-  }, []);
+    
+    const loadProduct = async () => {
+      if (!productId) {
+        setProduct(SAMPLE_PRODUCTS[0]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      // Try to fetch from DB first
+      const { data } = await supabase
+        .from("products")
+        .select(`
+          id,
+          brand,
+          model_name,
+          category,
+          condition,
+          price_ksh,
+          image_urls,
+          vendor_profiles ( business_name )
+        `)
+        .eq("id", productId)
+        .maybeSingle();
+
+      if (data) {
+        setProduct({
+          id: data.id,
+          title: `${data.brand} ${data.model_name}`,
+          price: data.price_ksh,
+          condition: data.condition,
+          vendor: data.vendor_profiles?.business_name || "Verified Vendor",
+          image: data.image_urls?.[0] || "/placeholder.svg"
+        });
+      } else {
+        // Fallback
+        const fallback = SAMPLE_PRODUCTS.find((p) => p.id === productId || p.id.toLowerCase() === productId?.toLowerCase()) || SAMPLE_PRODUCTS[0];
+        setProduct(fallback);
+      }
+      setLoading(false);
+    };
+
+    loadProduct();
+  }, [productId]);
+
+  const subtotal = product?.price || 0;
+  const escrowFee = Math.round(subtotal * 0.05);
+  const totalDue = subtotal + escrowFee;
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -118,9 +161,24 @@ const Checkout = () => {
     navigate("/orders/3469010c-a1a9-437a-9b72-f75dc5c5949f");
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#F8FAFC]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#0F3D8C]" />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#F8FAFC]">
+        <p className="text-[#64748B]">Product not found.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#F8FAFC] text-[#0F172A] antialiased min-h-screen">
-
       <main className="w-full max-w-container-max mx-auto px-6 md:px-12 py-8 md:py-12">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs md:text-sm text-[#64748B] mb-6">

@@ -1,30 +1,88 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, MessageCircle, Lock, Verified, Star, CheckCircle, MapPin } from "lucide-react";
+import { ShieldCheck, MessageCircle, Lock, Verified, Star, CheckCircle, MapPin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { SAMPLE_PRODUCTS } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const product = SAMPLE_PRODUCTS.find(p => p.id === id) || SAMPLE_PRODUCTS[5]; // fallback to macbook
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState("");
   
-  // Use the product's actual gallery if available, otherwise just its main image
-  const gallery = (product as any).gallery || [product.image];
-
-  const [activeImage, setActiveImage] = useState(gallery[0]);
-
-  // When id changes, update image
   useEffect(() => {
-    setActiveImage(gallery[0]);
-  }, [product.id]);
+    const loadProduct = async () => {
+      setLoading(true);
+      // Check Supabase first
+      const { data, error } = await supabase
+        .from("products")
+        .select(`
+          *,
+          vendor_profiles ( business_name, verification_status )
+        `)
+        .eq("id", id)
+        .maybeSingle();
 
+      if (data) {
+        setProduct({
+          id: data.id,
+          title: data.brand + " " + data.model_name,
+          price: data.price_ksh,
+          originalPrice: data.price_ksh * 1.2,
+          category: data.category,
+          condition: data.condition,
+          vendor: data.vendor_profiles?.business_name || "Unknown Vendor",
+          vendorVerified: data.vendor_profiles?.verification_status === "approved",
+          location: "Nairobi", // Default or fetch if location exists
+          gallery: data.image_urls || [data.image_urls?.[0] || "/placeholder.svg"],
+          specs: {
+            Processor: data.specifications?.processor || "N/A",
+            Memory: data.specifications?.ram || "N/A",
+            Storage: data.specifications?.storage || "N/A",
+            Display: "N/A",
+            Condition: data.condition_notes || "N/A",
+            DeviceID: data.serial_number || "N/A",
+          }
+        });
+        setActiveImage(data.image_urls?.[0] || "/placeholder.svg");
+      } else {
+        // Fallback to SAMPLE_PRODUCTS
+        const sp = SAMPLE_PRODUCTS.find(p => p.id === id) || SAMPLE_PRODUCTS[5];
+        setProduct(sp);
+        const gallery = (sp as any).gallery || [sp.image];
+        setActiveImage(gallery[0]);
+      }
+      setLoading(false);
+    };
+
+    if (id) {
+      loadProduct();
+    }
+  }, [id]);
 
   useEffect(() => {
-    document.title = `${product.title} | TechTrust`;
-    window.scrollTo(0, 0);
-  }, [product.title]);
+    if (product) {
+      document.title = `${product.title} | TechTrust`;
+      window.scrollTo(0, 0);
+    }
+  }, [product]);
+
+  if (loading) {
+    return (
+      <div className="flex h-[70vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return <div>Product not found</div>;
+  }
+  
+  const gallery = product.gallery || [product.image];
 
   return (
     <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-6xl">
@@ -35,7 +93,7 @@ const ProductDetail = () => {
             <img 
               src={activeImage} 
               alt="MacBook Pro" 
-              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" 
+              className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500" 
             />
           </div>
           
@@ -67,7 +125,7 @@ const ProductDetail = () => {
                 Protected by Float
               </span>
               <span className="text-slate-600 bg-slate-100 text-xs font-medium px-2.5 py-1 rounded-full border border-slate-200">
-                Refurbished - Excellent
+                {product.condition || "Refurbished - Excellent"}
               </span>
             </div>
             
@@ -75,7 +133,9 @@ const ProductDetail = () => {
             
             <div className="flex items-end gap-3">
               <span className="text-4xl font-bold text-slate-900 tracking-tight text-price font-data-price">KES {product.price.toLocaleString()}</span>
-              <span className="text-lg text-slate-400 line-through mb-1 font-medium">KES {product.originalPrice?.toLocaleString()}</span>
+              {product.originalPrice && (
+                <span className="text-lg text-slate-400 line-through mb-1 font-medium">KES {product.originalPrice?.toLocaleString()}</span>
+              )}
             </div>
           </div>
 
@@ -119,11 +179,9 @@ const ProductDetail = () => {
           {/* Seller Card */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all flex items-start gap-4 mt-2">
             <div className="relative shrink-0">
-              <img 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJg38FvLC2iTW0iYJS_JN6cKa80lBTjY-OFZHWiqw2LO5O7RRsreIw1bpW3XpBgN7zLY7a7pjIJ732-9ZXx3vXNxLG2uhUtY5RoGfdp0Il14s4tSGK9kh-EymUx11q3DXP18-qVAbqvyqggIJFh9MUMWyTs5bX0ao3meCE1hDhroPQ1HCXGEecO8thMMgh_uj3CsX4yk8a7_89MGd4QPdpGkNKMnKFDRdIR4HKZGca5hsprOQhvdNIuQ" 
-                alt="TechHub Nairobi" 
-                className="w-14 h-14 rounded-xl object-cover border border-slate-100" 
-              />
+              <div className="w-14 h-14 rounded-xl object-cover border border-slate-100 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xl uppercase">
+                {product.vendor.substring(0, 1)}
+              </div>
               <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-0.5 border-2 border-white">
                 <CheckCircle className="w-3.5 h-3.5 text-white" />
               </div>
