@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -40,131 +41,139 @@ import VendorDashboard from "./pages/vendor/VendorDashboard.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import AdminLogin from "./pages/admin/AdminLogin.tsx";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
-        <AuthProvider>
-          <CartProvider>
-            <CookieConsent />
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/welcome" element={<Welcome />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <AuthProvider>
+            <CartProvider>
+              <CookieConsent />
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/welcome" element={<Welcome />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-              <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
-              <Route path="/vendor/pending" element={<VendorPending />} />
-              <Route path="/vendor/suspended" element={<VendorSuspended />} />
-              <Route path="/vendor/rejected" element={<VendorRejected />} />
+                <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
+                <Route path="/vendor/pending" element={<VendorPending />} />
+                <Route path="/vendor/suspended" element={<VendorSuspended />} />
+                <Route path="/vendor/rejected" element={<VendorRejected />} />
 
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/dashboard"
+                  element={
+                    <ProtectedRoute roles={["admin"]} loginPath="/admin/login">
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route element={<AppLayout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/browse" element={<Browse />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/shop/:vendorId" element={<ShopPage />} />
-                <Route path="/repairs" element={<Repairs />} />
-                <Route path="/book-repair" element={<BookRepair />} />
-                <Route path="/how-it-works" element={<HowItWorks />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/verification" element={<VendorVerification />} />
-                <Route path="/disputes" element={<DisputePolicy />} />
-                <Route path="/seller-guidelines" element={<SellerGuidelines />} />
-                <Route
-                  path="/cart"
-                  element={
-                    <ProtectedRoute>
-                      <Cart />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/orders"
-                  element={
-                    <ProtectedRoute>
-                      <Orders />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/orders/:orderId"
-                  element={
-                    <ProtectedRoute>
-                      <OrderDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/checkout"
-                  element={
-                    <ProtectedRoute>
-                      <Checkout />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/checkout/:orderId"
-                  element={
-                    <ProtectedRoute>
-                      <Checkout />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/notifications"
-                  element={
-                    <ProtectedRoute>
-                      <Notifications />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/vendor/dashboard"
-                  element={
-                    <ProtectedRoute roles={["vendor"]} requireApprovedVendor>
-                      <VendorDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </CartProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+                <Route element={<AppLayout />}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/browse" element={<Browse />} />
+                  <Route path="/product/:id" element={<ProductDetail />} />
+                  <Route path="/shop/:vendorId" element={<ShopPage />} />
+                  <Route path="/repairs" element={<Repairs />} />
+                  <Route path="/book-repair" element={<BookRepair />} />
+                  <Route path="/how-it-works" element={<HowItWorks />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/verification" element={<VendorVerification />} />
+                  <Route path="/disputes" element={<DisputePolicy />} />
+                  <Route path="/seller-guidelines" element={<SellerGuidelines />} />
+                  <Route
+                    path="/cart"
+                    element={
+                      <ProtectedRoute>
+                        <Cart />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/orders"
+                    element={
+                      <ProtectedRoute>
+                        <Orders />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/orders/:orderId"
+                    element={
+                      <ProtectedRoute>
+                        <OrderDetail />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/checkout"
+                    element={
+                      <ProtectedRoute>
+                        <Checkout />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/checkout/:orderId"
+                    element={
+                      <ProtectedRoute>
+                        <Checkout />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/notifications"
+                    element={
+                      <ProtectedRoute>
+                        <Notifications />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/vendor/dashboard"
+                    element={
+                      <ProtectedRoute roles={["vendor"]} requireApprovedVendor>
+                        <VendorDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </CartProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

@@ -10,30 +10,27 @@ interface CountUpProps {
 
 export const CountUp = ({
   end,
-  duration = 2500,
+  duration = 2000,
   prefix = "",
   suffix = "+",
   className = "",
 }: CountUpProps) => {
-  const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
+  const [count, setCount] = useState(end);
   const ref = useRef<HTMLSpanElement>(null);
   const hasAnimated = useRef(false);
 
   useEffect(() => {
+    setCount(0);
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated.current) {
           hasAnimated.current = true;
-          setIsVisible(true);
           let startTime: number | null = null;
 
           const animate = (timestamp: number) => {
             if (!startTime) startTime = timestamp;
             const elapsed = timestamp - startTime;
             const progress = Math.min(elapsed / duration, 1);
-
-            // Smooth ease-out cubic curve for natural counting speed
             const easeOutCubic = 1 - Math.pow(1 - progress, 3);
             const currentVal = Math.floor(easeOutCubic * end);
 
@@ -49,7 +46,7 @@ export const CountUp = ({
           requestAnimationFrame(animate);
         }
       },
-      { threshold: 0.15, rootMargin: "0px 0px -20px 0px" }
+      { threshold: 0.1 }
     );
 
     const currentRef = ref.current;
@@ -64,9 +61,7 @@ export const CountUp = ({
   return (
     <span
       ref={ref}
-      className={`inline-block transition-all duration-700 ease-out transform ${
-        isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-3 scale-95"
-      } ${className}`}
+      className={`inline-block opacity-100 transition-all duration-500 ease-out ${className}`}
     >
       {prefix}
       {count.toLocaleString("en-US")}
