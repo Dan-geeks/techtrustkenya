@@ -1354,10 +1354,10 @@ app.post("/mpesa-stkpush", async (c) => {
 
     const result =
       provider === "darajapay"
-        ? await requestDarajaPayStk({ orderId: order.id, phone: phoneFmt, amountKsh })
+        ? await requestDarajaPayStk({ orderId: order.id, phone: phoneFmt, amountKsh: chargeAmount })
         : provider === "kcb_buni"
-          ? await requestKcbBuniStk({ orderId: order.id, phone: phoneFmt, amountKsh })
-          : await requestDarajaStk({ orderId: order.id, phone: phoneFmt, amountKsh });
+          ? await requestKcbBuniStk({ orderId: order.id, phone: phoneFmt, amountKsh: chargeAmount })
+          : await requestDarajaStk({ orderId: order.id, phone: phoneFmt, amountKsh: chargeAmount });
 
     if (!result.success) {
       await recordPaymentEvent({
