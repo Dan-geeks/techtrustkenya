@@ -34,8 +34,8 @@ export const Footer = () => {
           {/* Brand & Description */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <span className="font-display-h2 text-2xl font-bold text-primary">TechTrust</span>
               <img src="/logo.jpg" alt="TechTrust Logo" className="h-10 md:h-12 w-auto object-contain rounded-md" />
+              <span className="font-display-h2 text-2xl font-bold text-primary">TechTrust</span>
             </Link>
             <p className="font-ui-label text-xs md:text-sm text-on-surface-variant max-w-xs leading-relaxed">
               Kenya's premier verified tech marketplace with Float escrow protection.
