@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck, Camera, FileText, Loader2, Upload, X, MapPin, Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -250,7 +250,7 @@ const VendorOnboarding = () => {
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
-          <Link to="/" className="flex items-center gap-3 bg-white/10 px-3 py-1.5 rounded-2xl hover:bg-white/20 transition-colors">
+          <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
             <div className="bg-white p-1.5 rounded-xl shadow-sm">
               <img src="/logo-transparent.png" alt="TechTrust" className="h-14 w-auto object-contain" />
             </div>
