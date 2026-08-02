@@ -33,6 +33,7 @@ const empty = {
   warranty_duration_months: "",
   description: "",
   image_urls: [] as string[],
+  video_url: "",
 };
 
 export const ProductsTab = ({ vendor }: Props) => {
@@ -82,6 +83,7 @@ export const ProductsTab = ({ vendor }: Props) => {
       warranty_duration_months: p.warranty_duration_months?.toString() ?? "",
       description: p.description ?? "",
       image_urls: p.image_urls ?? [],
+      video_url: p.video_url ?? "",
     });
     setPriceError("");
     setOpen(true);
@@ -180,6 +182,7 @@ export const ProductsTab = ({ vendor }: Props) => {
           : null,
       description: form.description.trim() || null,
       image_urls: form.image_urls,
+      video_url: form.video_url.trim() || null,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -314,132 +317,172 @@ export const ProductsTab = ({ vendor }: Props) => {
             <DialogTitle>{editing ? "Edit product" : "New product"}</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label>Category</Label>
-                <Select
-                  value={form.category}
-                  onValueChange={(v: any) => setForm({ ...form, category: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="laptop">Laptop</SelectItem>
-                    <SelectItem value="smartphone">Smartphone</SelectItem>
-                    <SelectItem value="accessory">Accessory</SelectItem>
-                    <SelectItem value="spare_part">Spare part</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="space-y-6 py-2">
+            
+            {/* Basic Information Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider border-b border-border pb-2">
+                Basic Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label>Category</Label>
+                  <Select
+                    value={form.category}
+                    onValueChange={(v: any) => setForm({ ...form, category: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="laptop">Laptop</SelectItem>
+                      <SelectItem value="smartphone">Smartphone</SelectItem>
+                      <SelectItem value="accessory">Accessory</SelectItem>
+                      <SelectItem value="spare_part">Spare part</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-1">
-                <Label>Condition</Label>
-                <Select
-                  value={form.condition}
-                  onValueChange={(v: any) => setForm({ ...form, condition: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="refurbished">Refurbished</SelectItem>
-                    <SelectItem value="used">Used</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="space-y-1">
+                  <Label>Condition</Label>
+                  <Select
+                    value={form.condition}
+                    onValueChange={(v: any) => setForm({ ...form, condition: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="refurbished">Refurbished</SelectItem>
+                      <SelectItem value="used">Used</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-1">
-                <Label>Brand *</Label>
-                <Input
-                  value={form.brand}
-                  onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label>Model *</Label>
-                <Input
-                  value={form.model_name}
-                  onChange={(e) => setForm({ ...form, model_name: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label>Year of manufacture</Label>
-                <Input
-                  type="number"
-                  value={form.year_of_manufacture}
-                  onChange={(e) =>
-                    setForm({ ...form, year_of_manufacture: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label>Price (KSH) *</Label>
-                <Input
-                  type="number"
-                  value={form.price_ksh}
-                  className={priceError ? "border-destructive focus-visible:ring-destructive" : ""}
-                  onChange={(e) => {
-                    setForm({ ...form, price_ksh: e.target.value });
-                    validatePrice(e.target.value);
-                  }}
-                />
-                {priceError && (
-                  <p className="text-xs text-destructive">{priceError}</p>
-                )}
-              </div>
-
-              <div className="space-y-1">
-                <Label>Quantity in stock</Label>
-                <Input
-                  type="number"
-                  value={form.quantity_in_stock}
-                  onChange={(e) =>
-                    setForm({ ...form, quantity_in_stock: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label className="flex items-center gap-2">
-                  <Switch
-                    checked={form.warranty_status}
-                    onCheckedChange={(v) => setForm({ ...form, warranty_status: v })}
+                <div className="space-y-1">
+                  <Label>Brand *</Label>
+                  <Input
+                    placeholder="e.g. Apple, Samsung, Dell"
+                    value={form.brand}
+                    onChange={(e) => setForm({ ...form, brand: e.target.value })}
                   />
-                  Warranty
-                </Label>
-                {form.warranty_status && (
+                </div>
+
+                <div className="space-y-1">
+                  <Label>Model *</Label>
+                  <Input
+                    placeholder="e.g. MacBook Pro M2, Galaxy S23"
+                    value={form.model_name}
+                    onChange={(e) => setForm({ ...form, model_name: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label>Year of manufacture (Optional)</Label>
                   <Input
                     type="number"
-                    placeholder="Duration (months)"
-                    value={form.warranty_duration_months}
+                    placeholder="e.g. 2023"
+                    value={form.year_of_manufacture}
                     onChange={(e) =>
-                      setForm({ ...form, warranty_duration_months: e.target.value })
+                      setForm({ ...form, year_of_manufacture: e.target.value })
                     }
                   />
-                )}
+                </div>
+              </div>
+              
+              <div className="space-y-1 mt-2">
+                <div className="flex items-center justify-between">
+                  <Label>Description</Label>
+                  <span className="text-xs text-muted-foreground">
+                    {form.description.length}/{MAX_DESC}
+                  </span>
+                </div>
+                <Textarea
+                  placeholder="Detail the specs, condition, blemishes, and included accessories..."
+                  rows={4}
+                  maxLength={MAX_DESC}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <Label>Description</Label>
-                <span className="text-xs text-muted-foreground">
-                  {form.description.length}/{MAX_DESC}
-                </span>
+            {/* Pricing & Inventory Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider border-b border-border pb-2">
+                Pricing & Inventory
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label>Price (KSH) *</Label>
+                  <Input
+                    type="number"
+                    placeholder="Min. 500"
+                    value={form.price_ksh}
+                    className={priceError ? "border-destructive focus-visible:ring-destructive" : ""}
+                    onChange={(e) => {
+                      setForm({ ...form, price_ksh: e.target.value });
+                      validatePrice(e.target.value);
+                    }}
+                  />
+                  {priceError && (
+                    <p className="text-xs text-destructive">{priceError}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <Label>Quantity in stock</Label>
+                  <Input
+                    type="number"
+                    placeholder="1"
+                    value={form.quantity_in_stock}
+                    onChange={(e) =>
+                      setForm({ ...form, quantity_in_stock: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1 md:col-span-2">
+                  <Label className="flex items-center gap-2 mb-2">
+                    <Switch
+                      checked={form.warranty_status}
+                      onCheckedChange={(v) => setForm({ ...form, warranty_status: v })}
+                    />
+                    Provide TechTrust Warranty
+                  </Label>
+                  {form.warranty_status && (
+                    <Input
+                      type="number"
+                      placeholder="Warranty duration (in months)"
+                      value={form.warranty_duration_months}
+                      onChange={(e) =>
+                        setForm({ ...form, warranty_duration_months: e.target.value })
+                      }
+                      className="max-w-[250px]"
+                    />
+                  )}
+                </div>
               </div>
-              <Textarea
-                rows={3}
-                maxLength={MAX_DESC}
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
             </div>
+
+            {/* Media Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider border-b border-border pb-2">
+                Product Media
+              </h3>
+              
+              <div className="space-y-1 mb-4">
+                <Label>YouTube Video URL (Optional)</Label>
+                <Input
+                  type="url"
+                  placeholder="https://youtube.com/watch?v=..."
+                  value={form.video_url}
+                  onChange={(e) => setForm({ ...form, video_url: e.target.value })}
+                />
+              </div>
+
+
 
             <div className="space-y-2">
               <Label>Images</Label>
@@ -526,8 +569,9 @@ export const ProductsTab = ({ vendor }: Props) => {
               )}
             </div>
           </div>
+        </div>
 
-          <DialogFooter>
+        <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Store, Package, ShoppingBag, Settings as SettingsIcon, ShieldCheck, Loader2 } from "lucide-react";
 import { SettingsTab } from "@/components/vendor/SettingsTab";
+import { ProductsTab } from "@/components/vendor/ProductsTab";
+import { OverviewTab } from "@/components/vendor/OverviewTab";
+import { OrdersTab } from "@/components/vendor/OrdersTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -86,60 +89,15 @@ const VendorDashboard = () => {
 
         {/* Tab Contents */}
         {activeTab === "Overview" && (
-          <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="bg-card border border-border rounded-xl shadow-xs p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase">Total Sales (30d)</span>
-                </div>
-                <div className="font-data-price text-2xl font-bold text-foreground mb-2">KES 0.00</div>
-                <div className="text-xs text-emerald-600 font-semibold">No sales yet</div>
-              </div>
-              <div className="bg-card border border-border rounded-xl shadow-xs p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase">Active Orders</span>
-                </div>
-                <div className="font-data-price text-2xl font-bold text-foreground mb-2">0</div>
-                <div className="text-xs text-muted-foreground">0 awaiting shipment</div>
-              </div>
-              <div className="bg-card border border-border rounded-xl shadow-xs p-6 border-l-4 border-l-blue-500">
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase">Pending Float Funds</span>
-                </div>
-                <div className="font-data-price text-2xl font-bold text-foreground mb-2">KES 0.00</div>
-                <div className="text-xs text-blue-600 font-semibold">Secured in Float Escrow</div>
-              </div>
-              <div className="bg-card border border-border rounded-xl shadow-xs p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase">Seller Rating</span>
-                </div>
-                <div className="font-data-price text-2xl font-bold text-foreground mb-2">N/A</div>
-                <div className="text-xs text-muted-foreground">No reviews yet</div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl overflow-hidden shadow-xs">
-              <div className="p-4 border-b border-border flex justify-between items-center bg-muted/30">
-                <h3 className="font-bold text-foreground text-sm">Recent Escrow Orders</h3>
-              </div>
-              <div className="p-8 text-center text-muted-foreground text-sm">
-                No recent orders found.
-              </div>
-            </div>
-          </div>
+          <OverviewTab vendor={vendor} />
         )}
         
         {activeTab === "Products" && (
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h2 className="text-lg font-bold text-foreground mb-4">Product Catalog</h2>
-            <p className="text-xs text-muted-foreground">Listings verified under TechTrust seller standards.</p>
-          </div>
+          <ProductsTab vendor={vendor} />
         )}
 
         {activeTab === "Orders" && (
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h2 className="text-lg font-bold text-foreground mb-4">Escrow Orders</h2>
-            <p className="text-xs text-muted-foreground">Orders awaiting dispatch or buyer inspection confirmation.</p>
-          </div>
+          <OrdersTab vendor={vendor} />
         )}
 
         {activeTab === "Settings" && (
