@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TopNav } from "@/components/layout/TopNav";
 import { Card } from "@/components/ui/card";
@@ -41,14 +41,16 @@ const AdminDashboard = () => {
           <TabsTrigger value="vendors">Vendors</TabsTrigger>
           <TabsTrigger value="disputes">Disputes</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
+          <TabsTrigger value="repairs">Repairs</TabsTrigger>
+          <TabsTrigger value="escrow">Escrow</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="mt-6"><AdminOverview /></TabsContent>
         <TabsContent value="vendors" className="mt-6"><AdminVendors /></TabsContent>
         <TabsContent value="disputes" className="mt-6"><AdminDisputes /></TabsContent>
         <TabsContent value="users" className="mt-6"><AdminUsers /></TabsContent>
-        <TabsContent value="payments" className="mt-6"><AdminPayments /></TabsContent>
+        <TabsContent value="repairs" className="mt-6"><AdminRepairs /></TabsContent>
+        <TabsContent value="escrow" className="mt-6"><AdminPayments /></TabsContent>
         <TabsContent value="settings" className="mt-6"><AdminSettings /></TabsContent>
       </Tabs>
       </div>
@@ -975,6 +977,69 @@ const AdminPayments = () => {
   );
 };
 
+
+// ---------------------------------------------------------------------------
+// Repairs tab
+// ---------------------------------------------------------------------------
+
+const AdminRepairs = () => {
+  const [list, setList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const { data } = await supabase
+        .from("repair_requests")
+        .select("*, vendor:vendor_profiles(business_name), service:repair_services(service_name)")
+        .order("created_at", { ascending: false });
+      setList(data ?? []);
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-accent" /></div>;
+  if (list.length === 0) return <Card className="p-12 text-center text-muted-foreground">No repair requests found.</Card>;
+
+  return (
+    <div className="overflow-x-auto rounded-lg border">
+      <table className="w-full text-sm">
+        <thead className="bg-muted/50">
+          <tr>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">ID</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Service / Vendor</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Device / Issue</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Payment</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {list.map((r) => (
+            <tr key={r.id} className="hover:bg-muted/25 transition-colors">
+              <td className="px-4 py-3 font-mono text-xs">#{r.id.slice(0, 8).toUpperCase()}</td>
+              <td className="px-4 py-3">
+                <div className="font-medium">{r.service?.service_name ?? "General Repair"}</div>
+                <div className="text-xs text-muted-foreground">{r.vendor?.business_name ?? "Unknown Vendor"}</div>
+              </td>
+              <td className="px-4 py-3">
+                <div className="font-medium">{r.device_type} {r.device_model}</div>
+                <div className="text-xs text-muted-foreground max-w-xs truncate">{r.issue_description}</div>
+              </td>
+              <td className="px-4 py-3">
+                <Badge variant="outline" className="capitalize text-xs">{r.status.replace(/_/g, ' ')}</Badge>
+              </td>
+              <td className="px-4 py-3">
+                <Badge variant="outline" className="capitalize text-xs">{r.payment_status}</Badge>
+              </td>
+              <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(r.created_at)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Settings tab
