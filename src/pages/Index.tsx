@@ -227,40 +227,43 @@ const Index = () => {
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {SAMPLE_PRODUCTS.slice(0, 4).map((p) => (
-                <div
-                  key={p.id}
-                  className="group bg-white rounded-xl border border-[#c4c6d3]/30 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
-                >
-                  <div className="aspect-square bg-slate-50 relative overflow-hidden">
-                    <img
-                      src={p.images[0]}
-                      alt={p.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="p-4 flex flex-col flex-grow">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-ui-label text-xs text-[#434651] font-semibold">{p.category}</span>
-                      <span className="flex items-center gap-1 text-[12px] font-medium text-[#25c65f] bg-[#25c65f]/10 px-2 py-0.5 rounded-sm">
-                        <span className="material-symbols-outlined text-[14px]">verified</span>
-                      </span>
+              {SAMPLE_PRODUCTS.slice(0, 4).map((p) => {
+                const imgUrl = p.image || p.gallery?.[0] || (p as any).images?.[0] || (p as any).image_urls?.[0] || "/placeholder.svg";
+                return (
+                  <div
+                    key={p.id}
+                    className="group bg-white rounded-xl border border-[#c4c6d3]/30 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
+                  >
+                    <div className="aspect-square bg-slate-50 relative overflow-hidden">
+                      <img
+                        src={imgUrl}
+                        alt={p.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     </div>
-                    <h3 className="font-body-md-bold text-base text-[#131b2e] font-bold mb-4 line-clamp-1">{p.title}</h3>
-                    <div className="mt-auto pt-4 border-t border-[#c4c6d3]/20 flex flex-col gap-3">
-                      <span className="font-mono text-[22px] leading-tight text-[#131b2e] font-bold">
-                        KSh {p.price.toLocaleString()}
-                      </span>
-                      <Link
-                        to={`/product/${p.id}`}
-                        className="w-full bg-[#f2f3ff] text-[#0f3d8c] hover:bg-[#0f3d8c] hover:text-white border border-[#0f3d8c]/20 px-4 py-2 rounded-lg font-body-md-bold text-xs text-center transition-colors font-semibold"
-                      >
-                        Buy with Float
-                      </Link>
+                    <div className="p-4 flex flex-col flex-grow">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="font-ui-label text-xs text-[#434651] font-semibold">{p.category}</span>
+                        <span className="flex items-center gap-1 text-[12px] font-medium text-[#25c65f] bg-[#25c65f]/10 px-2 py-0.5 rounded-sm">
+                          <span className="material-symbols-outlined text-[14px]">verified</span>
+                        </span>
+                      </div>
+                      <h3 className="font-body-md-bold text-base text-[#131b2e] font-bold mb-4 line-clamp-1">{p.title}</h3>
+                      <div className="mt-auto pt-4 border-t border-[#c4c6d3]/20 flex flex-col gap-3">
+                        <span className="font-mono text-[22px] leading-tight text-[#131b2e] font-bold">
+                          KSh {p.price.toLocaleString()}
+                        </span>
+                        <Link
+                          to={`/product/${p.id}`}
+                          className="w-full bg-[#f2f3ff] text-[#0f3d8c] hover:bg-[#0f3d8c] hover:text-white border border-[#0f3d8c]/20 px-4 py-2 rounded-lg font-body-md-bold text-xs text-center transition-colors font-semibold"
+                        >
+                          Buy with Float
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="mt-8 text-center md:hidden">
               <Link
