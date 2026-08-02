@@ -151,7 +151,7 @@ const Browse = () => {
 
   return (
     <div className="bg-background text-on-background antialiased min-h-screen">
-      <main className="flex-grow w-full max-w-container-max mx-auto px-4 md:px-10 py-6 md:py-8 flex flex-col md:flex-row gap-6 md:gap-8">
+      <main className="flex-grow w-full max-w-[1280px] mx-auto px-6 md:px-12 py-8 md:py-10 flex flex-col md:flex-row gap-8 md:gap-10">
         {/* Filter Sidebar */}
         <aside className="w-full md:w-64 flex-shrink-0 flex flex-col gap-6">
           {/* Mobile Search & Filter Toggle */}
