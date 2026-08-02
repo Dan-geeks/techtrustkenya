@@ -27,8 +27,8 @@ const Browse = () => {
   const initialQuery = searchParams.get("q") || "";
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(["Laptops"]);
-  const [selectedConditions, setSelectedConditions] = useState<string[]>(["Refurbished - Grade A"]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [selectedLocation, setSelectedLocation] = useState<string>("All Locations");
