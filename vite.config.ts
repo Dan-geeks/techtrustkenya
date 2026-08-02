@@ -7,7 +7,7 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   // Firebase Hosting serves from the domain root; GitHub Pages serves from a
   // repo sub-path. VITE_BASE_PATH lets the Pages workflow ask for the latter.
-  base: process.env.VITE_BASE_PATH ?? "./",
+  base: process.env.VITE_BASE_PATH ?? "/",
   server: {
     host: "::",
     port: 8080,
