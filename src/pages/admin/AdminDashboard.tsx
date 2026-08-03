@@ -604,19 +604,25 @@ const AdminDisputes = () => {
 
   useEffect(() => { load(); }, []);
 
+  // resolve_dispute does the status change AND notifies both sides in one
+  // transaction. The old code updated the order and then inserted a
+  // notification directly, which notifications' "auth.uid() = user_id" policy
+  // silently refuses for anyone but yourself — so resolving a dispute told
+  // nobody, and never told the vendor anything at all.
   const resolve = async (o: DisputeOrder, outcome: "refund_customer" | "release_to_vendor") => {
-    if (outcome === "refund_customer") {
-      await supabase.from("orders").update({ status: "refunded", payment_status: "refunded", updated_at: new Date().toISOString() }).eq("id", o.id);
-      await supabase.from("notifications").insert([
-        { user_id: o.customer_id, title: "Dispute resolved: refund issued", message: `KES ${o.total_amount_ksh} will be refunded to your M-Pesa.`, type: "dispute", reference_id: o.id },
-      ]);
-    } else {
-      await supabase.from("orders").update({ status: "confirmed", payment_status: "released", float_released_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", o.id);
-      await supabase.from("notifications").insert([
-        { user_id: o.customer_id, title: "Dispute resolved: in vendor's favor", message: "Payment was released to the vendor.", type: "dispute", reference_id: o.id },
-      ]);
+    const { error } = await supabase.rpc("resolve_dispute", {
+      _order_id: o.id,
+      _outcome: outcome,
+      _note:
+        outcome === "refund_customer"
+          ? `KES ${Number(o.total_amount_ksh).toLocaleString()} is being refunded to your M-Pesa number.`
+          : "TechTrust reviewed this order and released the payment to the seller.",
+    });
+    if (error) {
+      toast.error(error.message);
+      return;
     }
-    toast.success("Dispute resolved");
+    toast.success("Dispute resolved — both parties notified.");
     load();
   };
 

@@ -18,6 +18,10 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 /** The five milestones shown in the tracker, in order. */
 const STEPS = [
@@ -90,6 +94,9 @@ export const OrderDetail = () => {
   const [notFound, setNotFound] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [advancing, setAdvancing] = useState(false);
+  const [disputeOpen, setDisputeOpen] = useState(false);
+  const [disputeReason, setDisputeReason] = useState("");
+  const [raising, setRaising] = useState(false);
   const { user } = useAuth();
 
   const fetchOrder = async () => {
@@ -171,6 +178,32 @@ export const OrderDetail = () => {
       await fetchOrder();
     }
     setConfirming(false);
+  };
+
+  /**
+   * Raise a dispute. open_dispute freezes the Float payment, tells the other
+   * side, and puts the order in front of every admin — none of which the old
+   * "link to the policy page" button did.
+   */
+  const raiseDispute = async () => {
+    if (!disputeReason.trim()) {
+      toast.error("Tell us what went wrong so we can review it.");
+      return;
+    }
+    setRaising(true);
+    const { error } = await supabase.rpc("open_dispute", {
+      _order_id: order.id,
+      _reason: disputeReason.trim(),
+    });
+    setRaising(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Dispute opened. Your payment stays frozen in Float while we review it.");
+    setDisputeOpen(false);
+    setDisputeReason("");
+    await fetchOrder();
   };
 
   /**
@@ -586,18 +619,69 @@ export const OrderDetail = () => {
                 </span>
               </button>
 
-              <Link
-                to="/disputes"
-                className="w-full bg-white border border-red-300 text-red-600 hover:bg-red-50 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs"
-              >
-                <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-                <span>Open Dispute / Report Issue</span>
+              {/* This used to link to /disputes, a static policy page — there
+                  was no way to actually raise one. */}
+              {order.status === "disputed" ? (
+                <div className="w-full rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
+                  <p className="font-bold flex items-center gap-1.5">
+                    <AlertTriangle className="h-4 w-4" /> Dispute under review
+                  </p>
+                  {order.dispute_reason && <p className="mt-1">You reported: {order.dispute_reason}</p>}
+                  <p className="mt-1">
+                    Your Float payment is frozen while TechTrust reviews this. We'll notify you with the outcome.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setDisputeReason(""); setDisputeOpen(true); }}
+                  disabled={isCompleted || isTerminated || currentIndex < 0}
+                  className="w-full bg-white border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs"
+                >
+                  <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                  <span>Open Dispute / Report Issue</span>
+                </button>
+              )}
+
+              <Link to="/disputes" className="block text-center text-[11px] text-[#64748B] underline">
+                How disputes work
               </Link>
             </div>
             )}
           </div>
         </div>
       </main>
+
+      <Dialog open={disputeOpen} onOpenChange={setDisputeOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Report a problem with this order</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-[#64748B] leading-relaxed">
+              Your payment is held in Float and stays frozen while we review this — the seller is not paid.
+              Tell us what happened, with as much detail as you can.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="dispute-reason">What went wrong?</Label>
+              <Textarea
+                id="dispute-reason"
+                rows={4}
+                placeholder="e.g. The laptop arrived with a cracked screen and 8GB RAM instead of the 16GB listed."
+                value={disputeReason}
+                onChange={(e) => setDisputeReason(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDisputeOpen(false)} disabled={raising}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={raiseDispute} disabled={raising}>
+              {raising ? "Opening…" : "Open dispute"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

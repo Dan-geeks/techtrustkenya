@@ -1,6 +1,9 @@
-﻿import { useEffect } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertTriangle, ShieldCheck, Scale, Clock, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
+import { AlertTriangle, ShieldCheck, Scale, Clock, CheckCircle2, XCircle, RefreshCw, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { formatKsh, formatDate } from "@/lib/format";
 
 const groundsTable = [
   { ground: "Non-delivery", desc: "Item was paid for but never delivered or courier failed to supply item." },
@@ -11,9 +14,85 @@ const groundsTable = [
   { ground: "Incomplete repair", desc: "Technician failed to resolve requested fault or caused secondary damage." }
 ];
 
+const STATUS_STYLE: Record<string, string> = {
+  disputed: "border-amber-400 bg-amber-50 text-amber-800",
+  refunded: "border-emerald-400 bg-emerald-50 text-emerald-800",
+  confirmed: "border-slate-300 bg-slate-50 text-slate-700",
+};
+
+/**
+ * The viewer's own disputes, above the policy text.
+ *
+ * This page was pure policy copy, and the order tracker's "Open Dispute" button
+ * simply linked here — so a buyer could read about disputes but never raise or
+ * track one.
+ */
+const MyDisputes = () => {
+  const { user } = useAuth();
+  const [rows, setRows] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    if (!user) { setRows([]); return; }
+    (async () => {
+      // RLS already limits orders to the ones you are party to, so this is the
+      // same query for a buyer and a seller.
+      const { data } = await supabase
+        .from("orders")
+        .select("id, status, dispute_reason, disputed_at, dispute_resolution, dispute_resolved_at, total_amount_ksh, product:products(brand, model_name)")
+        .not("disputed_at", "is", null)
+        .order("disputed_at", { ascending: false });
+      setRows(data ?? []);
+    })();
+  }, [user]);
+
+  if (!user) return null;
+  if (rows === null) {
+    return (
+      <div className="mb-10 flex justify-center py-8">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      </div>
+    );
+  }
+  if (rows.length === 0) return null;
+
+  return (
+    <div className="mb-12">
+      <h2 className="text-lg font-bold mb-3">Your disputes</h2>
+      <div className="space-y-3">
+        {rows.map((o) => (
+          <Link
+            key={o.id}
+            to={`/orders/${o.id}`}
+            className={`block rounded-xl border p-4 transition-colors hover:brightness-[0.98] ${
+              STATUS_STYLE[o.status] ?? "border-slate-300 bg-slate-50 text-slate-700"
+            }`}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-bold text-sm">
+                  {o.product?.brand} {o.product?.model_name}{" "}
+                  <span className="font-mono text-xs opacity-70">#{o.id.slice(0, 8).toUpperCase()}</span>
+                </p>
+                <p className="text-xs mt-1 opacity-90">Raised {formatDate(o.disputed_at)} · {formatKsh(Number(o.total_amount_ksh))}</p>
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wide shrink-0">
+                {o.status === "disputed" ? "Under review" : o.status === "refunded" ? "Refunded" : "Resolved"}
+              </span>
+            </div>
+            {o.dispute_reason && <p className="text-xs mt-2">You reported: {o.dispute_reason}</p>}
+            {o.dispute_resolution && (
+              <p className="text-xs mt-1 font-semibold">Outcome: {o.dispute_resolution}</p>
+            )}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const DisputePolicy = () => {
   useEffect(() => {
-    document.title = "Dispute Policy | TechTrust Kenya";
+    document.title = "Disputes | TechTrust Kenya";
   }, []);
 
   return (
@@ -23,10 +102,13 @@ const DisputePolicy = () => {
           <Scale className="w-4 h-4" />
           Neutral Escrow Adjudication Protocol
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">Dispute Resolution Policy</h1>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">Disputes</h1>
         <p className="text-sm text-muted-foreground mb-8">
-          How TechTrust fairly investigates complaints, protects buyer money in Float escrow, and resolves transaction disputes.
+          Raise a dispute from the order itself — open the order and choose <strong>Report a problem</strong>. Your
+          payment stays frozen in Float until we've reviewed it.
         </p>
+
+        <MyDisputes />
 
         {/* 4 Objectives */}
         <div className="grid md:grid-cols-4 gap-4 mb-10">

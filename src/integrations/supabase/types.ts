@@ -241,7 +241,12 @@ export type Database = {
           confirmation_deadline: string | null
           created_at: string
           customer_id: string
+          dispute_opened_by: string | null
           dispute_reason: string | null
+          dispute_resolution: string | null
+          dispute_resolved_at: string | null
+          dispute_resolved_by: string | null
+          disputed_at: string | null
           float_released_at: string | null
           id: string
           mpesa_receipt_number: string | null
@@ -271,7 +276,12 @@ export type Database = {
           confirmation_deadline?: string | null
           created_at?: string
           customer_id: string
+          dispute_opened_by?: string | null
           dispute_reason?: string | null
+          dispute_resolution?: string | null
+          dispute_resolved_at?: string | null
+          dispute_resolved_by?: string | null
+          disputed_at?: string | null
           float_released_at?: string | null
           id?: string
           mpesa_receipt_number?: string | null
@@ -301,7 +311,12 @@ export type Database = {
           confirmation_deadline?: string | null
           created_at?: string
           customer_id?: string
+          dispute_opened_by?: string | null
           dispute_reason?: string | null
+          dispute_resolution?: string | null
+          dispute_resolved_at?: string | null
+          dispute_resolved_by?: string | null
+          disputed_at?: string | null
           float_released_at?: string | null
           id?: string
           mpesa_receipt_number?: string | null
@@ -1045,6 +1060,14 @@ export type Database = {
           _type: string
           _user_id: string
         }
+        Returns: undefined
+      }
+      open_dispute: {
+        Args: { _order_id: string; _reason: string }
+        Returns: undefined
+      }
+      resolve_dispute: {
+        Args: { _note?: string; _order_id: string; _outcome: string }
         Returns: undefined
       }
       settle_order_into_float: {

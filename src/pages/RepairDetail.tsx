@@ -33,11 +33,11 @@ import {
 const FLOW = [
   { key: "submitted", label: "Request sent" },
   { key: "quotation_sent", label: "Quote received" },
-  { key: "received", label: "Paid — device handed over" },
+  { key: "received", label: "Paid & device handed over" },
   { key: "diagnosing", label: "Diagnosing" },
   { key: "in_repair", label: "Under repair" },
   { key: "ready_for_collection", label: "Ready for collection" },
-  { key: "completed", label: "Inspected & confirmed" },
+  { key: "completed", label: "Inspected and confirmed" },
 ] as const;
 
 // `repair_in_progress` is a legacy synonym for `in_repair` in the enum; treat
