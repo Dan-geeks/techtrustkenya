@@ -96,7 +96,7 @@ table.**
 
 ---
 
-## 3. Email — built, deployed, needs one key
+## 3. Email and SMS — built, deployed, each needs one key
 
 Before today the platform sent **no email at all**: Supabase has no custom SMTP
 (`smtp_host` empty, `mailer_autoconfirm: true`), and DarajaPay's
@@ -134,9 +134,23 @@ Two gotchas when you do:
    `RESEND_FROM="TechTrust <noreply@techtrustkenya.co.ke>"`.
 2. You cannot send as `@gmail.com`. Gmail's DMARC record blocks third parties.
 
-Check status any time at
+### SMS (`server/sms.ts`)
+
+Africa's Talking, sent on payment to **both sides**, for orders and repairs.
+Most M-Pesa customers here read a text long before an email.
+
+```powershell
+railway variables --set "AT_API_KEY=..." --set "AT_USERNAME=<your live username>"
+railway up --ci
+```
+
+**`AT_USERNAME` defaults to `sandbox`, which only reaches Africa's Talking
+simulator numbers — never a real handset.** That is the commonest silent
+misconfiguration, so `/config-check` spells it out. `AT_SENDER_ID` is optional.
+
+Check both any time at
 `https://techtrust-escrow-api-production-b177.up.railway.app/config-check` →
-`email.configured`.
+`email.configured` and `sms.configured`. Both are currently **false**.
 
 ---
 
@@ -207,6 +221,71 @@ vetting notifications originally carried a `vendor_profiles` id on a
 direction. A cheap guard is the assertion in the test suite that every
 `repair_update` `reference_id` resolves to a real `repair_requests` row.
 
+### The repair flow, end to end
+
+```
+submitted → quotation_sent → customer approves + PAYS into Float
+  → received → diagnosing → in_repair → ready_for_collection
+  → customer INSPECTS and CONFIRMS → completed, funds released
+```
+
+`repair_requests` always had `payment_status` (unpaid | held | released) — the
+Float model was designed for repairs and never wired up. It is now:
+
+- `POST /repair-stkpush` and `GET /repair-payment-status` mirror the order
+  endpoints. Repairs never borrow an `orders` row. Same two-response doctrine.
+- **Paying is what hands the device over.** `mark_repair_paid` advances
+  `quotation_sent → received` itself, so there is no vendor "Mark received"
+  button that could start work on an unpaid repair.
+- **Only the customer closes a repair.** The vendor cannot mark it completed;
+  `confirm_repair_collection` is the only thing that sets `released`, and a
+  failed inspection sends it back to `in_repair` with the funds still held.
+
+### Disputes
+
+`open_dispute()` / `resolve_dispute()`. Either side can dispute while the money
+is in Float; it freezes the payment, tells the other party and every admin.
+Resolution is admin-only and notifies both sides. `/disputes` lists the viewer's
+own disputes above the policy text.
+
+---
+
+## 4b. Three RLS traps that make things fail *silently*
+
+These caused most of the "it works sometimes" behaviour. Look here first.
+
+**1. You may only notify yourself.** `notifications` has one INSERT policy,
+`WITH CHECK (auth.uid() = user_id)`. Every cross-side notification inserted from
+the browser was a silent no-op — vendor quotes and the customer is never told,
+customer approves and the vendor is never told, admin resolves a dispute and
+nobody is told. The ones that appeared to work had a SECURITY DEFINER trigger
+behind them. **Use `notify_counterparty(...)`**, which permits it only when you
+and the recipient are the two sides of the referenced order or repair, or put it
+in a trigger.
+
+**2. `SECURITY DEFINER` does NOT clear `auth.uid()`.** It changes the role, not
+`request.jwt.claims`. A guard trigger that skips its lockdown "when
+`auth.uid()` is null, because that means a definer function" will therefore fire
+*inside* your definer function and revert its writes. This silently broke
+repair settlement: the repair completed and the money was never released. The
+fix is an explicit transaction-local flag:
+`set_config('techtrust.settling','on',true)`, which only the settlement
+functions set and the trigger checks.
+
+**3. `AFTER UPDATE OF <column>` fires on the columns named in the UPDATE
+statement**, not on what a BEFORE trigger changed. See §4.
+
+## 4c. Realtime is not a delivery guarantee
+
+`postgres_changes` **does not replay what was missed** while the socket was
+down, and it drops on sleep, flaky mobile data and backgrounded tabs. Anything
+inserted in that window never arrives. `NotificationsBell` therefore also polls
+every 30s and refetches on tab focus — treat realtime as an optimisation, never
+as the only path.
+
+Publication members: `messages`, `notifications`, `orders`, `repair_requests`
+(all `REPLICA IDENTITY FULL` except `orders`).
+
 ---
 
 ## 5. Accounts and access
@@ -227,19 +306,28 @@ email/password combination. Turn this off before anyone real uses it.
 
 Run against the live database inside `begin … rollback`:
 
-Repair vetting — 8/8:
-1. vendor self-approve blocked · 2. approve with 2/3 checks rejected ·
-3. admin approval with 3/3 stamps `repair_approved_at` · 4. vendor notified ·
-5. anon sees the approved technician on `/repairs` · 6. untick withdraws and
-clears checks · 7. re-tick files a fresh application · 8. every admin notified.
-
-Product technical specifications — 5/5, both add and edit:
-Processor, Memory, Storage, Display, Condition Notes and Device ID all persist
-and update; a partly-filled set stays partial rather than padding the product
-page with empty rows; anonymous shoppers can read them.
+| Suite | Result |
+|---|---|
+| Repair technician vetting | **8/8** — self-approval blocked, 2/3 rejected, 3/3 approves and stamps, both sides notified, anon sees the listing, untick withdraws, re-tick re-applies |
+| Product technical specs (add + edit) | **5/5** — all six fields persist and update; partial stays partial; shoppers can read them |
+| `/repairs/:id` access | **8/8** — customer and vendor can load, unrelated non-admin cannot, non-participant admin can, anon cannot, quote approval sticks, status advances, no dangling references |
+| Repair money flow | **12/12** — cross-side notification delivered, direct inserts still blocked, non-counterparties refused, payment held with auto-advance, duplicate settlement idempotent, vendor cannot release Float or fake a confirmation, failed inspection holds funds, passed inspection releases |
+| Disputes | **10/10** — stranger refused, empty reason refused, Float frozen, seller and every admin notified, no double disputes, non-admin cannot resolve, refund resolves, both sides told |
+| Notification at every repair step | **7/7** — 9 specific notifications across one repair, no generic "Repair update" left |
 
 Frontend `tsc --noEmit` clean, `npm run build` clean, `server/` `tsc --noEmit`
 clean.
+
+**Vitest baseline is 7 failures / 278 passing.** They pre-date this work
+(Router-context errors in the browse and m2 tests, an OrderDetail `text-price`
+assertion, and an admin "Verifications" tab that does not exist). `git stash`
+and re-run before blaming your own change.
+
+**Some test names in `m1_challenger` / `m2_challenger` describe a defect and
+then assert it as correct** — one literally read
+`expect(appTsx.includes('path="/repairs/:')).toBe(false)` with "DEFECT … -> 404"
+in its name, keeping the suite green while users hit 404s. Read the assertion,
+not the name.
 
 ---
 
@@ -247,7 +335,8 @@ clean.
 
 Roughly in priority order:
 
-1. **Set `RESEND_API_KEY`** — email is built and deployed but inert without it.
+1. **Set `RESEND_API_KEY` and `AT_API_KEY`** — email and SMS are built and
+   deployed but inert without them. Also set a real `AT_USERNAME`.
 2. **Turn off `VITE_DEMO_AUTH_BYPASS`** — anyone can sign in as anyone.
 3. **Vendor payouts don't work.** `payoutProvider: simulation`. Needs Safaricom
    B2C credentials.
