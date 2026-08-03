@@ -224,15 +224,12 @@ export const ProductsTab = ({ vendor }: Props) => {
 
     // orders.product_id is ON DELETE SET NULL and each order carries a snapshot
     // of what was bought, so deleting a listing never touches past orders.
-    const { count } = await supabase
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("product_id", p.id);
-
-    const note = (count ?? 0) > 0
-      ? `\n\nYour ${count} past order(s) for it are kept — only the listing is removed.`
-      : "";
-    if (!confirm(`Delete ${label}? This cannot be undone.${note}`)) return;
+    // Deliberately no pre-flight count query: it added a network round-trip
+    // before the dialog even appeared, which felt like the button had hung.
+    if (!confirm(
+      `Delete ${label}? This cannot be undone.\n\n` +
+      `Any past orders for it are kept — only the listing is removed.`
+    )) return;
 
     const { error } = await supabase.from("products").delete().eq("id", p.id);
 

@@ -105,7 +105,7 @@ const Checkout = () => {
           toast.success("Payment Received & Escrow Locked!");
           navigate(`/orders/${activeOrderId}`);
         }
-      }, 3000);
+      }, 1500);   // was 3000 - halves how long a paid order looks unpaid
     }
 
     return () => {
@@ -222,10 +222,9 @@ const Checkout = () => {
     // Real M-Pesa STK Push for the full order amount shown at checkout.
     triggerLiveStkPush(phoneNumber, newOrderId, totalDue);
 
-    setTimeout(() => {
-      setProcessing(false);
-      toast.success("M-Pesa STK Push prompt sent to your phone! Please enter your PIN.");
-    }, 1500);
+    // No artificial wait here: the prompt is already on its way, and the old
+    // 1.5s timer just made the UI feel sluggish.
+    setProcessing(false);
   };
 
   const handleConfirmPaymentReceived = () => {

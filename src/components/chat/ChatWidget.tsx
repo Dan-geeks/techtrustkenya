@@ -125,6 +125,22 @@ export const ChatWidget = () => {
     const tempMessage = newMessage;
     setNewMessage("");
 
+    // Render immediately rather than after the insert round-trip — waiting on
+    // the network before showing your own message is what made chat feel laggy.
+    const tempId = `pending-${Date.now()}`;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        sender_id: user.id,
+        receiver_id: activePartnerId,
+        content: tempMessage,
+        created_at: new Date().toISOString(),
+        is_read: false,
+      },
+    ]);
+    scrollToBottom();
+
     const { data, error } = await supabase
       .from("messages")
       .insert({
@@ -136,9 +152,12 @@ export const ChatWidget = () => {
       .single();
 
     if (!error && data) {
-      setMessages((prev) => [...prev, data]);
-      scrollToBottom();
+      // Swap the placeholder for the stored row (real id, server timestamp).
+      setMessages((prev) => prev.map((m) => (m.id === tempId ? data : m)));
     } else {
+      // Roll the placeholder back so nothing looks sent when it wasn't.
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setNewMessage(tempMessage);
       toast.error("Failed to send message: " + (error?.message || "Unknown error"));
       console.error("Chat send error:", error);
     }
