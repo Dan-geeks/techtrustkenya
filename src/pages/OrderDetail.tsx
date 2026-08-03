@@ -361,15 +361,19 @@ export const OrderDetail = () => {
               <h3 className="text-base font-bold text-[#0F172A] border-b border-slate-100 pb-3">Order Items</h3>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 py-2">
                 <img
-                  src={order.product?.image_urls?.[0] || "/placeholder.svg"}
-                  alt={order.product?.model_name || "Product"}
+                  src={order.product?.image_urls?.[0] || order.product_image_url || "/placeholder.svg"}
+                  alt={order.product?.model_name || order.product_name || "Product"}
                   className="w-20 h-20 rounded-xl object-contain bg-slate-50 border border-slate-200 p-2 flex-shrink-0"
                 />
                 <div className="flex-grow min-w-0">
+                  {/* Fall back to the snapshot: a vendor may have deleted the
+                      listing since, which nulls product_id but never the order. */}
                   <h4 className="font-bold text-base text-[#0F172A]">
-                    {order.product?.brand} {order.product?.model_name}
+                    {order.product?.brand ?? order.product_brand} {order.product?.model_name ?? order.product_name}
                   </h4>
-                  <p className="text-xs text-[#64748B] mt-0.5">Condition: {order.product?.condition}</p>
+                  {order.product?.condition && (
+                    <p className="text-xs text-[#64748B] mt-0.5">Condition: {order.product.condition}</p>
+                  )}
                   <p className="text-xs text-[#64748B] mt-0.5">Quantity: {order.quantity}</p>
                 </div>
                 <div className="font-mono text-lg font-bold text-[#0F172A] flex-shrink-0">

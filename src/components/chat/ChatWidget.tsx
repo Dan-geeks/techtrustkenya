@@ -30,7 +30,15 @@ export const ChatWidget = () => {
       }
       const customEvent = e as CustomEvent;
       const { partnerId, partnerName: pName } = customEvent.detail;
-      
+
+      // Every entry point must pass a profiles(id). A missing one means the
+      // vendor has no owner account, and sending would fail on
+      // messages_receiver_id_fkey.
+      if (!partnerId) {
+        toast.error("This vendor has no contactable account yet.");
+        return;
+      }
+
       if (partnerId === user.id) {
         toast.error("You cannot message yourself");
         return;

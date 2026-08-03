@@ -209,14 +209,48 @@ export const ProductsTab = ({ vendor }: Props) => {
     }
   };
 
-  const remove = async (p: any) => {
-    if (!confirm(`Delete ${p.brand} ${p.model_name}? This cannot be undone.`)) return;
-    const { error } = await supabase.from("products").delete().eq("id", p.id);
+  /** Archive instead of deleting: keeps the row so order history survives. */
+  const archive = async (p: any) => {
+    const { error } = await supabase.from("products").update({ is_active: false }).eq("id", p.id);
     if (error) toast.error(error.message);
     else {
-      toast.success("Product deleted");
+      toast.success("Removed from the marketplace. Kept for your order history.");
       load();
     }
+  };
+
+  const remove = async (p: any) => {
+    const label = `${p.brand} ${p.model_name}`;
+
+    // orders.product_id is ON DELETE SET NULL and each order carries a snapshot
+    // of what was bought, so deleting a listing never touches past orders.
+    const { count } = await supabase
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("product_id", p.id);
+
+    const note = (count ?? 0) > 0
+      ? `\n\nYour ${count} past order(s) for it are kept — only the listing is removed.`
+      : "";
+    if (!confirm(`Delete ${label}? This cannot be undone.${note}`)) return;
+
+    const { error } = await supabase.from("products").delete().eq("id", p.id);
+
+    if (error) {
+      // Something else still references it. Offer the non-destructive route
+      // rather than surfacing a raw constraint error.
+      if (error.code === "23503") {
+        if (confirm(`${label} is still referenced by other records, so it can't be deleted. Remove it from the marketplace instead?`)) {
+          await archive(p);
+        }
+        return;
+      }
+      toast.error(error.message);
+      return;
+    }
+
+    toast.success("Product deleted");
+    load();
   };
 
   const stockBadge = (qty: number) => {

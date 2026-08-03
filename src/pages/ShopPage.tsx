@@ -144,6 +144,8 @@ const ShopPage = () => {
             </p>
 
             <button
+              disabled={!vendor.user_id}
+              title={vendor.user_id ? undefined : "This shop has no contactable account yet"}
               onClick={() => {
                 window.dispatchEvent(
                   new CustomEvent("open-chat", {
@@ -153,7 +155,7 @@ const ShopPage = () => {
                   })
                 );
               }}
-              className="w-full flex items-center justify-center gap-2 bg-[#0f3d8c] hover:bg-[#002766] text-white py-2.5 rounded-lg font-bold text-sm transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-[#0f3d8c] hover:bg-[#002766] disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-lg font-bold text-sm transition-colors"
             >
               <MessageCircle className="w-4 h-4" />
               Message Vendor

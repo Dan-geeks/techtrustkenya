@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Store, CheckCircle, Package, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -123,10 +123,10 @@ const Orders = () => {
                     <div className="flex-grow">
                       <div className="flex gap-4 items-start">
                         <div className="w-16 h-16 rounded-md bg-secondary flex-shrink-0 overflow-hidden border border-border">
-                          <img alt={order.product?.model_name} className="w-full h-full object-cover" src={order.product?.image_urls?.[0] || "/placeholder.svg"} />
+                          <img alt={order.product?.model_name ?? order.product_name} className="w-full h-full object-cover" src={order.product?.image_urls?.[0] || order.product_image_url || "/placeholder.svg"} />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-foreground">{order.product?.brand} {order.product?.model_name}</h3>
+                          <h3 className="font-semibold text-foreground">{order.product?.brand ?? order.product_brand} {order.product?.model_name ?? order.product_name}</h3>
                           <p className="text-sm text-muted-foreground line-clamp-1 mt-1">Condition: {order.product?.condition}</p>
                           <p className="text-sm text-muted-foreground">Qty: {order.quantity}</p>
                         </div>
