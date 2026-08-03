@@ -6,6 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface VendorProfile {
   id: string;
+  /** Owner's profiles(id). messages.receiver_id references profiles, so this —
+   *  not `id` — is who a buyer actually chats with. */
+  user_id: string | null;
   business_name: string;
   city: string;
   physical_address: string;
@@ -144,7 +147,9 @@ const ShopPage = () => {
               onClick={() => {
                 window.dispatchEvent(
                   new CustomEvent("open-chat", {
-                    detail: { partnerId: vendor.id, partnerName: vendor.business_name },
+                    // messages.receiver_id -> profiles(id): must be the owner
+                    // account, not the vendor_profiles row id.
+                    detail: { partnerId: vendor.user_id, partnerName: vendor.business_name },
                   })
                 );
               }}

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { SAMPLE_PRODUCTS } from "@/data/products";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { isVendorVerified } from "@/lib/format";
 
@@ -28,7 +29,7 @@ const ProductDetail = () => {
         .from("products")
         .select(`
           *,
-          vendor_profiles ( business_name, verification_status )
+          vendor_profiles ( business_name, verification_status, user_id )
         `)
         .eq("id", id)
         .maybeSingle();
@@ -43,6 +44,9 @@ const ProductDetail = () => {
           condition: data.condition,
           vendor: data.vendor_profiles?.business_name || "Unknown Vendor",
           vendor_id: data.vendor_id,
+          // messages.receiver_id -> profiles(id), so chat must target the
+          // vendor's OWNER account, not the vendor_profiles row id.
+          vendorUserId: data.vendor_profiles?.user_id ?? null,
           vendorVerified: isVendorVerified(data.vendor_profiles?.verification_status),
           location: "Nairobi", // Default or fetch if location exists
           gallery: data.image_urls || [data.image_urls?.[0] || "/placeholder.svg"],
@@ -196,8 +200,12 @@ const ProductDetail = () => {
                 <DropdownMenuItem 
                   className="cursor-pointer flex items-center gap-2 py-3"
                   onClick={() => {
+                    if (!product.vendorUserId) {
+                      toast.error("This vendor has no contactable account yet.");
+                      return;
+                    }
                     window.dispatchEvent(new CustomEvent("open-chat", {
-                      detail: { partnerId: product.vendor_id, partnerName: product.vendor }
+                      detail: { partnerId: product.vendorUserId, partnerName: product.vendor }
                     }));
                   }}
                 >
