@@ -13,7 +13,10 @@ const Profile = () => {
   const [phone, setPhone] = useState("712345678");
   const [conversations, setConversations] = useState<any[]>([]);
   const referralCode = "TECH500";
-  const shareLink = `https://techtrustkenya.web.app/auth?mode=signup&ref=${referralCode}`;
+  // Built from the current origin rather than a hardcoded host, so the link a
+  // user shares matches the domain they are actually on — otherwise everyone
+  // referred from techtrustkenya.com would be sent to the .web.app address.
+  const shareLink = `${window.location.origin}/auth?mode=signup&ref=${referralCode}`;
 
   useEffect(() => {
     document.title = "Profile & Referral Wallet | TechTrust Kenya";

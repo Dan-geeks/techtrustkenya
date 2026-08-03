@@ -14,7 +14,8 @@ recalled from memory.
 |---|---|
 | Repo | `~/techtrustkenya` → `github.com/Dan-geeks/techtrustkenya` |
 | Working branch | `fix/order-tracker-chat-realtime-and-railway-migration` — **not merged to `main`** |
-| Live site | https://techtrustkenya.web.app |
+| Live site | https://techtrustkenya.com · https://www.techtrustkenya.com · https://techtrustkenya.web.app |
+| Registrar | Namecheap (account `Dangeeks01`), BasicDNS — `dns1/dns2.registrar-servers.com` |
 | Firebase | project `stkpush-cff51`, hosting site `techtrustkenya`. No `.firebaserc` — every command needs `--project stkpush-cff51` |
 | Supabase | project ref **`okvgadkyknfknqtxnjzz`** ("tech-trust-kenya", eu-west-1) |
 | Escrow API | https://techtrust-escrow-api-production-b177.up.railway.app |
@@ -33,6 +34,61 @@ firebase deploy --only hosting:techtrustkenya --project stkpush-cff51
 cd ~/techtrustkenya/server
 railway up --ci
 ```
+
+### The custom domain (added 2026-08-03)
+
+`techtrustkenya.com` and `www.techtrustkenya.com` are attached to the Firebase
+Hosting site `techtrustkenya`, with Firebase's free managed SSL.
+
+**Namecheap → Advanced DNS** now holds exactly:
+
+| Type | Host | Value |
+|---|---|---|
+| A | `@` | `199.36.158.100` |
+| TXT | `@` | `hosting-site=techtrustkenya` |
+| CNAME | `www` | `techtrustkenya.web.app` |
+| TXT | `_acme-challenge` | *(cert validation token — safe to delete once the cert is ACTIVE)* |
+| TXT | `@` | `v=spf1 include:spf.efwd.registrar-servers.com ~all` — **email forwarding, leave alone** |
+
+The old parking records (an `A @ → 162.255.119.146` behind a URL Redirect, and
+`CNAME www → parkingpage.namecheap.com`) were removed. The SPF record was
+deliberately preserved.
+
+**The Firebase CLI cannot manage custom domains** — use the Hosting REST API:
+
+```
+GET/POST https://firebasehosting.googleapis.com/v1beta1/projects/stkpush-cff51/sites/techtrustkenya/customDomains
+```
+
+The **gcloud account on this box (`lawrencekairegi@gmail.com`) has no access to
+`stkpush-cff51`** — its token 403s. Mint one from the Firebase CLI's own stored
+refresh token instead (`~/.config/configstore/firebase-tools.json`, account
+`labcoatsxd@gmail.com`) by POSTing to `https://oauth2.googleapis.com/token`.
+
+**`certPreference` is `GROUPED`**, so both domains share one certificate — the
+apex being unvalidated blocks `www` as well, even when `www` is already
+`HOST_ACTIVE`.
+
+**Firebase caches DNS.** After changing records it keeps reporting
+`HOST_MISMATCH` with the *old* IP under `requiredDnsUpdates.discovered` for a
+while, and the HTTP ACME challenge fails against the stale address
+(`ACME_HTTP_ERROR`). Public DNS being correct is what matters; it catches up on
+its own. Adding the `_acme-challenge` TXT it offers under
+`cert.verification.dns.desired` lets validation succeed over DNS instead of
+HTTP, sidestepping the stale-A problem.
+
+Everything that had to learn about the new domain:
+
+- **Escrow API `ALLOWED_ORIGINS`** — both new origins added, redeployed, and
+  verified returning the right `access-control-allow-origin`.
+- **Supabase `uri_allow_list`** — `https://techtrustkenya.com/**` and the `www`
+  form added. `site_url` is still the `.web.app` address; switch it once the
+  cert is live so password-reset and OAuth emails point at the real domain.
+- **Firebase Auth `authorizedDomains`** — both added. This is the **shared**
+  project hosting ~24 apps, so that list must only ever be appended to; wiping
+  it would break Google sign-in for every other app.
+- **`Profile.tsx`** built its referral share link from a hardcoded
+  `techtrustkenya.web.app`; it now uses `window.location.origin`.
 
 ### Running SQL against production
 
