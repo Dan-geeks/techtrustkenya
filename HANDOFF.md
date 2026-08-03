@@ -65,9 +65,13 @@ The **gcloud account on this box (`lawrencekairegi@gmail.com`) has no access to
 refresh token instead (`~/.config/configstore/firebase-tools.json`, account
 `labcoatsxd@gmail.com`) by POSTing to `https://oauth2.googleapis.com/token`.
 
-**`certPreference` is `GROUPED`**, so both domains share one certificate — the
-apex being unvalidated blocks `www` as well, even when `www` is already
-`HOST_ACTIVE`.
+**Status: both live**, HTTP 200 over HTTPS, HTTP 301s to HTTPS, certificates
+issued by Google Trust Services (valid to 1 Nov 2026, auto-renewing).
+
+**`certPreference` is `GROUPED`**, so both names are validated together — the
+apex being unvalidated blocked `www` as well, even while `www` was already
+`HOST_ACTIVE`. Once the apex cleared, `www` completed on its own within minutes
+and never needed its own `_acme-challenge.www` record.
 
 **Firebase caches DNS.** After changing records it keeps reporting
 `HOST_MISMATCH` with the *old* IP under `requiredDnsUpdates.discovered` for a
@@ -82,8 +86,10 @@ Everything that had to learn about the new domain:
 - **Escrow API `ALLOWED_ORIGINS`** — both new origins added, redeployed, and
   verified returning the right `access-control-allow-origin`.
 - **Supabase `uri_allow_list`** — `https://techtrustkenya.com/**` and the `www`
-  form added. `site_url` is still the `.web.app` address; switch it once the
-  cert is live so password-reset and OAuth emails point at the real domain.
+  form added; `site_url` now `https://techtrustkenya.com`. The `.web.app` URL
+  stays in the allow list so the old address keeps working.
+- **Escrow API `SITE_URL`** — now the custom domain, so links in receipt and
+  welcome emails point at the real site.
 - **Firebase Auth `authorizedDomains`** — both added. This is the **shared**
   project hosting ~24 apps, so that list must only ever be appended to; wiping
   it would break Google sign-in for every other app.
