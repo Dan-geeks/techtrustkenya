@@ -45,29 +45,11 @@ export const NotificationsBell = () => {
       .order("created_at", { ascending: false })
       .limit(10);
 
-    const { data: messagesData } = await supabase
-      .from("messages")
-      .select("*, sender:sender_id(full_name)")
-      .eq("receiver_id", user.id)
-      .eq("is_read", false)
-      .order("created_at", { ascending: false });
+    // Message notifications are now real rows written by trg_messages_notify,
+    // so nothing is synthesised here. Synthesising from unread messages meant a
+    // thread vanished from notifications the moment ChatWidget marked it read.
+    setItems((notificationsData ?? []).slice(0, 15) as Notification[]);
 
-    const messageNotifications = (messagesData || []).map((msg: any) => ({
-      id: msg.id,
-      title: "New Message",
-      message: `${msg.sender?.full_name || "Someone"}: ${msg.content}`,
-      type: "new_message",
-      is_read: false,
-      reference_id: msg.sender_id, // Store sender_id here to open chat
-      created_at: msg.created_at,
-      _partnerName: msg.sender?.full_name || "User"
-    }));
-
-    const merged = [...(notificationsData || []), ...messageNotifications].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-
-    setItems(merged.slice(0, 15) as Notification[]);
   };
 
   useEffect(() => {
@@ -128,14 +110,16 @@ export const NotificationsBell = () => {
   };
 
   const handleClick = async (n: Notification & { _partnerName?: string }) => {
-    if (n.type === "new_message") {
+    if (n.type === "message") {
       setOpen(false);
+      if (!n.is_read) await markOne(n.id);
+      // reference_id holds the sender's profiles(id).
       window.dispatchEvent(
         new CustomEvent("open-chat", {
-          detail: { partnerId: n.reference_id, partnerName: n._partnerName || "User" },
+          detail: { partnerId: n.reference_id, partnerName: n.title.replace(/^New message from /, "") },
         })
       );
-      fetchItems(); // refresh after opening
+      fetchItems();
       return;
     }
     

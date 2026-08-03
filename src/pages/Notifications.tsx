@@ -73,7 +73,7 @@ const NotificationItem = ({
   const handleClick = () => {
     if (!notif.is_read) onRead(notif.id);
     
-    if (notif.type === "new_message") {
+    if (notif.type === "message") {
       window.dispatchEvent(
         new CustomEvent("open-chat", {
           detail: { partnerId: notif.reference_id, partnerName: notif._partnerName || "User" },
@@ -139,43 +139,19 @@ const Notifications = () => {
         .order("created_at", { ascending: false })
         .limit(50);
 
-      const { data: messagesData } = await supabase
-        .from("messages")
-        .select("*, sender:sender_id(full_name)")
-        .eq("receiver_id", user.id)
-        .eq("is_read", false)
-        .order("created_at", { ascending: false });
-
-      const messageNotifications = (messagesData || []).map((msg: any) => ({
-        id: msg.id,
-        title: "New Message",
-        message: `${msg.sender?.full_name || "Someone"}: ${msg.content}`,
-        type: "new_message",
-        is_read: false,
-        reference_id: msg.sender_id,
-        created_at: msg.created_at,
-        _partnerName: msg.sender?.full_name || "User"
-      }));
-
-      const merged = [...((notificationsData as Notification[]) ?? []), ...messageNotifications].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      
-      setNotifs(merged);
+      // Message notifications are real rows now (trg_messages_notify), so
+      // nothing is synthesised. Synthesising from unread messages meant a thread
+      // disappeared from this page as soon as ChatWidget marked it read.
+      setNotifs((notificationsData as Notification[]) ?? []);
       setLoading(false);
     })();
   }, [user]);
 
   const markRead = async (id: string) => {
-    const notif = notifs.find(n => n.id === id);
     setNotifs((prev) =>
       prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
     );
-    if (notif?.type === "new_message") {
-      await supabase.from("messages").update({ is_read: true }).eq("id", id);
-    } else {
-      await supabase.from("notifications").update({ is_read: true }).eq("id", id);
-    }
+    await supabase.from("notifications").update({ is_read: true }).eq("id", id);
   };
 
   const markAllRead = async () => {

@@ -28,9 +28,16 @@ const empty = {
   year_of_manufacture: "",
   condition: "new" as "new" | "refurbished" | "used",
   price_ksh: "",
+  original_price_ksh: "",
   quantity_in_stock: "1",
   warranty_status: false,
   warranty_duration_months: "",
+  spec_processor: "",
+  spec_ram: "",
+  spec_storage: "",
+  spec_display: "",
+  condition_notes: "",
+  serial_number: "",
   description: "",
   image_urls: [] as string[],
   video_url: "",
@@ -78,9 +85,16 @@ export const ProductsTab = ({ vendor }: Props) => {
       year_of_manufacture: p.year_of_manufacture?.toString() ?? "",
       condition: p.condition,
       price_ksh: p.price_ksh.toString(),
+      original_price_ksh: p.original_price_ksh ? p.original_price_ksh.toString() : "",
       quantity_in_stock: p.quantity_in_stock.toString(),
       warranty_status: p.warranty_status,
       warranty_duration_months: p.warranty_duration_months?.toString() ?? "",
+      spec_processor: p.specifications?.processor ?? "",
+      spec_ram: p.specifications?.ram ?? "",
+      spec_storage: p.specifications?.storage ?? "",
+      spec_display: p.specifications?.display ?? "",
+      condition_notes: p.condition_notes ?? "",
+      serial_number: p.serial_number ?? "",
       description: p.description ?? "",
       image_urls: p.image_urls ?? [],
       video_url: p.video_url ?? "",
@@ -153,7 +167,7 @@ export const ProductsTab = ({ vendor }: Props) => {
 
   const validatePrice = (val: string) => {
     if (!val) { setPriceError(""); return; }
-    setPriceError(Number(val) < 500 ? "Price must be at least KSH 500" : "");
+    setPriceError(Number(val) < 1 ? "Price must be at least KSH 1" : "");
   };
 
   const save = async () => {
@@ -161,8 +175,12 @@ export const ProductsTab = ({ vendor }: Props) => {
       toast.error("Brand, model and price are required.");
       return;
     }
-    if (Number(form.price_ksh) < 500) {
-      toast.error("Price must be at least KSH 500.");
+    if (Number(form.price_ksh) < 1) {
+      toast.error("Price must be at least KSH 1.");
+      return;
+    }
+    if (form.original_price_ksh && Number(form.original_price_ksh) <= Number(form.price_ksh)) {
+      toast.error("Original price must be higher than the selling price, or left blank.");
       return;
     }
     setSaving(true);
@@ -174,12 +192,26 @@ export const ProductsTab = ({ vendor }: Props) => {
       year_of_manufacture: form.year_of_manufacture ? Number(form.year_of_manufacture) : null,
       condition: form.condition,
       price_ksh: Number(form.price_ksh),
+      // Blank means no discount -> NULL, so no struck-through price is rendered.
+      original_price_ksh: form.original_price_ksh ? Number(form.original_price_ksh) : null,
       quantity_in_stock: Number(form.quantity_in_stock || 0),
       warranty_status: form.warranty_status,
       warranty_duration_months:
         form.warranty_status && form.warranty_duration_months
           ? Number(form.warranty_duration_months)
           : null,
+      // Only persist specs that were filled in, so the product page can hide
+      // empty rows instead of printing "N/A" for everything.
+      specifications: (() => {
+        const spec: Record<string, string> = {};
+        if (form.spec_processor.trim()) spec.processor = form.spec_processor.trim();
+        if (form.spec_ram.trim()) spec.ram = form.spec_ram.trim();
+        if (form.spec_storage.trim()) spec.storage = form.spec_storage.trim();
+        if (form.spec_display.trim()) spec.display = form.spec_display.trim();
+        return Object.keys(spec).length ? spec : null;
+      })(),
+      condition_notes: form.condition_notes.trim() || null,
+      serial_number: form.serial_number.trim() || null,
       description: form.description.trim() || null,
       image_urls: form.image_urls,
       video_url: form.video_url.trim() || null,
@@ -449,7 +481,7 @@ export const ProductsTab = ({ vendor }: Props) => {
                   <Label>Price (KSH) *</Label>
                   <Input
                     type="number"
-                    placeholder="Min. 500"
+                    placeholder="e.g. 1500"
                     value={form.price_ksh}
                     className={priceError ? "border-destructive focus-visible:ring-destructive" : ""}
                     onChange={(e) => {
@@ -460,6 +492,21 @@ export const ProductsTab = ({ vendor }: Props) => {
                   {priceError && (
                     <p className="text-xs text-destructive">{priceError}</p>
                   )}
+                </div>
+
+                <div className="space-y-1">
+                  <Label>Original price (KSH)</Label>
+                  <Input
+                    type="number"
+                    placeholder="Leave blank if not discounted"
+                    value={form.original_price_ksh}
+                    onChange={(e) => setForm({ ...form, original_price_ksh: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {form.original_price_ksh && Number(form.original_price_ksh) > Number(form.price_ksh || 0)
+                      ? `Shown struck through. Buyers save KES ${(Number(form.original_price_ksh) - Number(form.price_ksh || 0)).toLocaleString()}.`
+                      : "Optional. Must be higher than the price to show a discount."}
+                  </p>
                 </div>
 
                 <div className="space-y-1">
@@ -493,6 +540,68 @@ export const ProductsTab = ({ vendor }: Props) => {
                       className="max-w-[250px]"
                     />
                   )}
+                </div>
+              </div>
+            </div>
+
+            {/* Technical Specifications — every field optional. Whatever is left
+                blank is simply not shown on the product page. */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider border-b border-border pb-2">
+                Technical Specifications
+              </h3>
+              <p className="text-xs text-muted-foreground -mt-2">
+                All optional. Anything you leave blank is hidden on the listing rather than shown as "N/A".
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label>Processor</Label>
+                  <Input
+                    placeholder="e.g. Intel Core i7-8650U"
+                    value={form.spec_processor}
+                    onChange={(e) => setForm({ ...form, spec_processor: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Memory</Label>
+                  <Input
+                    placeholder="e.g. 16GB DDR4"
+                    value={form.spec_ram}
+                    onChange={(e) => setForm({ ...form, spec_ram: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Storage</Label>
+                  <Input
+                    placeholder="e.g. 512GB SSD"
+                    value={form.spec_storage}
+                    onChange={(e) => setForm({ ...form, spec_storage: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Display</Label>
+                  <Input
+                    placeholder='e.g. 14" FHD 1920x1080'
+                    value={form.spec_display}
+                    onChange={(e) => setForm({ ...form, spec_display: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Condition notes</Label>
+                  <Input
+                    placeholder="e.g. Minor scuff on lid, battery 92%"
+                    value={form.condition_notes}
+                    onChange={(e) => setForm({ ...form, condition_notes: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Device ID / serial</Label>
+                  <Input
+                    placeholder="e.g. 5CD8412ABC"
+                    value={form.serial_number}
+                    onChange={(e) => setForm({ ...form, serial_number: e.target.value })}
+                  />
                 </div>
               </div>
             </div>

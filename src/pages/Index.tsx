@@ -240,7 +240,6 @@ const Index = () => {
               </div>
               {/* Step 2 */}
               <div className="flex flex-col items-center text-center p-6 rounded-xl bg-white border border-[#c4c6d3]/20 shadow-sm relative">
-                <div className="hidden md:block absolute top-14 -left-4 w-8 border-t-2 border-dashed border-[#c4c6d3]/50"></div>
                 <div className="w-16 h-16 rounded-full bg-[#f2f3ff] flex items-center justify-center text-[#0f3d8c] mb-6">
                   <span className="material-symbols-outlined text-[32px]">account_balance</span>
                 </div>
@@ -248,7 +247,6 @@ const Index = () => {
                 <p className="font-body-md text-sm text-[#434651] leading-relaxed">
                   Your payment is held in a secure, financial-grade escrow account, not sent to the seller.
                 </p>
-                <div className="hidden md:block absolute top-14 -right-4 w-8 border-t-2 border-dashed border-[#c4c6d3]/50"></div>
               </div>
               {/* Step 3 */}
               <div className="flex flex-col items-center text-center p-6 rounded-xl bg-white border border-[#c4c6d3]/20 shadow-sm">

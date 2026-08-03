@@ -19,12 +19,16 @@ const Checkout = () => {
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("express");
-  const [phoneNumber, setPhoneNumber] = useState("0712345678");
+  // Empty so the placeholder actually shows. It used to be pre-filled with a
+  // real-looking number, which the buyer had to clear before typing their own
+  // — and risked pushing the STK prompt to a stranger's phone if they didn't.
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [paybillNumber, setPaybillNumber] = useState("400200");
   const [accountNumber, setAccountNumber] = useState("TT-8492-MK2");
   const [tillNumber, setTillNumber] = useState("890123");
   const [processing, setProcessing] = useState(false);
   const [stkModalOpen, setStkModalOpen] = useState(false);
+  const [paymentError, setPaymentError] = useState<{ kind: "failed" | "timeout"; message: string } | null>(null);
 
   useEffect(() => {
     document.title = "Secure Escrow Checkout | TechTrust Kenya";
@@ -91,25 +95,86 @@ const Checkout = () => {
   const subtotal = totalDue - serviceFee;
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    if (!stkModalOpen || !activeOrderId) return;
 
-    if (stkModalOpen && activeOrderId) {
-      intervalId = setInterval(async () => {
+    let intervalId: NodeJS.Timeout;
+    let stopped = false;
+    let elapsed = 0;
+    const STEP = 1500;
+    const GIVE_UP_AFTER = 150_000; // 2.5 min — Safaricom abandons a prompt well before this
+
+    const finish = (kind: "failed" | "timeout", message: string) => {
+      stopped = true;
+      clearInterval(intervalId);
+      setStkModalOpen(false);
+      setProcessing(false);
+      setPaymentError({ kind, message });
+      toast.error(message);
+    };
+
+    intervalId = setInterval(async () => {
+      if (stopped) return;
+      elapsed += STEP;
+
+      // Ask the escrow API rather than reading the row directly: it reconciles
+      // against DarajaPay, which is what actually records a decline. Polling
+      // the table alone meant a cancelled or insufficient-funds push stayed
+      // "pending" forever and the UI waited for something that never comes.
+      let status: string | null = null;
+      let reason: string | null = null;
+      try {
+        const { data: s } = await supabase.auth.getSession();
+        const token = s?.session?.access_token;
+        if (token && ESCROW_API_BASE) {
+          const r = await fetch(`${ESCROW_API_BASE}/payment-status?order_id=${activeOrderId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const j = await r.json();
+          status = j?.status ?? null;
+          reason = j?.reason ?? j?.error ?? null;
+        }
+      } catch {
+        /* fall through to the direct read below */
+      }
+
+      if (!status) {
         const { data } = await supabase
           .from("orders")
           .select("payment_status")
           .eq("id", activeOrderId)
           .maybeSingle();
+        if (data?.payment_status === "paid_float") status = "paid";
+        else if (data?.payment_status === "failed") status = "failed";
+      }
 
-        if (data && data.payment_status === "paid_float") {
-          toast.success("Payment Received & Escrow Locked!");
-          navigate(`/orders/${activeOrderId}`);
-        }
-      }, 1500);   // was 3000 - halves how long a paid order looks unpaid
-    }
+      if (status === "paid") {
+        stopped = true;
+        clearInterval(intervalId);
+        toast.success("Payment Received & Escrow Locked!");
+        navigate(`/orders/${activeOrderId}`);
+        return;
+      }
+
+      if (status === "failed") {
+        finish(
+          "failed",
+          reason ||
+            "Payment was not completed. This usually means the request was cancelled or there were insufficient funds.",
+        );
+        return;
+      }
+
+      if (elapsed >= GIVE_UP_AFTER) {
+        finish(
+          "timeout",
+          "We didn't receive a confirmation for this payment. If money left your account it will still be picked up — check My Orders.",
+        );
+      }
+    }, STEP);
 
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      stopped = true;
+      clearInterval(intervalId);
     };
   }, [stkModalOpen, navigate, activeOrderId]);
 
@@ -181,6 +246,7 @@ const Checkout = () => {
       return;
     }
 
+    setPaymentError(null);
     setProcessing(true);
 
     // 1. Create real order
@@ -403,6 +469,21 @@ const Checkout = () => {
                     </p>
                   </div>
                 </div>
+
+                {/* Why the last attempt did not go through. Without this the
+                    modal just closed and the buyer was left guessing. */}
+                {paymentError && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex gap-3">
+                    <Info className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-red-800">
+                        {paymentError.kind === "failed" ? "Payment not completed" : "No confirmation received"}
+                      </p>
+                      <p className="text-xs text-red-700 mt-1 leading-relaxed">{paymentError.message}</p>
+                      <p className="text-xs text-red-700 mt-1">You can try again below.</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Submit Pay Button */}
                 <button

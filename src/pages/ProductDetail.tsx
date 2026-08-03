@@ -39,7 +39,12 @@ const ProductDetail = () => {
           id: data.id,
           title: data.brand + " " + data.model_name,
           price: data.price_ksh,
-          originalPrice: data.price_ksh * 1.2,
+          // Was price_ksh * 1.2, which made EVERY product look 20% off even
+          // when nothing was discounted. Only a real vendor-set value counts.
+          originalPrice:
+            data.original_price_ksh && data.original_price_ksh > data.price_ksh
+              ? data.original_price_ksh
+              : null,
           category: data.category,
           condition: data.condition,
           vendor: data.vendor_profiles?.business_name || "Unknown Vendor",
@@ -50,23 +55,28 @@ const ProductDetail = () => {
           vendorVerified: isVendorVerified(data.vendor_profiles?.verification_status),
           location: "Nairobi", // Default or fetch if location exists
           gallery: data.image_urls || [data.image_urls?.[0] || "/placeholder.svg"],
-          // products has no specifications/condition_notes/serial_number columns,
-          // so every row here used to fall through to "N/A". These are the
-          // columns the table actually has.
-          specs: {
-            Brand: data.brand || "—",
-            Model: data.model_name || "—",
-            Condition: data.condition
-              ? data.condition.charAt(0).toUpperCase() + data.condition.slice(1)
-              : "—",
-            Year: data.year_of_manufacture ? String(data.year_of_manufacture) : "—",
-            Warranty:
-              data.warranty_status && data.warranty_duration_months
-                ? `${data.warranty_duration_months} months`
-                : "No warranty",
-            Availability:
-              data.quantity_in_stock > 0 ? `${data.quantity_in_stock} in stock` : "Out of stock",
-          }
+          // Only rows the vendor actually filled in. Previously this table
+          // read columns that did not exist, so every line rendered "N/A".
+          specs: (() => {
+            const sp = (data.specifications ?? {}) as Record<string, string>;
+            const rows: Record<string, string> = {};
+            if (sp.processor) rows.Processor = sp.processor;
+            if (sp.ram) rows.Memory = sp.ram;
+            if (sp.storage) rows.Storage = sp.storage;
+            if (sp.display) rows.Display = sp.display;
+            if (data.condition_notes) rows["Condition Notes"] = data.condition_notes;
+            if (data.serial_number) rows["Device ID"] = data.serial_number;
+            // Always-known facts, so the panel is never empty.
+            if (data.brand) rows.Brand = data.brand;
+            if (data.condition) {
+              rows.Condition = data.condition.charAt(0).toUpperCase() + data.condition.slice(1);
+            }
+            if (data.year_of_manufacture) rows.Year = String(data.year_of_manufacture);
+            if (data.warranty_status && data.warranty_duration_months) {
+              rows.Warranty = `${data.warranty_duration_months} months`;
+            }
+            return rows;
+          })(),
         });
         setActiveImage(data.image_urls?.[0] || "/placeholder.svg");
       } else {
@@ -257,40 +267,35 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Specifications Table */}
-      <div className="mt-16 max-w-4xl">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Technical Specifications</h2>
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <table className="w-full text-left border-collapse">
-            <tbody className="divide-y divide-slate-200">
-              <tr className="hover:bg-slate-50 transition-colors">
-                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Processor</th>
-                <td className="py-4 px-6 text-sm text-slate-600">{product.specs.Processor}</td>
-              </tr>
-              <tr className="hover:bg-slate-50 transition-colors">
-                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Memory</th>
-                <td className="py-4 px-6 text-sm text-slate-600">{product.specs.Memory}</td>
-              </tr>
-              <tr className="hover:bg-slate-50 transition-colors">
-                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Storage</th>
-                <td className="py-4 px-6 text-sm text-slate-600">{product.specs.Storage}</td>
-              </tr>
-              <tr className="hover:bg-slate-50 transition-colors">
-                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Display</th>
-                <td className="py-4 px-6 text-sm text-slate-600">{product.specs.Display}</td>
-              </tr>
-              <tr className="hover:bg-slate-50 transition-colors">
-                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Condition Notes</th>
-                <td className="py-4 px-6 text-sm text-slate-600 leading-relaxed">{product.specs.Condition}</td>
-              </tr>
-              <tr className="hover:bg-slate-50 transition-colors">
-                <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">Device ID</th>
-                <td className="py-4 px-6 text-sm font-mono font-medium text-slate-500 tracking-wider">{product.specs.DeviceID}</td>
-              </tr>
-            </tbody>
-          </table>
+      {/* Specifications Table — driven by whatever the vendor actually filled
+          in, so blank fields disappear instead of rendering "N/A". */}
+      {Object.keys(product.specs ?? {}).length > 0 && (
+        <div className="mt-16 max-w-4xl">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">Technical Specifications</h2>
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <table className="w-full text-left border-collapse">
+              <tbody className="divide-y divide-slate-200">
+                {Object.entries(product.specs as Record<string, string>).map(([label, value]) => (
+                  <tr key={label} className="hover:bg-slate-50 transition-colors">
+                    <th className="py-4 px-6 text-sm font-semibold text-slate-700 bg-slate-50/50 w-1/3 border-r border-slate-200">
+                      {label}
+                    </th>
+                    <td
+                      className={
+                        label === "Device ID"
+                          ? "py-4 px-6 text-sm font-mono font-medium text-slate-500 tracking-wider"
+                          : "py-4 px-6 text-sm text-slate-600 leading-relaxed"
+                      }
+                    >
+                      {value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </main>
   );
 };
