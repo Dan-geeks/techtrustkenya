@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, useLocation, Link } from "react-router-do
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getPostLoginPath } from "@/lib/redirectByRole";
+import { sendWelcomeEmail } from "@/lib/functions";
 import { toast } from "sonner";
 import { ShieldCheck, Mail, Key, Eye, EyeOff, Loader2, ArrowRight, CheckCircle2, ArrowLeft, User, ShoppingBag, Store, Gift, Wand2 } from "lucide-react";
 
@@ -198,6 +199,12 @@ export const Auth = () => {
             console.warn("Referral code application warning:", refErr);
           }
         }
+
+        // Fire-and-forget — never awaited into the navigation path below.
+        void sendWelcomeEmail({
+          name: cleanFullName,
+          role: accountType === "vendor" ? "vendor" : "customer",
+        });
 
         if (accountType === "vendor") {
           toast.success("Vendor account created! Starting onboarding...");

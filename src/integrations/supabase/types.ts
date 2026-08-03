@@ -804,6 +804,15 @@ export type Database = {
           phone: string | null
           physical_address: string
           rejection_reason: string | null
+          repair_application_status: string
+          repair_applied_at: string | null
+          repair_approved_at: string | null
+          repair_approved_by: string | null
+          repair_rejection_reason: string | null
+          repair_specialties: string[]
+          repair_step_identity: boolean
+          repair_step_safety: boolean
+          repair_step_skills: boolean
           shop_photo_urls: string[] | null
           sub_county: string | null
           subscription_expires_at: string | null
@@ -838,6 +847,15 @@ export type Database = {
           phone?: string | null
           physical_address: string
           rejection_reason?: string | null
+          repair_application_status?: string
+          repair_applied_at?: string | null
+          repair_approved_at?: string | null
+          repair_approved_by?: string | null
+          repair_rejection_reason?: string | null
+          repair_specialties?: string[]
+          repair_step_identity?: boolean
+          repair_step_safety?: boolean
+          repair_step_skills?: boolean
           shop_photo_urls?: string[] | null
           sub_county?: string | null
           subscription_expires_at?: string | null
@@ -872,6 +890,15 @@ export type Database = {
           phone?: string | null
           physical_address?: string
           rejection_reason?: string | null
+          repair_application_status?: string
+          repair_applied_at?: string | null
+          repair_approved_at?: string | null
+          repair_approved_by?: string | null
+          repair_rejection_reason?: string | null
+          repair_specialties?: string[]
+          repair_step_identity?: boolean
+          repair_step_safety?: boolean
+          repair_step_skills?: boolean
           shop_photo_urls?: string[] | null
           sub_county?: string | null
           subscription_expires_at?: string | null
@@ -987,6 +1014,7 @@ export type Database = {
         | "promotion"
         | "dispute"
         | "vendor_application"
+        | "message"
       order_payment_status:
         | "pending"
         | "paid_float"
@@ -1170,6 +1198,7 @@ export const Constants = {
         "promotion",
         "dispute",
         "vendor_application",
+        "message",
       ],
       order_payment_status: [
         "pending",

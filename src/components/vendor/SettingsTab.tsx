@@ -126,8 +126,8 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
           <div>
             <Label className="text-base font-semibold text-slate-900">Offer repair services</Label>
             <p className="text-xs text-slate-500 mt-1">
-              Adds a <strong>Repairs</strong> tab here for incoming requests, and lists you as a
-              technician customers can pick when booking a repair.
+              Adds a <strong>Repairs</strong> tab here for incoming requests. TechTrust vets every
+              technician before listing them publicly, so this files an application first.
             </p>
           </div>
           <Switch
@@ -135,6 +135,50 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
             onCheckedChange={(c) => setForm({ ...form, offers_repairs: !!c })}
           />
         </div>
+
+        {/* Where the application actually stands. Without this the vendor ticks
+            the box, never appears on /repairs, and has no idea why. */}
+        {form.offers_repairs && vendor?.repair_application_status && vendor.repair_application_status !== "none" && (
+          <div
+            className={`rounded-xl border p-4 text-xs ${
+              vendor.repair_application_status === "approved"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                : vendor.repair_application_status === "rejected"
+                ? "border-red-200 bg-red-50 text-red-800"
+                : "border-amber-200 bg-amber-50 text-amber-800"
+            }`}
+          >
+            {vendor.repair_application_status === "approved" ? (
+              <p><strong>Listed as a repair technician.</strong> Customers can find and book you on the Repairs page.</p>
+            ) : vendor.repair_application_status === "rejected" ? (
+              <p>
+                <strong>Repair application not approved.</strong>{" "}
+                {vendor.repair_rejection_reason || "Contact support if you'd like this reviewed again."}
+              </p>
+            ) : (
+              <>
+                <p className="mb-2">
+                  <strong>Repair application under review.</strong> You'll appear on the Repairs page once TechTrust
+                  clears all three checks:
+                </p>
+                <ul className="space-y-1">
+                  {[
+                    ["repair_step_identity", "Identity & business verified"],
+                    ["repair_step_skills", "Repair skills reviewed"],
+                    ["repair_step_safety", "Safety & data handling briefing"],
+                  ].map(([col, label]) => (
+                    <li key={col} className="flex items-center gap-2">
+                      <span className={vendor[col] ? "text-emerald-600" : "text-slate-400"}>
+                        {vendor[col] ? "✓" : "○"}
+                      </span>
+                      <span>{label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        )}
       </Card>
 
       {/* Location Settings Card */}

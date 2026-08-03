@@ -15,6 +15,7 @@
 // reaching `paid` is proof of payment.
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { emailConfigured, sendOrderPaidEmail, sendVendorSaleEmail, sendWelcomeEmail } from "./email";
 
 type User = { id: string; email?: string };
 
@@ -263,6 +264,18 @@ async function notify(userId: string, title: string, message: string, type: stri
     });
   } catch (error) {
     console.warn("notification insert skipped", error);
+  }
+}
+
+async function getProfile(userId: string): Promise<{ email?: string | null; full_name?: string | null } | null> {
+  try {
+    const rows = await rest<Array<{ email?: string | null; full_name?: string | null }>>(
+      `profiles?select=email,full_name&id=eq.${encodeURIComponent(userId)}&limit=1`,
+    );
+    return rows[0] ?? null;
+  } catch (error) {
+    console.warn("profile lookup failed", error);
+    return null;
   }
 }
 
@@ -684,6 +697,71 @@ async function settleIntoFloat(args: {
     reference: transactionId,
     payload: args.payload ?? { receipt },
   });
+
+  // Receipts go out after the order is safely marked paid, and are awaited only
+  // so failures land in the same request's logs. sendOrderPaidEmail never
+  // throws, so a dead mail provider cannot un-settle a real payment.
+  await sendPaymentEmails(order, Number(amount), receipt);
+}
+
+/**
+ * Buyer receipt + vendor "you have a sale". Best-effort: every failure inside
+ * is logged and swallowed, because this runs on the payment-confirmed path.
+ */
+async function sendPaymentEmails(order: Order, amountKsh: number, receipt: string) {
+  if (!emailConfigured()) return;
+  try {
+    const [customer, vendor, product] = await Promise.all([
+      getProfile(order.customer_id),
+      getVendor(order.vendor_id),
+      order.product_id
+        ? rest<Array<{ brand?: string | null; model_name?: string | null }>>(
+            `products?select=brand,model_name&id=eq.${encodeURIComponent(order.product_id)}&limit=1`,
+          ).catch(() => [])
+        : Promise.resolve([]),
+    ]);
+
+    const productName = [product[0]?.brand, product[0]?.model_name].filter(Boolean).join(" ") || null;
+
+    if (customer?.email) {
+      await sendOrderPaidEmail({
+        email: customer.email,
+        name: customer.full_name ?? undefined,
+        orderId: order.id,
+        amountKsh,
+        receipt,
+        productName,
+        vendorName: vendor?.business_name ?? null,
+      });
+    }
+
+    // vendor_profiles.email is the shop's contact address; fall back to the
+    // owner's account email when the shop never filled one in.
+    const vendorEmail =
+      (await (async () => {
+        try {
+          const rows = await rest<Array<{ email?: string | null }>>(
+            `vendor_profiles?select=email&id=eq.${encodeURIComponent(order.vendor_id)}&limit=1`,
+          );
+          return rows[0]?.email ?? null;
+        } catch {
+          return null;
+        }
+      })()) || (vendor?.user_id ? (await getProfile(vendor.user_id))?.email ?? null : null);
+
+    if (vendorEmail) {
+      await sendVendorSaleEmail({
+        email: vendorEmail,
+        businessName: vendor?.business_name ?? null,
+        orderId: order.id,
+        amountKsh,
+        payoutKsh: order.vendor_payout_ksh ?? null,
+        productName,
+      });
+    }
+  } catch (error) {
+    console.warn("payment emails skipped", error);
+  }
 }
 
 async function failPayment(order: Order, reason: string, provider: string, payload?: unknown) {
@@ -1299,6 +1377,13 @@ app.get("/config-check", (c) => {
       baseUrl: darajapayBaseUrl(),
       tillNumber: has("DARAJAPAY_TILL_NUMBER"),
     },
+    email: {
+      // Without RESEND_API_KEY every send is a logged no-op — the platform
+      // still works, but nobody gets a welcome or a receipt.
+      configured: emailConfigured(),
+      from: process.env.RESEND_FROM ?? "TechTrust <onboarding@resend.dev> (default)",
+      supportEmail: process.env.SUPPORT_EMAIL ?? "support@techtrustkenya.co.ke (default)",
+    },
   });
 });
 
@@ -1774,7 +1859,45 @@ app.post("/notify-vendor-approved", async (c) => {
       "vendor_application",
     );
 
-    return json({ success: true, emailSent: false });
+    const profile = await getProfile(vendorUserId);
+    const emailResult = profile?.email
+      ? await sendWelcomeEmail({ email: profile.email, name: profile.full_name ?? undefined, role: "vendor" })
+      : { ok: false, skipped: "no email on file" };
+
+    return json({ success: true, emailSent: emailResult.ok });
+  } catch (error) {
+    if (error instanceof Response) return error;
+    return json({ success: false, error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+
+/**
+ * Welcome email for a brand-new account. Called fire-and-forget by the client
+ * the first time a session appears for an account it has not greeted before.
+ *
+ * Authenticated: the caller's own JWT decides who gets the mail, so this cannot
+ * be used to spray email at arbitrary addresses. The body may only *supplement*
+ * the name and role; the address always comes from the verified session or the
+ * caller's own profile row.
+ */
+app.post("/email/welcome", async (c) => {
+  try {
+    const user = await requireUser(c);
+    const { name, role } = await readBody(c);
+
+    const profile = await getProfile(user.id);
+    const to = user.email ?? profile?.email ?? null;
+    if (!to) return json({ success: false, error: "no email address on this account" }, 400);
+
+    const result = await sendWelcomeEmail({
+      email: to,
+      name: firstString(name, profile?.full_name ?? undefined),
+      role: role === "vendor" ? "vendor" : "customer",
+    });
+
+    // Always 200: a welcome email must never look like a failed signup to the
+    // client that fired it.
+    return json({ success: true, sent: result.ok, skipped: result.skipped ?? null, error: result.error ?? null });
   } catch (error) {
     if (error instanceof Response) return error;
     return json({ success: false, error: error instanceof Error ? error.message : String(error) }, 500);

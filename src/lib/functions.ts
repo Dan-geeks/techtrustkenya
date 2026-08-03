@@ -65,6 +65,36 @@ export async function invokeFunction<T = any>(
   }
 }
 
+/**
+ * Fire the welcome email for a freshly created account.
+ *
+ * Deliberately fire-and-forget: the server addresses the mail from the caller's
+ * own verified session, and a mail failure must never surface as a failed
+ * signup. Guarded so the same browser doesn't re-send on every auth state
+ * re-emit (an OAuth round trip fires several).
+ */
+export async function sendWelcomeEmail(args: { name?: string; role?: "customer" | "vendor" }): Promise<void> {
+  if (!FUNCTION_BASE_URL) return;
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.access_token) return;
+
+    const guard = `techtrust:welcomed:${session.user.id}`;
+    if (localStorage.getItem(guard)) return;
+    localStorage.setItem(guard, "1");
+
+    await fetch(`${FUNCTION_BASE_URL}/email/welcome`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ name: args.name, role: args.role ?? "customer" }),
+    });
+  } catch (error) {
+    console.warn("welcome email skipped", error);
+  }
+}
+
 export type PaymentStatus = {
   success: boolean;
   status: "pending" | "paid" | "failed";

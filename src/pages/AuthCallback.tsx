@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getPostLoginPath } from "@/lib/redirectByRole";
+import { sendWelcomeEmail } from "@/lib/functions";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, AlertCircle } from "lucide-react";
 
@@ -59,6 +60,14 @@ export const AuthCallback = () => {
           
           const pendingRole = localStorage.getItem("pending_role");
           localStorage.removeItem("pending_role");
+
+          // Google signups never hit the Auth.tsx signUp path, so this is the
+          // only place they get greeted. sendWelcomeEmail dedupes per user id,
+          // so returning users are not re-mailed on every sign-in.
+          void sendWelcomeEmail({
+            name: fullName,
+            role: pendingRole === "vendor" ? "vendor" : "customer",
+          });
 
           if (pendingRole === "vendor") {
             navigate("/vendor/onboarding", { replace: true });

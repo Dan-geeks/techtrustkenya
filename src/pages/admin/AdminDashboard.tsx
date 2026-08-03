@@ -982,7 +982,293 @@ const AdminPayments = () => {
 // Repairs tab
 // ---------------------------------------------------------------------------
 
+// The three checks a vendor has to clear before we put them in front of
+// customers. Keyed by the vendor_profiles column each one writes.
+const VETTING_STEPS = [
+  {
+    col: "repair_step_identity" as const,
+    label: "Identity & business verified",
+    hint: "ID document and business certificate seen; shop address confirmed.",
+  },
+  {
+    col: "repair_step_skills" as const,
+    label: "Repair skills reviewed",
+    hint: "Experience, certification or portfolio checked for the devices they list.",
+  },
+  {
+    col: "repair_step_safety" as const,
+    label: "Safety & data handling briefing",
+    hint: "Vendor has acknowledged customer-data handling and device safety rules.",
+  },
+];
+
+/**
+ * Vendors who ticked "I offer repair services" during onboarding. Ticking that
+ * box files an application (see the sync_repair_application trigger); this is
+ * where an admin works through the three checks and decides whether the vendor
+ * gets listed on /repairs.
+ */
+const RepairTechnicianApplications = () => {
+  const [list, setList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"pending" | "approved" | "rejected" | "all">("pending");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [rejecting, setRejecting] = useState<any | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    let query = supabase
+      .from("vendor_profiles")
+      .select("*")
+      .eq("offers_repairs", true)
+      .order("repair_applied_at", { ascending: false });
+    if (tab !== "all") query = query.eq("repair_application_status", tab);
+    const { data, error } = await query;
+    if (error) toast.error(error.message);
+    setList(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [tab]);
+
+  // Optimistic: the checkbox flips immediately and rolls back if the write
+  // fails, so ticking three boxes doesn't feel like three round trips.
+  const toggleStep = async (vendor: any, col: string) => {
+    const next = !vendor[col];
+    setList((prev) => prev.map((v) => (v.id === vendor.id ? { ...v, [col]: next } : v)));
+    const { error } = await supabase.from("vendor_profiles").update({ [col]: next }).eq("id", vendor.id);
+    if (error) {
+      setList((prev) => prev.map((v) => (v.id === vendor.id ? { ...v, [col]: !next } : v)));
+      toast.error(error.message);
+    }
+  };
+
+  const approve = async (vendor: any) => {
+    setBusy(vendor.id);
+    const { data: auth } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("vendor_profiles")
+      .update({
+        repair_application_status: "approved",
+        repair_approved_by: auth?.user?.id ?? null,
+        repair_rejection_reason: null,
+      })
+      .eq("id", vendor.id);
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`${vendor.business_name} is now listed on the Repairs page.`);
+    load();
+  };
+
+  const reject = async () => {
+    if (!rejecting) return;
+    setBusy(rejecting.id);
+    const { error } = await supabase
+      .from("vendor_profiles")
+      .update({
+        repair_application_status: "rejected",
+        repair_rejection_reason: rejectReason.trim() || null,
+      })
+      .eq("id", rejecting.id);
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Application rejected. The vendor has been notified.");
+    setRejecting(null);
+    setRejectReason("");
+    load();
+  };
+
+  const unlist = async (vendor: any) => {
+    setBusy(vendor.id);
+    const { error } = await supabase
+      .from("vendor_profiles")
+      .update({ repair_application_status: "pending" })
+      .eq("id", vendor.id);
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Removed from the Repairs page — back in the review queue.");
+    load();
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Repair technician applications</h2>
+        <p className="text-sm text-muted-foreground">
+          Vendors who opted in to repairs. Clear all three checks, then approve to list them on the public Repairs page.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {(["pending", "approved", "rejected", "all"] as const).map((t) => (
+          <Button
+            key={t}
+            size="sm"
+            variant={tab === t ? "default" : "outline"}
+            className="capitalize"
+            onClick={() => setTab(t)}
+          >
+            {t}
+          </Button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-accent" /></div>
+      ) : list.length === 0 ? (
+        <Card className="p-12 text-center text-muted-foreground">
+          No {tab === "all" ? "" : tab} repair technician applications.
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {list.map((v) => {
+            const cleared = VETTING_STEPS.filter((s) => v[s.col]).length;
+            const ready = cleared === VETTING_STEPS.length;
+            return (
+              <Card key={v.id} className="p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold truncate">{v.business_name}</h3>
+                      <Badge
+                        variant="outline"
+                        className={`capitalize text-xs ${
+                          v.repair_application_status === "approved"
+                            ? "border-emerald-500 text-emerald-600"
+                            : v.repair_application_status === "rejected"
+                            ? "border-red-500 text-red-600"
+                            : "border-amber-500 text-amber-600"
+                        }`}
+                      >
+                        {v.repair_application_status}
+                      </Badge>
+                      {(v.verification_status === "approved" || v.verification_status === "verified") && (
+                        <Badge variant="outline" className="text-xs border-blue-500 text-blue-600 gap-1">
+                          <ShieldCheck className="h-3 w-3" /> Shop verified
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                      {v.owner_name && <span>{v.owner_name}</span>}
+                      {v.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" />{v.phone}</span>}
+                      {v.email && <span className="inline-flex items-center gap-1"><Mail className="h-3 w-3" />{v.email}</span>}
+                      {(v.city || v.county) && (
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />{[v.city, v.county].filter(Boolean).join(", ")}
+                        </span>
+                      )}
+                      {v.repair_applied_at && <span>Applied {formatDate(v.repair_applied_at)}</span>}
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-xs shrink-0">{cleared}/3 checks</Badge>
+                </div>
+
+                <div className="grid gap-2 mb-4">
+                  {VETTING_STEPS.map((s, i) => (
+                    <label
+                      key={s.col}
+                      className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/40 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        className="mt-1 h-4 w-4 shrink-0 accent-emerald-600"
+                        checked={!!v[s.col]}
+                        onChange={() => toggleStep(v, s.col)}
+                      />
+                      <span className="min-w-0">
+                        <span className="text-sm font-medium block">Step {i + 1} — {s.label}</span>
+                        <span className="text-xs text-muted-foreground block">{s.hint}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+
+                {v.repair_application_status === "rejected" && v.repair_rejection_reason && (
+                  <p className="text-xs text-red-600 mb-3">Reason given: {v.repair_rejection_reason}</p>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  {v.repair_application_status === "approved" ? (
+                    <Button size="sm" variant="outline" disabled={busy === v.id} onClick={() => unlist(v)}>
+                      {busy === v.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><XCircle className="h-4 w-4 mr-1" /> Remove from Repairs page</>}
+                    </Button>
+                  ) : (
+                    <>
+                      <Button size="sm" disabled={!ready || busy === v.id} onClick={() => approve(v)}>
+                        {busy === v.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle2 className="h-4 w-4 mr-1" /> Approve &amp; list</>}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 hover:text-red-700"
+                        disabled={busy === v.id}
+                        onClick={() => { setRejecting(v); setRejectReason(""); }}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" /> Reject
+                      </Button>
+                      {!ready && (
+                        <span className="text-xs text-muted-foreground self-center">
+                          Clear all three checks to enable approval.
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <Dialog open={!!rejecting} onOpenChange={(o) => !o && setRejecting(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject {rejecting?.business_name}?</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Reason (sent to the vendor)</Label>
+            <Textarea
+              rows={3}
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g. We could not verify your repair certification."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejecting(null)}>Cancel</Button>
+            <Button variant="destructive" disabled={!!busy} onClick={reject}>Reject application</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
 const AdminRepairs = () => {
+  const [view, setView] = useState<"technicians" | "requests">("technicians");
+
+  return (
+    <div className="space-y-6">
+      <div className="flex gap-2 border-b">
+        {([["technicians", "Technicians"], ["requests", "Repair requests"]] as const).map(([k, label]) => (
+          <button
+            key={k}
+            onClick={() => setView(k)}
+            className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+              view === k ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {view === "technicians" ? <RepairTechnicianApplications /> : <AdminRepairRequests />}
+    </div>
+  );
+};
+
+const AdminRepairRequests = () => {
   const [list, setList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

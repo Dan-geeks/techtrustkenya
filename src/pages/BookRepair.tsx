@@ -30,12 +30,14 @@ const BookRepair = () => {
   const [techs, setTechs] = useState<any[]>([]);
 
   useEffect(() => {
-    // Only vendors who ticked "offers repairs" during onboarding.
+    // Only vendors the admin has vetted and listed as repair technicians —
+    // ticking "offers repairs" at onboarding just files an application.
     (async () => {
       const { data } = await supabase
         .from("vendor_profiles")
         .select("id, business_name, city, county")
         .eq("offers_repairs", true)
+        .eq("repair_application_status", "approved")
         .order("business_name");
       setTechs(data ?? []);
       const preset = new URLSearchParams(window.location.search).get("vendor");

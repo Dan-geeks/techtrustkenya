@@ -5,7 +5,9 @@ import { isVendorVerified } from "@/lib/format";
 
 const Repairs = () => {
   // This page was entirely static, so a customer could never see who actually
-  // repairs things. List the vendors who enabled repairs at onboarding.
+  // repairs things. List the vendors who enabled repairs at onboarding AND
+  // have been through the admin's three vetting checks — ticking the box alone
+  // is only an application, not a licence to appear here.
   const [techs, setTechs] = useState<any[]>([]);
   const [loadingTechs, setLoadingTechs] = useState(true);
 
@@ -15,6 +17,7 @@ const Repairs = () => {
         .from("vendor_profiles")
         .select("id, business_name, city, county, physical_address, average_rating, verification_status, shop_photo_urls")
         .eq("offers_repairs", true)
+        .eq("repair_application_status", "approved")
         .order("average_rating", { ascending: false });
       setTechs(data ?? []);
       setLoadingTechs(false);
