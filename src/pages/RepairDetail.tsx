@@ -104,6 +104,25 @@ const RepairDetail = () => {
   useEffect(() => {
     document.title = "Repair | TechTrust Kenya";
     load();
+
+    if (!id) return;
+    // Both sides watch the same row, so a quote, a payment or a status change
+    // lands on the other person's screen without a reload.
+    const channel = supabase
+      .channel(`repair_${id}_${Math.random().toString(36).slice(2)}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "repair_requests", filter: `id=eq.${id}` },
+        (payload) => {
+          if (payload.new) setReq((prev: any) => ({ ...prev, ...payload.new }));
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const isCustomer = !!user && !!req && user.id === req.customer_id;
@@ -123,32 +142,15 @@ const RepairDetail = () => {
     load();
   };
 
+  // Both of these are announced by notify_customer_repair_status, which derives
+  // the notification from the row change itself. Sending one from here too
+  // would double up, and would only work from this screen.
   const approveQuote = async () => {
     await patch({ customer_approved_quote: true }, "Quote approved — the technician has been notified.");
-    if (vendor?.user_id) {
-      // notify_counterparty, not a direct insert: notifications' INSERT policy
-      // is "auth.uid() = user_id", so notifying the other side silently fails.
-      await supabase.rpc("notify_counterparty", {
-        _user_id: vendor.user_id,
-        _title: "Quote approved",
-        _message: `${customer?.full_name ?? "The customer"} approved your quote of ${formatKsh(req.quoted_price_ksh ?? 0)}. They can now pay it into Float.`,
-        _type: "repair_update",
-        _reference_id: req.id,
-      });
-    }
   };
 
   const declineRepair = async () => {
     await patch({ status: "cancelled" }, "Repair cancelled.");
-    if (vendor?.user_id) {
-      await supabase.rpc("notify_counterparty", {
-        _user_id: vendor.user_id,
-        _title: "Repair cancelled",
-        _message: `${customer?.full_name ?? "The customer"} cancelled the repair request.`,
-        _type: "repair_update",
-        _reference_id: req.id,
-      });
-    }
   };
 
   /**

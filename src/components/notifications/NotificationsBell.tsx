@@ -87,9 +87,26 @@ export const NotificationsBell = () => {
       )
       .subscribe();
 
+    // Realtime alone is not dependable enough to be the only path. The socket
+    // drops on sleep, on a flaky mobile connection, and whenever a phone
+    // backgrounds the tab, and postgres_changes does NOT replay what was missed
+    // while it was down — so a notification inserted during that window never
+    // arrives, which is exactly the "sometimes it comes, sometimes it doesn't"
+    // behaviour reported. Poll as a floor, and refetch whenever the user comes
+    // back to the tab so returning to the app always shows the truth.
+    const interval = setInterval(fetchItems, 30_000);
+    const onFocus = () => {
+      if (document.visibilityState === "visible") fetchItems();
+    };
+    document.addEventListener("visibilitychange", onFocus);
+    window.addEventListener("focus", onFocus);
+
     return () => {
       supabase.removeChannel(notificationsChannel);
       supabase.removeChannel(messagesChannel);
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onFocus);
+      window.removeEventListener("focus", onFocus);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
