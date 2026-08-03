@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CountUp } from "@/components/ui/count-up";
-import { SAMPLE_PRODUCTS } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { isVendorVerified } from "@/lib/format";
 import { useState } from "react";
@@ -281,7 +280,7 @@ const Index = () => {
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...dbProducts, ...SAMPLE_PRODUCTS].slice(0, 4).map((p) => {
+              {dbProducts.slice(0, 4).map((p) => {
                 const imgUrl = p.image || p.gallery?.[0] || (p as any).images?.[0] || (p as any).image_urls?.[0] || "/placeholder.svg";
                 return (
                   <div

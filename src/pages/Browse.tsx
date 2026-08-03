@@ -15,7 +15,6 @@ interface Product {
   location: string;
   badge?: string;
 }
-import { SAMPLE_PRODUCTS } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 
 const CATEGORIES = ["Laptops", "Smartphones", "Tablets", "Components & Accessories", "Cameras", "Wearables"];
@@ -51,9 +50,13 @@ const Browse = () => {
           condition,
           price_ksh,
           image_urls,
+          quantity_in_stock,
           vendor_profiles ( business_name, verification_status )
         `)
         .eq("is_active", true)
+        // Never list what cannot be sold: paying for a 0-stock item takes the
+        // money and then fails to settle, leaving it in limbo.
+        .gt("quantity_in_stock", 0)
         .order("created_at", { ascending: false });
 
       if (data) {
@@ -130,7 +133,6 @@ const Browse = () => {
       else if (p.category === "accessory" || p.category === "spare_part") bump("Components & Accessories");
       else bump("Laptops");
     });
-    (SAMPLE_PRODUCTS as any[]).forEach((p) => bump(p.category));
     return counts;
   }, [dbProducts]);
 
@@ -160,7 +162,10 @@ const Browse = () => {
       };
     });
 
-    let result = [...mappedDb, ...SAMPLE_PRODUCTS];
+    // Only real catalogue rows. SAMPLE_PRODUCTS have ids like "prod-1" (not
+    // UUIDs) and carry no vendor, so checking one out failed with
+    // "Failed to create order" — never list something that cannot be bought.
+    let result = [...mappedDb];
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
@@ -201,7 +206,9 @@ const Browse = () => {
     }
 
     return result;
-  }, [searchQuery, selectedCategories, selectedConditions, selectedLocation, minPrice, maxPrice, sortBy]);
+    // dbProducts MUST be a dependency: products load asynchronously, and without
+    // it the memo keeps its first (empty) result and the grid renders nothing.
+  }, [dbProducts, searchQuery, selectedCategories, selectedConditions, selectedLocation, minPrice, maxPrice, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
   const paginatedProducts = useMemo(() => {

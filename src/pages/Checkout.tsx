@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ShieldCheck, Lock, Smartphone, Receipt, Store, CreditCard, ArrowLeft, CheckCircle2, Loader2, Info, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { SAMPLE_PRODUCTS } from "@/data/products";
 import { ESCROW_API_BASE } from "@/lib/functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,7 +31,9 @@ const Checkout = () => {
     
     const loadProduct = async () => {
       if (!productId) {
-        setProduct(SAMPLE_PRODUCTS[0]);
+        // No product to buy. Loading a placeholder here let people reach a
+        // checkout for an item that does not exist in the catalogue.
+        setProduct(null);
         setLoading(false);
         return;
       }
@@ -49,6 +50,7 @@ const Checkout = () => {
           condition,
           price_ksh,
           image_urls,
+          quantity_in_stock,
           vendor_profiles ( id, business_name, user_id )
         `)
         .eq("id", productId)
@@ -63,12 +65,15 @@ const Checkout = () => {
           vendor: data.vendor_profiles?.business_name || "Verified Vendor",
           vendorProfileId: data.vendor_profiles?.id,
           vendorUserId: data.vendor_profiles?.user_id,
+          stock: data.quantity_in_stock ?? 0,
           image: data.image_urls?.[0] || "/placeholder.svg"
         });
       } else {
-        // Fallback
-        const fallback = SAMPLE_PRODUCTS.find((p) => p.id === productId || p.id.toLowerCase() === productId?.toLowerCase()) || SAMPLE_PRODUCTS[0];
-        setProduct(fallback);
+        // Unknown id (e.g. a non-UUID demo id). Falling back to a sample
+        // product produced a checkout whose order insert always failed with
+        // "Failed to create order", because the sample has no vendor and no
+        // real product row.
+        setProduct(null);
       }
       setLoading(false);
     };
@@ -162,8 +167,22 @@ const Checkout = () => {
       return;
     }
 
+    if (product && product.stock !== undefined && product.stock <= 0) {
+      // settle_order_into_float() cannot decrement stock below zero, so the
+      // payment would be taken and then fail to settle.
+      toast.error("This item is out of stock.");
+      return;
+    }
+
+    if (!product?.id || !product?.vendorProfileId) {
+      // Without a real product row and a resolvable vendor the insert fails on a
+      // NOT NULL / uuid constraint and surfaces as "Failed to create order".
+      toast.error("This listing is unavailable for purchase. Please pick another item.");
+      return;
+    }
+
     setProcessing(true);
-    
+
     // 1. Create real order
     const { data: orderData, error: orderErr } = await supabase.from("orders").insert({
       customer_id: user.id,
