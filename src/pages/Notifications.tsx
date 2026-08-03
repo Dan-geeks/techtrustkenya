@@ -88,7 +88,7 @@ const NotificationItem = ({
       return;
     }
     
-    const route = routeForNotification(notif);
+    const route = routeForNotification(notif, roles ?? []);
     if (route) {
       navigate(route);
     } else {

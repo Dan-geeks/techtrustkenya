@@ -541,13 +541,22 @@ export type Database = {
         Row: {
           created_at: string
           customer_approved_quote: boolean
+          customer_confirmed_at: string | null
           customer_id: string
           device_description: string
           id: string
+          inspection_notes: string | null
+          inspection_passed: boolean | null
+          mpesa_receipt_number: string | null
           mpesa_transaction_id: string | null
+          paid_amount_ksh: number | null
+          paid_at: string | null
+          payment_gateway_response: Json | null
+          payment_provider: string | null
           payment_status: Database["public"]["Enums"]["repair_payment_status"]
           problem_description: string
           quoted_price_ksh: number | null
+          released_at: string | null
           repair_service_id: string | null
           status: Database["public"]["Enums"]["repair_status"]
           technician_notes: string | null
@@ -557,13 +566,22 @@ export type Database = {
         Insert: {
           created_at?: string
           customer_approved_quote?: boolean
+          customer_confirmed_at?: string | null
           customer_id: string
           device_description: string
           id?: string
+          inspection_notes?: string | null
+          inspection_passed?: boolean | null
+          mpesa_receipt_number?: string | null
           mpesa_transaction_id?: string | null
+          paid_amount_ksh?: number | null
+          paid_at?: string | null
+          payment_gateway_response?: Json | null
+          payment_provider?: string | null
           payment_status?: Database["public"]["Enums"]["repair_payment_status"]
           problem_description: string
           quoted_price_ksh?: number | null
+          released_at?: string | null
           repair_service_id?: string | null
           status?: Database["public"]["Enums"]["repair_status"]
           technician_notes?: string | null
@@ -573,13 +591,22 @@ export type Database = {
         Update: {
           created_at?: string
           customer_approved_quote?: boolean
+          customer_confirmed_at?: string | null
           customer_id?: string
           device_description?: string
           id?: string
+          inspection_notes?: string | null
+          inspection_passed?: boolean | null
+          mpesa_receipt_number?: string | null
           mpesa_transaction_id?: string | null
+          paid_amount_ksh?: number | null
+          paid_at?: string | null
+          payment_gateway_response?: Json | null
+          payment_provider?: string | null
           payment_status?: Database["public"]["Enums"]["repair_payment_status"]
           problem_description?: string
           quoted_price_ksh?: number | null
+          released_at?: string | null
           repair_service_id?: string | null
           status?: Database["public"]["Enums"]["repair_status"]
           technician_notes?: string | null
@@ -961,6 +988,14 @@ export type Database = {
     Functions: {
       apply_referral_code: { Args: { p_code: string }; Returns: boolean }
       auto_release_float: { Args: never; Returns: undefined }
+      confirm_repair_collection: {
+        Args: {
+          _inspection_notes?: string
+          _inspection_passed: boolean
+          _repair_id: string
+        }
+        Returns: undefined
+      }
       create_order_atomic: {
         Args: { _phone?: string; _product_id: string; _quantity: number }
         Returns: string
@@ -992,6 +1027,26 @@ export type Database = {
             }
             Returns: undefined
           }
+      mark_repair_paid: {
+        Args: {
+          _mpesa_tx: string
+          _paid_amount_ksh?: number
+          _payment_provider?: string
+          _receipt: string
+          _repair_id: string
+        }
+        Returns: undefined
+      }
+      notify_counterparty: {
+        Args: {
+          _message: string
+          _reference_id: string
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       settle_order_into_float: {
         Args: {
           _mpesa_tx: string

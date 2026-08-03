@@ -129,7 +129,7 @@ export const NotificationsBell = () => {
     }
     
     if (!n.is_read) await markOne(n.id);
-    const route = routeForNotification(n);
+    const route = routeForNotification(n, roles ?? []);
     setOpen(false);
     if (route) navigate(route);
   };

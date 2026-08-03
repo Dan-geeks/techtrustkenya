@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 /** The five milestones shown in the tracker, in order. */
 const STEPS = [
@@ -88,6 +89,8 @@ export const OrderDetail = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
+  const { user } = useAuth();
 
   const fetchOrder = async () => {
     if (!id) {
@@ -170,6 +173,42 @@ export const OrderDetail = () => {
     setConfirming(false);
   };
 
+  /**
+   * Vendor-side fulfilment, so a vendor opening the tracker from their
+   * dashboard can act on the order here instead of going back to the list.
+   * Mirrors the buttons in the dashboard Orders tab.
+   */
+  const advanceOrder = async (status: string, note: string) => {
+    if (!order || advancing) return;
+    setAdvancing(true);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: status as any, updated_at: new Date().toISOString() })
+      .eq("id", order.id);
+
+    if (error) {
+      toast.error(error.message);
+      setAdvancing(false);
+      return;
+    }
+
+    // Keep the customer informed at each step; the tracker they are watching is
+    // realtime, but the notification is what actually pulls them back to it.
+    // Must go through notify_counterparty: a direct insert is blocked by
+    // notifications' "auth.uid() = user_id" policy and fails silently.
+    await supabase.rpc("notify_counterparty", {
+      _user_id: order.customer_id,
+      _title: "Order update",
+      _message: note,
+      _type: "order_update",
+      _reference_id: order.id,
+    });
+
+    toast.success("Order updated.");
+    await fetchOrder();
+    setAdvancing(false);
+  };
+
   if (loading) {
     return (
       <div className="bg-[#F8FAFC] text-[#0F172A] antialiased min-h-screen flex items-center justify-center px-4">
@@ -200,6 +239,11 @@ export const OrderDetail = () => {
   const isCompleted = currentIndex === 4;
   const amount = order.total_amount_ksh?.toLocaleString() ?? "0";
   const banner = BANNERS[currentIndex];
+
+  // The vendor row is joined on vendor_id, so its user_id is the shop owner.
+  // Compare against that rather than the customer_id: an admin viewing the
+  // order is neither, and must not get either side's action buttons.
+  const isVendorSide = !!user && !!order.vendor?.user_id && user.id === order.vendor.user_id;
 
   // ---- Real vendor location (no fabricated courier GPS) ----
   const rawLat = order.vendor?.gps_latitude ?? order.vendor?.latitude;
@@ -455,7 +499,71 @@ export const OrderDetail = () => {
               </div>
             </div>
 
-            {/* Finalize transaction */}
+            {/* Vendor fulfilment. Shown instead of the customer's confirm card
+                when the viewer owns the shop this order belongs to, so the
+                tracker is useful from both sides of the same URL. */}
+            {isVendorSide && (
+              <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-[#E2E8F0] space-y-4">
+                <h3 className="font-bold text-base text-[#0F172A]">Fulfil This Order</h3>
+                <p className="text-xs text-[#64748B] leading-relaxed">
+                  The customer's payment is held in Float. Move the order along as you go — they see each step on
+                  this same page, and their confirmation is what releases your payout.
+                </p>
+
+                <div className="flex flex-wrap gap-2">
+                  {order.status === "payment_held" && (
+                    <button
+                      onClick={() => advanceOrder("vendor_preparing", "The vendor has confirmed your order and is preparing it.")}
+                      disabled={advancing}
+                      className="bg-[#0F3D8C] hover:bg-[#0c327a] disabled:opacity-50 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all"
+                    >
+                      {advancing ? "Saving…" : "Confirm Order"}
+                    </button>
+                  )}
+                  {order.status === "vendor_preparing" && (
+                    <>
+                      <button
+                        onClick={() => advanceOrder("out_for_delivery", "Your order is on the way.")}
+                        disabled={advancing}
+                        className="bg-[#0F3D8C] hover:bg-[#0c327a] disabled:opacity-50 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all"
+                      >
+                        Out for delivery
+                      </button>
+                      <button
+                        onClick={() => advanceOrder("ready_for_pickup", "Your order is ready for pickup.")}
+                        disabled={advancing}
+                        className="bg-white border border-[#CBD5E1] hover:bg-slate-50 disabled:opacity-50 text-[#0F172A] font-bold py-2.5 px-4 rounded-xl text-sm transition-all"
+                      >
+                        Ready for pickup
+                      </button>
+                    </>
+                  )}
+                  {(order.status === "out_for_delivery" || order.status === "ready_for_pickup") && (
+                    <button
+                      onClick={() => advanceOrder("delivered_awaiting_confirmation", "Your order has been delivered. Inspect it, then confirm to release the funds.")}
+                      disabled={advancing}
+                      className="bg-[#0F3D8C] hover:bg-[#0c327a] disabled:opacity-50 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all"
+                    >
+                      Mark delivered
+                    </button>
+                  )}
+                  {order.status === "delivered_awaiting_confirmation" && (
+                    <p className="text-xs text-[#64748B]">
+                      Waiting for the customer to inspect and confirm. That releases your payout from Float.
+                    </p>
+                  )}
+                  {isCompleted && (
+                    <p className="text-xs text-emerald-700 font-semibold">
+                      Confirmed by the customer — your payout has been released from Float.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Finalize transaction — customer only. A vendor must never be
+                able to confirm delivery on the buyer's behalf. */}
+            {!isVendorSide && (
             <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-[#E2E8F0] space-y-4">
               <h3 className="font-bold text-base text-[#0F172A]">Finalize Transaction</h3>
               <p className="text-xs text-[#64748B] leading-relaxed">
@@ -486,6 +594,7 @@ export const OrderDetail = () => {
                 <span>Open Dispute / Report Issue</span>
               </Link>
             </div>
+            )}
           </div>
         </div>
       </main>

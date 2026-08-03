@@ -10,10 +10,18 @@ export const formatDate = (iso: string): string => {
   });
 };
 
-export const routeForNotification = (n: {
-  type: string;
-  reference_id: string | null;
-}): string | null => {
+/**
+ * Where a notification should take you when tapped.
+ *
+ * `roles` matters for vendor_application: those go to a dashboard, and an admin
+ * reviewing a technician application does not hold the `vendor` role — sending
+ * them to /vendor/dashboard bounced them to the home page via ProtectedRoute.
+ * Pass the viewer's roles so each side lands somewhere they can actually open.
+ */
+export const routeForNotification = (
+  n: { type: string; reference_id: string | null },
+  roles: string[] = [],
+): string | null => {
   switch (n.type) {
     case "repair_update":
       return n.reference_id ? `/repairs/${n.reference_id}` : "/repairs";
@@ -25,6 +33,8 @@ export const routeForNotification = (n: {
     case "dispute":
       return n.reference_id ? `/orders/${n.reference_id}` : null;
     case "vendor_application":
+      // Admins get the review queue; vendors get their own dashboard.
+      if (roles.includes("admin") && !roles.includes("vendor")) return "/admin/dashboard";
       return "/vendor/dashboard";
     default:
       return null;

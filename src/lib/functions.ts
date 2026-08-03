@@ -95,6 +95,40 @@ export async function sendWelcomeEmail(args: { name?: string; role?: "customer" 
   }
 }
 
+export type RepairPaymentStatus = {
+  success: boolean;
+  status: "pending" | "paid";
+  paymentStatus?: "unpaid" | "held" | "released";
+  repairStatus?: string;
+  heldInFloat?: boolean;
+  receipt?: string | null;
+};
+
+/**
+ * Response 2 for a repair. As with orders, the STK push's first response only
+ * means the PIN prompt was delivered — poll this until `status` stops being
+ * "pending" before treating the repair as paid.
+ */
+export async function fetchRepairPaymentStatus(repairId: string): Promise<RepairPaymentStatus | null> {
+  if (!FUNCTION_BASE_URL) return null;
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.access_token) return null;
+
+    const response = await fetch(
+      `${FUNCTION_BASE_URL}/repair-payment-status?repair_id=${encodeURIComponent(repairId)}`,
+      { headers: { Authorization: `Bearer ${session.access_token}` } },
+    );
+    const data = (await response.json().catch(() => null)) as RepairPaymentStatus | null;
+    if (!response.ok || !data?.success) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 export type PaymentStatus = {
   success: boolean;
   status: "pending" | "paid" | "failed";

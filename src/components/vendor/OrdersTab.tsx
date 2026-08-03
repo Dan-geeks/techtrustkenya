@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,7 @@ export const OrdersTab = ({ vendor }: { vendor: any }) => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const navigate = useNavigate();
 
   const load = async () => {
     setLoading(true);
@@ -77,13 +79,19 @@ export const OrdersTab = ({ vendor }: { vendor: any }) => {
       ) : (
         <div className="space-y-3">
           {filtered.map((o) => (
-            <Card key={o.id} className="p-4">
+            <Card
+              key={o.id}
+              // The whole card opens the tracker. Buttons inside stopPropagation
+              // so acting on an order doesn't also navigate away from it.
+              onClick={() => navigate(`/orders/${o.id}`)}
+              className="p-4 cursor-pointer transition-colors hover:bg-muted/40"
+            >
               <div className="flex gap-4">
                 <img src={o.product?.image_urls?.[0] ?? "/placeholder.svg"} alt="" className="w-16 h-16 rounded object-cover bg-muted shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <div className="font-medium truncate">{o.product?.brand} {o.product?.model_name}</div>
+                      <div className="font-medium truncate hover:underline">{o.product?.brand} {o.product?.model_name}</div>
                       <div className="text-xs text-muted-foreground">
                         <span className="text-data-id">#{o.id.slice(0, 8).toUpperCase()}</span> · Qty <span className="text-stat">{o.quantity}</span> · {formatDate(o.created_at)}
                       </div>
@@ -98,7 +106,7 @@ export const OrdersTab = ({ vendor }: { vendor: any }) => {
                     </div>
                   </div>
                   {STATUSES.includes(o.status) && o.status !== "delivered_awaiting_confirmation" && (
-                    <div className="flex flex-wrap gap-2 mt-3">
+                    <div className="flex flex-wrap gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
                       {o.status === "payment_held" && (
                         <Button size="sm" onClick={() => updateStatus(o.id, "vendor_preparing")}>Confirm Order</Button>
                       )}

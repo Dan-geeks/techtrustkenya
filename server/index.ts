@@ -16,6 +16,9 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { emailConfigured, sendOrderPaidEmail, sendVendorSaleEmail, sendWelcomeEmail } from "./email";
+import {
+  smsConfigured, sendSms, orderPaidSms, vendorSaleSms, repairPaidSms, repairPaidVendorSms,
+} from "./sms";
 
 type User = { id: string; email?: string };
 
@@ -267,10 +270,12 @@ async function notify(userId: string, title: string, message: string, type: stri
   }
 }
 
-async function getProfile(userId: string): Promise<{ email?: string | null; full_name?: string | null } | null> {
+type Profile = { email?: string | null; full_name?: string | null; phone_number?: string | null };
+
+async function getProfile(userId: string): Promise<Profile | null> {
   try {
-    const rows = await rest<Array<{ email?: string | null; full_name?: string | null }>>(
-      `profiles?select=email,full_name&id=eq.${encodeURIComponent(userId)}&limit=1`,
+    const rows = await rest<Profile[]>(
+      `profiles?select=email,full_name,phone_number&id=eq.${encodeURIComponent(userId)}&limit=1`,
     );
     return rows[0] ?? null;
   } catch (error) {
@@ -699,17 +704,18 @@ async function settleIntoFloat(args: {
   });
 
   // Receipts go out after the order is safely marked paid, and are awaited only
-  // so failures land in the same request's logs. sendOrderPaidEmail never
-  // throws, so a dead mail provider cannot un-settle a real payment.
-  await sendPaymentEmails(order, Number(amount), receipt);
+  // so failures land in the same request's logs. Nothing in here throws, so a
+  // dead mail or SMS provider cannot un-settle a real payment.
+  await sendPaymentNotices(order, Number(amount), receipt);
 }
 
 /**
- * Buyer receipt + vendor "you have a sale". Best-effort: every failure inside
- * is logged and swallowed, because this runs on the payment-confirmed path.
+ * Buyer receipt + vendor "you have a sale", by email and SMS. Best-effort:
+ * every failure inside is logged and swallowed, because this runs on the
+ * payment-confirmed path.
  */
-async function sendPaymentEmails(order: Order, amountKsh: number, receipt: string) {
-  if (!emailConfigured()) return;
+async function sendPaymentNotices(order: Order, amountKsh: number, receipt: string) {
+  if (!emailConfigured() && !smsConfigured()) return;
   try {
     const [customer, vendor, product] = await Promise.all([
       getProfile(order.customer_id),
@@ -759,8 +765,29 @@ async function sendPaymentEmails(order: Order, amountKsh: number, receipt: strin
         productName,
       });
     }
+
+    // SMS. Most M-Pesa customers here read a text long before an email, so the
+    // receipt goes to both. dedupeKey stops a retried callback double-texting.
+    if (smsConfigured()) {
+      if (customer?.phone_number) {
+        await sendSms({
+          to: customer.phone_number,
+          message: orderPaidSms({ amountKsh, receipt, orderId: order.id }),
+          dedupeKey: `order-paid-sms:${order.id}`,
+        });
+      }
+      const vendorPhone =
+        vendor?.phone || (vendor?.user_id ? (await getProfile(vendor.user_id))?.phone_number ?? null : null);
+      if (vendorPhone) {
+        await sendSms({
+          to: vendorPhone,
+          message: vendorSaleSms({ amountKsh, orderId: order.id }),
+          dedupeKey: `vendor-sale-sms:${order.id}`,
+        });
+      }
+    }
   } catch (error) {
-    console.warn("payment emails skipped", error);
+    console.warn("payment notices skipped", error);
   }
 }
 
@@ -1384,6 +1411,14 @@ app.get("/config-check", (c) => {
       from: process.env.RESEND_FROM ?? "TechTrust <onboarding@resend.dev> (default)",
       supportEmail: process.env.SUPPORT_EMAIL ?? "support@techtrustkenya.co.ke (default)",
     },
+    sms: {
+      // Without AT_API_KEY every send is a logged no-op. "sandbox" as the
+      // username only reaches Africa's Talking simulator numbers, never a real
+      // handset — that catches the commonest silent misconfiguration.
+      configured: smsConfigured(),
+      username: process.env.AT_USERNAME ?? "sandbox (default — will NOT reach real phones)",
+      senderId: process.env.AT_SENDER_ID ?? "(shared pool number)",
+    },
   });
 });
 
@@ -1865,6 +1900,230 @@ app.post("/notify-vendor-approved", async (c) => {
       : { ok: false, skipped: "no email on file" };
 
     return json({ success: true, emailSent: emailResult.ok });
+  } catch (error) {
+    if (error instanceof Response) return error;
+    return json({ success: false, error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Repairs — the same two-response escrow as an order, on repair_requests.
+//
+// repair_requests carries its own payment_status (unpaid | held | released),
+// so repairs never borrow an orders row. Everything below mirrors the order
+// endpoints; only the table and the settle RPC differ.
+// ---------------------------------------------------------------------------
+
+type Repair = {
+  id: string;
+  customer_id: string;
+  vendor_id: string;
+  device_description?: string | null;
+  status: string;
+  quoted_price_ksh?: number | null;
+  customer_approved_quote: boolean;
+  payment_status: string;
+  mpesa_transaction_id?: string | null;
+  mpesa_receipt_number?: string | null;
+};
+
+const REPAIR_FIELDS =
+  "id,customer_id,vendor_id,device_description,status,quoted_price_ksh," +
+  "customer_approved_quote,payment_status,mpesa_transaction_id,mpesa_receipt_number";
+
+async function getRepair(repairId: string): Promise<Repair | null> {
+  const rows = await rest<Repair[]>(
+    `repair_requests?select=${encodeURIComponent(REPAIR_FIELDS)}&id=eq.${encodeURIComponent(repairId)}&limit=1`,
+  );
+  return rows[0] ?? null;
+}
+
+async function settleRepairIntoFloat(args: {
+  repair: Repair;
+  receipt: string;
+  transactionId: string;
+  amountKsh?: number;
+  provider: string;
+}) {
+  await rpc("mark_repair_paid", {
+    _repair_id: args.repair.id,
+    _receipt: args.receipt,
+    _mpesa_tx: args.transactionId,
+    _paid_amount_ksh: Number.isFinite(Number(args.amountKsh)) ? Math.round(Number(args.amountKsh)) : null,
+    _payment_provider: args.provider,
+  });
+
+  // Only after the repair is safely marked paid. Never throws.
+  await sendRepairPaymentNotices(args.repair, Number(args.amountKsh ?? args.repair.quoted_price_ksh ?? 0), args.receipt);
+}
+
+/** Customer receipt + technician "start work", by SMS. Best-effort. */
+async function sendRepairPaymentNotices(repair: Repair, amountKsh: number, receipt: string) {
+  if (!smsConfigured()) return;
+  try {
+    const [customer, vendorRows] = await Promise.all([
+      getProfile(repair.customer_id),
+      rest<Array<{ user_id?: string | null; phone?: string | null }>>(
+        `vendor_profiles?select=user_id,phone&id=eq.${encodeURIComponent(repair.vendor_id)}&limit=1`,
+      ).catch(() => []),
+    ]);
+
+    if (customer?.phone_number) {
+      await sendSms({
+        to: customer.phone_number,
+        message: repairPaidSms({
+          amountKsh, receipt, repairId: repair.id, device: repair.device_description,
+        }),
+        dedupeKey: `repair-paid-sms:${repair.id}`,
+      });
+    }
+
+    const vendorPhone =
+      vendorRows[0]?.phone ||
+      (vendorRows[0]?.user_id ? (await getProfile(vendorRows[0].user_id))?.phone_number ?? null : null);
+    if (vendorPhone) {
+      await sendSms({
+        to: vendorPhone,
+        message: repairPaidVendorSms({ amountKsh, repairId: repair.id, device: repair.device_description }),
+        dedupeKey: `repair-paid-vendor-sms:${repair.id}`,
+      });
+    }
+  } catch (error) {
+    console.warn("repair payment notices skipped", error);
+  }
+}
+
+app.post("/repair-stkpush", async (c) => {
+  try {
+    const user = await requireUser(c);
+    const { repair_id, phone } = await readBody(c);
+    if (!repair_id) return json({ success: false, error: "repair_id is required" }, 400);
+    if (!phone) return json({ success: false, error: "phone is required" }, 400);
+
+    const phoneFmt = formatPhone(String(phone));
+    if (!phoneFmt) return json({ success: false, error: "Enter a valid Kenyan number (07XXXXXXXX or 2547XXXXXXXX)" }, 400);
+
+    const repair = await getRepair(String(repair_id));
+    if (!repair) return json({ success: false, error: "Repair request not found" }, 404);
+    if (repair.customer_id !== user.id && !(await isAdmin(user.id))) {
+      return json({ success: false, error: "Forbidden" }, 403);
+    }
+    if (repair.payment_status !== "unpaid") {
+      return json({ success: false, error: "This repair has already been paid for" }, 409);
+    }
+    // The quote IS the price. Refusing to push without one stops a customer
+    // being charged an amount nobody agreed.
+    if (!repair.quoted_price_ksh || repair.quoted_price_ksh < 1) {
+      return json({ success: false, error: "The technician has not sent a quote yet" }, 409);
+    }
+    if (!repair.customer_approved_quote) {
+      return json({ success: false, error: "Approve the quote before paying" }, 409);
+    }
+
+    const provider = resolveProvider();
+    const chargeAmount = resolveChargeAmount(Number(repair.quoted_price_ksh));
+    console.log(`[repair-stkpush] provider=${provider} repair=${repair.id} phone=${maskPhone(phoneFmt)} amount=${chargeAmount}`);
+
+    if (provider === "simulation") {
+      const tx = `SIM-R${repair.id.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+      await settleRepairIntoFloat({
+        repair,
+        receipt: `SIM${Date.now().toString().slice(-8)}`,
+        transactionId: tx,
+        amountKsh: repair.quoted_price_ksh,
+        provider: "simulation",
+      });
+      return json({
+        success: true,
+        provider: "simulation",
+        amountKsh: repair.quoted_price_ksh,
+        CheckoutRequestID: tx,
+        CustomerMessage: "Sandbox payment confirmed and held in TechTrust Float",
+      });
+    }
+
+    const result =
+      provider === "darajapay"
+        ? await requestDarajaPayStk({ orderId: repair.id, phone: phoneFmt, amountKsh: chargeAmount })
+        : provider === "kcb_buni"
+          ? await requestKcbBuniStk({ orderId: repair.id, phone: phoneFmt, amountKsh: chargeAmount })
+          : await requestDarajaStk({ orderId: repair.id, phone: phoneFmt, amountKsh: chargeAmount });
+
+    if (!result.success) {
+      return json({ success: false, error: result.error, provider: result.provider, details: result.details }, 502);
+    }
+
+    // Response 1 only. Persist the CheckoutRequestID before returning or
+    // Response 2 can never be matched back to this repair.
+    await rest(`repair_requests?id=eq.${encodeURIComponent(repair.id)}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({
+        mpesa_transaction_id: result.transactionId,
+        payment_provider: result.provider,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+
+    return json({
+      success: true,
+      provider: result.provider,
+      amountKsh: chargeAmount,
+      CheckoutRequestID: result.transactionId,
+      CustomerMessage: "Enter your M-Pesa PIN to hold this payment in Float",
+    });
+  } catch (error) {
+    if (error instanceof Response) return error;
+    return json({ success: false, error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+
+/**
+ * Response 2 for a repair. With DarajaPay no callback ever lands, so polling
+ * this is the only way a repair leaves `unpaid`.
+ */
+app.get("/repair-payment-status", async (c) => {
+  try {
+    const user = await requireUser(c);
+    const repairId = c.req.query("repair_id");
+    if (!repairId) return json({ success: false, error: "repair_id is required" }, 400);
+
+    let repair = await getRepair(repairId);
+    if (!repair) return json({ success: false, error: "Repair request not found" }, 404);
+    if (repair.customer_id !== user.id && !(await isAdmin(user.id))) {
+      return json({ success: false, error: "Forbidden" }, 403);
+    }
+
+    if (repair.payment_status === "unpaid" && repair.mpesa_transaction_id) {
+      const checkoutId = repair.mpesa_transaction_id;
+      try {
+        const res = await fetch(`${darajapayBaseUrl()}/widget/status?id=${encodeURIComponent(checkoutId)}`);
+        const data = await getJson(res);
+        const status = firstString(data.status, data.state, data.paymentStatus)?.toLowerCase();
+        if (res.ok && (status === "paid" || status === "success" || status === "completed")) {
+          await settleRepairIntoFloat({
+            repair,
+            receipt: firstString(data.receipt, data.MpesaReceiptNumber, data.mpesaReceiptNumber) ?? checkoutId,
+            transactionId: checkoutId,
+            amountKsh: Number(data.amount) || repair.quoted_price_ksh || undefined,
+            provider: "darajapay",
+          });
+          repair = (await getRepair(repairId)) ?? repair;
+        }
+      } catch (error) {
+        // A hiccup mid-poll is not a payment failure — stay pending.
+        console.warn("[repair-payment-status] widget/status failed", error);
+      }
+    }
+
+    return json({
+      success: true,
+      status: repair.payment_status === "unpaid" ? "pending" : "paid",
+      paymentStatus: repair.payment_status,
+      repairStatus: repair.status,
+      heldInFloat: repair.payment_status === "held",
+      receipt: repair.mpesa_receipt_number ?? null,
+    });
   } catch (error) {
     if (error instanceof Response) return error;
     return json({ success: false, error: error instanceof Error ? error.message : String(error) }, 500);
