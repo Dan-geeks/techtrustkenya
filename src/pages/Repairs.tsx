@@ -1,7 +1,26 @@
-﻿import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { isVendorVerified } from "@/lib/format";
 
 const Repairs = () => {
+  // This page was entirely static, so a customer could never see who actually
+  // repairs things. List the vendors who enabled repairs at onboarding.
+  const [techs, setTechs] = useState<any[]>([]);
+  const [loadingTechs, setLoadingTechs] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("vendor_profiles")
+        .select("id, business_name, city, county, physical_address, average_rating, verification_status, shop_photo_urls")
+        .eq("offers_repairs", true)
+        .order("average_rating", { ascending: false });
+      setTechs(data ?? []);
+      setLoadingTechs(false);
+    })();
+  }, []);
+
   useEffect(() => {
     document.title = "Certified Tech Repairs | TechTrust Kenya";
     window.scrollTo(0, 0);
@@ -210,6 +229,62 @@ const Repairs = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+        {/* Verified technicians, straight from vendor_profiles. */}
+        <section className="py-20 md:py-28 bg-white border-t border-[#E2E8F0]">
+          <div className="max-w-container-max mx-auto px-6 md:px-12">
+            <div className="mb-12">
+              <h2 className="font-display-h2 text-3xl md:text-4xl text-[#0F172A] font-bold mb-2">
+                Verified repair technicians
+              </h2>
+              <p className="text-base text-[#64748B]">
+                Every shop below has passed our physical inspection. Pick one and book directly.
+              </p>
+            </div>
+
+            {loadingTechs ? (
+              <p className="text-sm text-[#64748B]">Loading technicians...</p>
+            ) : techs.length === 0 ? (
+              <div className="border-2 border-dashed border-[#E2E8F0] rounded-2xl p-12 text-center">
+                <p className="font-semibold text-[#0F172A]">No repair technicians listed yet</p>
+                <p className="text-sm text-[#64748B] mt-1">
+                  Vendors appear here once they enable <strong>Offer repair services</strong> in their dashboard.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {techs.map((t) => (
+                  <div key={t.id} className="bg-white rounded-2xl p-6 border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all flex flex-col">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 rounded-full bg-[#0F3D8C]/10 flex items-center justify-center text-[#0F3D8C] font-bold">
+                        {(t.business_name || "?").substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-[#0F172A] truncate">{t.business_name}</h3>
+                        <p className="text-xs text-[#64748B] truncate">
+                          {[t.physical_address, t.city].filter(Boolean).join(", ") || "Kenya"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {isVendorVerified(t.verification_status) && (
+                      <span className="inline-flex items-center gap-1 self-start bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 px-2.5 py-1 rounded-full text-[11px] font-bold mb-4">
+                        <span className="material-symbols-outlined text-[14px]">verified_user</span>
+                        Physically Verified
+                      </span>
+                    )}
+
+                    <Link
+                      to={`/book-repair?vendor=${t.id}`}
+                      className="mt-auto w-full text-center bg-[#0F3D8C] hover:bg-[#002766] text-white py-2.5 rounded-lg font-bold text-sm transition-colors"
+                    >
+                      Book with this technician
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>

@@ -7,12 +7,21 @@ import { OrdersTab } from "@/components/vendor/OrdersTab";
 import { MessagesTab } from "@/components/vendor/MessagesTab";
 import { RepairsTab } from "@/components/vendor/RepairsTab";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const VendorDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"Overview" | "Products" | "Orders" | "Repairs" | "Messages" | "Settings">("Overview");
+  const [searchParams] = useSearchParams();
+
+  // Lets a notification deep-link straight to a tab, e.g.
+  // /vendor/dashboard?tab=Messages, instead of landing on Overview.
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    const allowed = ["Overview", "Products", "Orders", "Repairs", "Messages", "Settings"];
+    if (t && allowed.includes(t)) setActiveTab(t as typeof activeTab);
+  }, [searchParams]);
   const [vendor, setVendor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -117,8 +126,14 @@ const VendorDashboard = () => {
           <MessagesTab />
         )}
 
+        {/* SettingsTab gets the whole row: it needs vendor.id to save at all,
+            and reads offers_repairs off it. It was previously handed a stripped
+            business_name/phone/email object, so neither worked. */}
         {activeTab === "Settings" && (
-          <SettingsTab vendor={{ business_name: businessName, phone: vendor?.phone || "", email: user?.email || "" }} onUpdated={loadVendor} />
+          <SettingsTab
+            vendor={{ ...vendor, business_name: businessName, email: user?.email || "" }}
+            onUpdated={loadVendor}
+          />
         )}
       </div>
     </div>

@@ -4,6 +4,7 @@ import { ShieldCheck, Lock, Smartphone, Receipt, Store, CreditCard, ArrowLeft, C
 import { toast } from "sonner";
 import { ESCROW_API_BASE } from "@/lib/functions";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchEscrowFeePercent, DEFAULT_ESCROW_FEE_PERCENT } from "@/lib/settings";
 import { useAuth } from "@/hooks/useAuth";
 
 type PaymentMethodType = "express" | "paybill" | "till" | "mobile_money";
@@ -29,6 +30,13 @@ const Checkout = () => {
   const [processing, setProcessing] = useState(false);
   const [stkModalOpen, setStkModalOpen] = useState(false);
   const [paymentError, setPaymentError] = useState<{ kind: "failed" | "timeout"; message: string } | null>(null);
+  // Admin-controlled (app_settings.escrow_fee_percentage). Was hardcoded at 5%,
+  // so changing it in the admin console never reached the buyer.
+  const [feePercent, setFeePercent] = useState<number>(DEFAULT_ESCROW_FEE_PERCENT);
+
+  useEffect(() => {
+    fetchEscrowFeePercent().then(setFeePercent).catch(() => {});
+  }, []);
 
   useEffect(() => {
     document.title = "Secure Escrow Checkout | TechTrust Kenya";
@@ -91,7 +99,7 @@ const Checkout = () => {
   // These feed both the summary UI and the order row so the two cannot drift.
   const listedPrice = product?.price || 0;
   const totalDue = listedPrice;
-  const serviceFee = Math.floor(totalDue * 0.05);
+  const serviceFee = Math.floor((totalDue * feePercent) / 100);
   const subtotal = totalDue - serviceFee;
 
   useEffect(() => {
@@ -379,7 +387,7 @@ const Checkout = () => {
                   <span className="font-mono text-[#0F172A] font-bold text-price">KES {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[#64748B]">
-                  <span>TechTrust service fee (5%)</span>
+                  <span>TechTrust service fee ({feePercent}%)</span>
                   <span className="font-mono text-[#0F172A] font-bold text-price">
                     KES {serviceFee.toLocaleString()}
                   </span>

@@ -69,16 +69,22 @@ const NotificationItem = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
+  const { roles } = useAuth();
+  const isVendor = !!roles?.includes("vendor");
 
   const handleClick = () => {
     if (!notif.is_read) onRead(notif.id);
     
     if (notif.type === "message") {
-      window.dispatchEvent(
-        new CustomEvent("open-chat", {
-          detail: { partnerId: notif.reference_id, partnerName: notif._partnerName || "User" },
-        })
-      );
+      const partnerName = (notif.title || "").replace(/^New message from /, "") || "User";
+      // Go to the inbox for whichever side this user is, then open the thread
+      // so they can read and reply without navigating there manually.
+      navigate(isVendor ? "/vendor/dashboard?tab=Messages" : "/profile#messages");
+      setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent("open-chat", { detail: { partnerId: notif.reference_id, partnerName } })
+        );
+      }, 250);
       return;
     }
     

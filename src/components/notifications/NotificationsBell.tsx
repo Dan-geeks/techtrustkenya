@@ -31,7 +31,7 @@ const timeAgo = (iso: string) => {
 };
 
 export const NotificationsBell = () => {
-  const { user } = useAuth();
+  const { user, roles } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
@@ -113,12 +113,17 @@ export const NotificationsBell = () => {
     if (n.type === "message") {
       setOpen(false);
       if (!n.is_read) await markOne(n.id);
-      // reference_id holds the sender's profiles(id).
-      window.dispatchEvent(
-        new CustomEvent("open-chat", {
-          detail: { partnerId: n.reference_id, partnerName: n.title.replace(/^New message from /, "") },
-        })
-      );
+      const partnerName = n.title.replace(/^New message from /, "");
+
+      // Land on the inbox for whichever side you are, rather than leaving the
+      // user to navigate there themselves, then open the thread so they can
+      // reply straight away. reference_id holds the sender's profiles(id).
+      navigate(roles?.includes("vendor") ? "/vendor/dashboard?tab=Messages" : "/profile#messages");
+      setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent("open-chat", { detail: { partnerId: n.reference_id, partnerName } })
+        );
+      }, 250);
       fetchItems();
       return;
     }

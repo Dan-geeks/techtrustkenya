@@ -13,6 +13,7 @@ interface Product {
   vendor: string;
   vendorVerified: boolean;
   location: string;
+  originalPrice?: number | null;
   badge?: string;
 }
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +50,7 @@ const Browse = () => {
           category,
           condition,
           price_ksh,
+          original_price_ksh,
           image_urls,
           quantity_in_stock,
           vendor_profiles ( business_name, verification_status )
@@ -155,6 +157,9 @@ const Browse = () => {
         category: cat,
         condition: cond,
         price: p.price_ksh,
+        // Only a genuine vendor-set discount, never a computed one.
+        originalPrice:
+          p.original_price_ksh && p.original_price_ksh > p.price_ksh ? p.original_price_ksh : null,
         image: p.image_urls?.[0] || "/placeholder.svg",
         vendor: p.vendor_profiles?.business_name || "Unknown Vendor",
         vendorVerified: isVendorVerified(p.vendor_profiles?.verification_status),
@@ -474,13 +479,14 @@ const Browse = () => {
                       className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
                       src={product.image}
                     />
-                    {product.badge && (
+                    {/* Discount flag, from the vendor's optional original price. */}
+                    {product.originalPrice ? (
                       <div className="absolute top-2 right-2 flex gap-1">
-                        <span className="px-2 py-0.5 bg-white/90 backdrop-blur text-[#0F3D8C] font-mono text-xs font-bold rounded shadow-sm border border-[#E2E8F0]">
-                          {product.badge}
+                        <span className="px-2 py-0.5 bg-[#10B981] text-white font-mono text-xs font-bold rounded shadow-sm">
+                          SAVE {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                         </span>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                   <div className="p-4 flex flex-col gap-3 flex-grow">
                     <div className="flex items-center gap-1.5">
@@ -496,8 +502,21 @@ const Browse = () => {
                       {product.title}
                     </h3>
                     <div className="mt-auto pt-4 border-t border-[#E2E8F0] flex flex-col gap-2">
-                      <div className="font-mono text-xl font-bold text-[#0F172A] text-price font-data-price">
-                        KES {product.price.toLocaleString()}
+                      <div className="flex items-baseline gap-2 flex-wrap">
+                        <div className="font-mono text-xl font-bold text-[#0F172A] text-price font-data-price">
+                          KES {product.price.toLocaleString()}
+                        </div>
+                        {/* Shown only for a real vendor-set discount. */}
+                        {product.originalPrice ? (
+                          <>
+                            <span className="font-mono text-sm text-slate-400 line-through">
+                              KES {product.originalPrice.toLocaleString()}
+                            </span>
+                            <span className="bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 rounded px-1.5 py-0.5 text-[10px] font-bold">
+                              -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                            </span>
+                          </>
+                        ) : null}
                       </div>
                       <div className="flex items-center gap-1 text-[#10B981] font-mono text-xs font-semibold">
                         <span
