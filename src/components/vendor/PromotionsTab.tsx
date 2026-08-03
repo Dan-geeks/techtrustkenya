@@ -59,8 +59,12 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
       return;
     }
     setStkPhase("sending");
-    
-    // Trigger real M-Pesa STK Push prompt (charged 1 Bob to phone)
+
+    // Charge what the vendor is actually shown and what gets recorded on the
+    // promotion row. This was hardcoded to 1, so every promotion — however
+    // long or expensive — collected exactly KES 1.
+    const totalAmount = (PRICES[type] * Number(days)) / 7;
+
     const digits = String(phone ?? "").replace(/^\+/, "").replace(/\D/g, "");
     let formattedPhone = digits;
     if (/^0[71]\d{8}$/.test(digits)) formattedPhone = `254${digits.slice(1)}`;
@@ -72,9 +76,9 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phone: formattedPhone,
-          amount_ksh: 1,
-          amountKsh: 1,
-          amount: 1,
+          amount_ksh: totalAmount,
+          amountKsh: totalAmount,
+          amount: totalAmount,
         }),
       });
     } catch (err) {
@@ -82,7 +86,6 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
     }
 
     setTimeout(async () => {
-      const totalAmount = (PRICES[type] * Number(days)) / 7;
       const expires = new Date();
       expires.setDate(expires.getDate() + Number(days));
 

@@ -127,10 +127,9 @@ const Checkout = () => {
       await fetch(`${ESCROW_API_BASE}/mpesa-stkpush`, {
         method: "POST",
         headers,
-        // Send the REAL order total. The server caps it (resolveChargeAmount:
-        // PAYMENT_SANDBOX_MODE + PAYMENT_TEST_AMOUNT_KSH=1), so testing still
-        // charges 1 bob. Hardcoding 2 here would have charged 2 bob instead of
-        // the true price the moment sandbox mode is turned off.
+        // Send the REAL order total — this is what the customer is charged.
+        // The server's resolveChargeAmount() only overrides it while
+        // PAYMENT_SANDBOX_MODE is on, and that is now off in production.
         body: JSON.stringify({
           order_id: orderId,
           phone: formattedPhone,
@@ -201,7 +200,7 @@ const Checkout = () => {
 
     setStkModalOpen(true);
 
-    // Trigger real M-Pesa STK Push prompt (charged 1 Bob to phone, displaying full order price on site)
+    // Real M-Pesa STK Push for the full order amount shown at checkout.
     triggerLiveStkPush(phoneNumber, newOrderId, totalDue);
 
     setTimeout(() => {
