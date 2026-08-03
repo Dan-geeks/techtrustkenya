@@ -76,8 +76,14 @@ const Checkout = () => {
     loadProduct();
   }, [productId]);
 
-  const subtotal = product?.price || 0;
-  const totalDue = subtotal;
+  // The listed price is what the buyer pays. TechTrust's 5% is taken OUT of it
+  // (the vendor receives the net), so Total Due always equals the listed price:
+  //   listed 85,000  ->  subtotal 80,750 + service fee 4,250  =  85,000 due.
+  // These feed both the summary UI and the order row so the two cannot drift.
+  const listedPrice = product?.price || 0;
+  const totalDue = listedPrice;
+  const serviceFee = Math.floor(totalDue * 0.05);
+  const subtotal = totalDue - serviceFee;
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -166,8 +172,8 @@ const Checkout = () => {
       product_id: product.id,
       quantity: 1,
       total_amount_ksh: totalDue,
-      platform_fee_ksh: Math.floor(totalDue * 0.05),
-      vendor_payout_ksh: totalDue - Math.floor(totalDue * 0.05),
+      platform_fee_ksh: serviceFee,
+      vendor_payout_ksh: subtotal,
       status: "pending_payment"
     }).select("id").single();
 
@@ -290,8 +296,10 @@ const Checkout = () => {
                   <span className="font-mono text-[#0F172A] font-bold text-price">KES {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[#64748B]">
-                  <span>Buyer Protection Fee</span>
-                  <span className="font-mono text-[#10B981] font-bold text-price">FREE</span>
+                  <span>TechTrust service fee (5%)</span>
+                  <span className="font-mono text-[#0F172A] font-bold text-price">
+                    KES {serviceFee.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center pt-3 border-t border-slate-200">
                   <span className="font-bold text-[#0F172A] text-base">Total Due</span>
