@@ -181,6 +181,32 @@ Two things worth knowing:
 Unticking the box withdraws the application and clears all three checks, so
 re-applying starts clean rather than inheriting stale ticks.
 
+### The `/repairs/:id` 404
+
+`routeForNotification()` has always turned a `repair_update` notification into
+`/repairs/<reference_id>`, but that route was never registered — so every repair
+notification landed on the 404 page, and a customer who booked a repair could
+never look at it again. `src/pages/RepairDetail.tsx` now serves it, for both the
+customer and the vendor, off the existing RLS.
+
+Fixed alongside it, all in the same flow:
+
+- Nothing anywhere ever set `customer_approved_quote`, so a quote could be sent
+  but never accepted and the vendor's "Mark received" button stayed disabled
+  forever. The customer approves or declines on the detail page.
+- The admin's repair table read `device_type` / `device_model` /
+  `issue_description` — none of which exist. The real columns are
+  `device_description` and `problem_description`.
+- `repair_requests` had SELECT policies for the customer and the vendor and
+  **none for admins**, so the admin tab was empty regardless of content. It read
+  as "no repair requests found" rather than a permissions problem.
+
+**Watch for this shape of bug**: a link built from an id of the wrong type. The
+vetting notifications originally carried a `vendor_profiles` id on a
+`repair_update`, which would have rebuilt the same 404 from a different
+direction. A cheap guard is the assertion in the test suite that every
+`repair_update` `reference_id` resolves to a real `repair_requests` row.
+
 ---
 
 ## 5. Accounts and access
