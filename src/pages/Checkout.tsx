@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ShieldCheck, Lock, Smartphone, Receipt, Store, CreditCard, ArrowLeft, CheckCircle2, Loader2, Info, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { SAMPLE_PRODUCTS } from "@/data/products";
+import { ESCROW_API_BASE } from "@/lib/functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -89,7 +90,7 @@ const Checkout = () => {
           .eq("id", activeOrderId)
           .maybeSingle();
 
-        if (data && (data.payment_status === "paid_float" || data.payment_status === "paid")) {
+        if (data && data.payment_status === "paid_float") {
           toast.success("Payment Received & Escrow Locked!");
           navigate(`/orders/${activeOrderId}`);
         }
@@ -117,15 +118,19 @@ const Checkout = () => {
         headers["Authorization"] = `Bearer ${session.access_token}`;
       }
 
-      await fetch("https://techtrust-escrow-api-production.up.railway.app/mpesa-stkpush", {
+      await fetch(`${ESCROW_API_BASE}/mpesa-stkpush`, {
         method: "POST",
         headers,
+        // Send the REAL order total. The server caps it (resolveChargeAmount:
+        // PAYMENT_SANDBOX_MODE + PAYMENT_TEST_AMOUNT_KSH=1), so testing still
+        // charges 1 bob. Hardcoding 2 here would have charged 2 bob instead of
+        // the true price the moment sandbox mode is turned off.
         body: JSON.stringify({
           order_id: orderId,
           phone: formattedPhone,
-          amount_ksh: 2,
-          amountKsh: 2,
-          amount: 2,
+          amount_ksh: amount,
+          amountKsh: amount,
+          amount,
         }),
       }).catch((e) => console.warn("Escrow API call:", e));
     } catch (err) {
@@ -177,13 +182,10 @@ const Checkout = () => {
 
     // 2. Notify the vendor!
     if (product.vendorUserId) {
-      await supabase.from("notifications").insert({
-        user_id: product.vendorUserId,
-        title: "New Order Pending Payment!",
-        message: `A customer has initiated checkout for ${product.title}.`,
-        type: "new_order",
-        reference_id: newOrderId
-      });
+      // The vendor's "New Order Received" notification is raised by the
+      // trg_orders_notify_vendor trigger. It cannot be inserted from here:
+      // the notifications INSERT policy is WITH CHECK (auth.uid() = user_id),
+      // so a customer writing a row addressed to the vendor is denied by RLS.
       await supabase.from("messages").insert({
         sender_id: user.id,
         receiver_id: product.vendorUserId,
@@ -203,8 +205,15 @@ const Checkout = () => {
   };
 
   const handleConfirmPaymentReceived = () => {
+    // Never fall back to a hardcoded order id — that sent buyers to someone
+    // else's order. With no active order there is nothing to track.
+    if (!activeOrderId) {
+      toast.error("We couldn't find this order. Please check My Orders.");
+      navigate("/orders");
+      return;
+    }
     toast.success("Payment Received & Escrow Locked! Redirecting to Order Tracker...");
-    navigate(`/orders/${activeOrderId || "3469010c-a1a9-437a-9b72-f75dc5c5949f"}`);
+    navigate(`/orders/${activeOrderId}`);
   };
 
   if (loading) {

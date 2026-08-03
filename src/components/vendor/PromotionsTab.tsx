@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ESCROW_API_BASE } from "@/lib/functions";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKsh, formatDate } from "@/lib/format";
 import { toast } from "sonner";
@@ -66,7 +67,7 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
     else if (/^[71]\d{8}$/.test(digits)) formattedPhone = `254${digits}`;
 
     try {
-      await fetch("https://techtrust-escrow-api-production.up.railway.app/mpesa-stkpush", {
+      await fetch(`${ESCROW_API_BASE}/mpesa-stkpush`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

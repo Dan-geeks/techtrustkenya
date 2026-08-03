@@ -11,6 +11,10 @@ type InvokeResult<T> = {
 
 const FUNCTION_BASE_URL = import.meta.env.VITE_RAILWAY_FUNCTION_URL?.replace(/\/+$/, "");
 
+/** Base URL of the escrow API. Pages must use this rather than hardcoding a Railway
+ *  host — two pages pinned the old deleted deployment and silently broke. */
+export const ESCROW_API_BASE = FUNCTION_BASE_URL ?? "";
+
 /** True when a dedicated escrow API is configured (rather than Supabase edge functions). */
 export const hasEscrowApi = Boolean(FUNCTION_BASE_URL);
 

@@ -30,3 +30,12 @@ export const routeForNotification = (n: {
       return null;
   }
 };
+
+/**
+ * vendor_verification_status carries two synonyms for the same state:
+ * "verified" (5 vendors) and "approved" (6 vendors). Pages that checked only
+ * one of them showed "Verified Partner" incorrectly for roughly half the
+ * marketplace, in both directions. Always go through this helper.
+ */
+export const isVendorVerified = (status?: string | null) =>
+  status === "verified" || status === "approved";

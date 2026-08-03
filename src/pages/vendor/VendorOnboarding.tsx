@@ -253,7 +253,14 @@ const VendorOnboarding = () => {
             Back
           </Button>
           <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
-            <img src="/logo-transparent.png" alt="TechTrust" className="h-14 w-auto object-contain drop-shadow-sm brightness-0 invert" />
+            {/* logo-mark-white.png is the navy mark baked onto a white square.
+                logo-transparent.png carries a soft grey glow in its alpha, which
+                rendered as the grey square against this blue background. */}
+            <img
+              src="/logo-mark-white.png"
+              alt="TechTrust"
+              className="h-14 w-14 rounded-xl object-contain shadow-sm"
+            />
             <span className="font-display-h2 font-bold text-2xl text-white drop-shadow-sm">TechTrust</span>
           </Link>
           <div className="w-[72px]" /> {/* Spacer for centering */}

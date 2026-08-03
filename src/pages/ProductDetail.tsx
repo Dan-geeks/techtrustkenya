@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ShieldCheck, MessageCircle, Lock, Verified, Star, CheckCircle, MapPin, Loader2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
 
 import { SAMPLE_PRODUCTS } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
+import { isVendorVerified } from "@/lib/format";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -42,16 +43,25 @@ const ProductDetail = () => {
           condition: data.condition,
           vendor: data.vendor_profiles?.business_name || "Unknown Vendor",
           vendor_id: data.vendor_id,
-          vendorVerified: data.vendor_profiles?.verification_status === "approved",
+          vendorVerified: isVendorVerified(data.vendor_profiles?.verification_status),
           location: "Nairobi", // Default or fetch if location exists
           gallery: data.image_urls || [data.image_urls?.[0] || "/placeholder.svg"],
+          // products has no specifications/condition_notes/serial_number columns,
+          // so every row here used to fall through to "N/A". These are the
+          // columns the table actually has.
           specs: {
-            Processor: data.specifications?.processor || "N/A",
-            Memory: data.specifications?.ram || "N/A",
-            Storage: data.specifications?.storage || "N/A",
-            Display: "N/A",
-            Condition: data.condition_notes || "N/A",
-            DeviceID: data.serial_number || "N/A",
+            Brand: data.brand || "—",
+            Model: data.model_name || "—",
+            Condition: data.condition
+              ? data.condition.charAt(0).toUpperCase() + data.condition.slice(1)
+              : "—",
+            Year: data.year_of_manufacture ? String(data.year_of_manufacture) : "—",
+            Warranty:
+              data.warranty_status && data.warranty_duration_months
+                ? `${data.warranty_duration_months} months`
+                : "No warranty",
+            Availability:
+              data.quantity_in_stock > 0 ? `${data.quantity_in_stock} in stock` : "Out of stock",
           }
         });
         setActiveImage(data.image_urls?.[0] || "/placeholder.svg");

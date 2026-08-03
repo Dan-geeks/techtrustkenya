@@ -1,8 +1,9 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CountUp } from "@/components/ui/count-up";
 import { SAMPLE_PRODUCTS } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
+import { isVendorVerified } from "@/lib/format";
 import { useState } from "react";
 
 const Index = () => {
@@ -24,11 +25,11 @@ const Index = () => {
 
       if (data) {
         const mappedDb = data.map((p) => {
+          // product_category enum is singular: laptop | smartphone | accessory | spare_part.
+          // These were compared against plurals, so every product fell through to "Laptops".
           let cat = "Laptops";
-          if (p.category === "smartphones") cat = "Smartphones";
-          if (p.category === "tablets") cat = "Tablets";
-          if (p.category === "accessories") cat = "Components & Accessories";
-          if (p.category === "wearables") cat = "Wearables";
+          if (p.category === "smartphone") cat = "Smartphones";
+          else if (p.category === "accessory" || p.category === "spare_part") cat = "Components & Accessories";
           return {
             id: p.id,
             title: p.model_name || p.brand || "Product",
@@ -37,7 +38,7 @@ const Index = () => {
             price: p.price_ksh || 0,
             image: (p.image_urls && p.image_urls.length > 0) ? p.image_urls[0] : "/placeholder.svg",
             vendor: p.vendor_profiles?.business_name || "Unknown Vendor",
-            vendorVerified: p.vendor_profiles?.verification_status === "verified",
+            vendorVerified: isVendorVerified(p.vendor_profiles?.verification_status),
             location: "Nairobi",
           };
         });

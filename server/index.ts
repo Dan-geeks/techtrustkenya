@@ -514,7 +514,7 @@ async function requestDarajaStk(args: { orderId: string; phone: string; amountKs
   };
 }
 
-const DARAJAPAY_DEFAULT_BASE = "https://darajapay-api-production-65ba.up.railway.app";
+const DARAJAPAY_DEFAULT_BASE = "https://darajapay-api-production-2fea.up.railway.app";
 
 function darajapayBaseUrl() {
   return cleanBaseUrl(env("DARAJAPAY_BASE_URL"), DARAJAPAY_DEFAULT_BASE);

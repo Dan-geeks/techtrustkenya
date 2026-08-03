@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { isVendorVerified } from "@/lib/format";
 import { useParams, Link } from "react-router-dom";
 import { ShieldCheck, MapPin, Star, Store, CheckCircle, ArrowRight, Phone, Mail, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,7 +88,7 @@ const ShopPage = () => {
     );
   }
 
-  const isVerified = vendor.verification_status === "verified";
+  const isVerified = isVendorVerified(vendor.verification_status);
   const joinedDate = new Date(vendor.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   return (

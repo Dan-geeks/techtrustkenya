@@ -133,7 +133,7 @@ const AdminOverview = () => {
       />
       <StatCard
         icon={Wallet}
-        label="Platform Revenue (10%)"
+        label="Platform Revenue (5%)"
         value={formatKsh(stats.revenue)}
         borderColor="border-l-green-500"
         iconBg="bg-green-100 text-green-600"

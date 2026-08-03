@@ -1,6 +1,7 @@
-﻿import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { isVendorVerified } from "@/lib/format";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Search, Tune, X, Shield, Verified, ArrowRight, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { Search, X, Shield, Verified, ArrowRight, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 
 interface Product {
   id: string;
@@ -119,6 +120,20 @@ const Browse = () => {
     setCurrentPage(1);
   };
 
+  // Real per-category counts. These were hardcoded (124/89/45/210/12/34) while
+  // the catalogue actually holds single digits, so every number shown was fiction.
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    const bump = (c: string) => { counts[c] = (counts[c] ?? 0) + 1; };
+    dbProducts.forEach((p) => {
+      if (p.category === "smartphone") bump("Smartphones");
+      else if (p.category === "accessory" || p.category === "spare_part") bump("Components & Accessories");
+      else bump("Laptops");
+    });
+    (SAMPLE_PRODUCTS as any[]).forEach((p) => bump(p.category));
+    return counts;
+  }, [dbProducts]);
+
   // Filter & Sort Products
   const filteredProducts = useMemo(() => {
     const mappedDb = dbProducts.map((p) => {
@@ -140,7 +155,7 @@ const Browse = () => {
         price: p.price_ksh,
         image: p.image_urls?.[0] || "/placeholder.svg",
         vendor: p.vendor_profiles?.business_name || "Unknown Vendor",
-        vendorVerified: p.vendor_profiles?.verification_status === "verified",
+        vendorVerified: isVendorVerified(p.vendor_profiles?.verification_status),
         location: "Nairobi",
       };
     });
@@ -248,14 +263,7 @@ const Browse = () => {
                 Category
               </h3>
               <div className="flex flex-col gap-2.5">
-                {[
-                  { name: "Laptops", count: 124 },
-                  { name: "Smartphones", count: 89 },
-                  { name: "Tablets", count: 45 },
-                  { name: "Components & Accessories", count: 210 },
-                  { name: "Cameras", count: 12 },
-                  { name: "Wearables", count: 34 },
-                ].map((cat) => (
+                {CATEGORIES.map((name) => ({ name, count: categoryCounts[name] ?? 0 })).map((cat) => (
                   <label key={cat.name} className="flex items-center justify-between cursor-pointer select-none">
                     <div className="flex items-center gap-3">
                       <input
