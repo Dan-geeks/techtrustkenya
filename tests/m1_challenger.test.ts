@@ -59,11 +59,15 @@ describe("M1 Empirical Verification & Stress Testing Suite", () => {
       expect(routeForNotification({ type: "order_update", reference_id: null })).toBe(null);
     });
 
-    it("case 3: repair_update with reference_id returns /repairs/rep-123 (DEFECT: route /repairs/:id missing in App.tsx -> 404)", () => {
+    it("case 3: repair_update with reference_id returns /repairs/rep-123 and that route EXISTS", () => {
+      // This used to assert `includes('path="/repairs/:') === false`, pinning
+      // the defect in place: every repair notification routed to a page that
+      // was never registered, so the vendor got a 404. The route now exists,
+      // so the assertion is inverted to guard against it being removed again.
       const appTsx = fs.readFileSync(path.resolve(process.cwd(), "src/App.tsx"), "utf-8");
       const routeWithId = routeForNotification({ type: "repair_update", reference_id: "rep-123" });
       expect(routeWithId).toBe("/repairs/rep-123");
-      expect(appTsx.includes('path="/repairs/:')).toBe(false);
+      expect(appTsx.includes('path="/repairs/:')).toBe(true);
     });
 
     it("case 4: repair_update with null reference_id returns null (DEFECT: fails to return /repairs)", () => {

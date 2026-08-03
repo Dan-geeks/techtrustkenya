@@ -1309,8 +1309,12 @@ const AdminRepairRequests = () => {
                 <div className="text-xs text-muted-foreground">{r.vendor?.business_name ?? "Unknown Vendor"}</div>
               </td>
               <td className="px-4 py-3">
-                <div className="font-medium">{r.device_type} {r.device_model}</div>
-                <div className="text-xs text-muted-foreground max-w-xs truncate">{r.issue_description}</div>
+                {/* These read device_type/device_model/issue_description, none
+                    of which exist on repair_requests — every cell rendered
+                    blank. The real columns are device_description and
+                    problem_description. */}
+                <div className="font-medium">{r.device_description}</div>
+                <div className="text-xs text-muted-foreground max-w-xs truncate">{r.problem_description}</div>
               </td>
               <td className="px-4 py-3">
                 <Badge variant="outline" className="capitalize text-xs">{r.status.replace(/_/g, ' ')}</Badge>

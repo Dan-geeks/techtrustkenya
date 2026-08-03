@@ -24,6 +24,7 @@ import VendorVerification from "./pages/VendorVerification.tsx";
 import DisputePolicy from "./pages/DisputePolicy.tsx";
 import SellerGuidelines from "./pages/SellerGuidelines.tsx";
 import Repairs from "./pages/Repairs.tsx";
+import RepairDetail from "./pages/RepairDetail.tsx";
 import BookRepair from "./pages/BookRepair.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -96,6 +97,16 @@ const App = () => (
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/shop/:vendorId" element={<ShopPage />} />
                   <Route path="/repairs" element={<Repairs />} />
+                  {/* repair_update notifications have always pointed here.
+                      Without this route every one of them 404'd. */}
+                  <Route
+                    path="/repairs/:id"
+                    element={
+                      <ProtectedRoute>
+                        <RepairDetail />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="/book-repair" element={<BookRepair />} />
                   <Route path="/how-it-works" element={<HowItWorks />} />
                   <Route path="/terms" element={<Terms />} />
