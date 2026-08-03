@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Wrench, ArrowRight, ShieldCheck, Camera, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,32 +6,88 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const BookRepair = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Everything below used to be uncontrolled: the form collected nothing and
+  // handleSubmit was a setTimeout labelled "Simulate API call", so no repair
+  // request ever reached a technician.
+  const [deviceType, setDeviceType] = useState("");
+  const [brandModel, setBrandModel] = useState("");
+  const [issue, setIssue] = useState("");
+  const [problemDetail, setProblemDetail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
+  const [vendorId, setVendorId] = useState("");
+  const [techs, setTechs] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Only vendors who ticked "offers repairs" during onboarding.
+    (async () => {
+      const { data } = await supabase
+        .from("vendor_profiles")
+        .select("id, business_name, city, county")
+        .eq("offers_repairs", true)
+        .order("business_name");
+      setTechs(data ?? []);
+      const preset = new URLSearchParams(window.location.search).get("vendor");
+      if (preset && (data ?? []).some((v: any) => v.id === preset)) setVendorId(preset);
+    })();
+  }, []);
 
   useEffect(() => {
     document.title = "Book a Repair | TechTrust";
     window.scrollTo(0, 0);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step < 3) {
       setStep(step + 1);
       return;
     }
     
+    if (!user) {
+      toast.error("Please sign in so the technician can reach you.");
+      navigate("/auth");
+      return;
+    }
+    if (!vendorId) {
+      toast.error("Please choose a technician.");
+      return;
+    }
+
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      setIsSubmitted(true);
-      window.scrollTo(0, 0);
-    }, 1500);
+    const { error } = await supabase.from("repair_requests").insert({
+      customer_id: user.id,
+      vendor_id: vendorId,
+      device_description: [deviceType, brandModel].filter(Boolean).join(" - "),
+      problem_description: [
+        issue ? `Issue: ${issue}` : null,
+        problemDetail,
+        fullName ? `Contact: ${fullName}` : null,
+        phone ? `Phone: ${phone}` : null,
+        location ? `Location: ${location}` : null,
+      ].filter(Boolean).join("\n"),
+      status: "submitted",
+    });
+    setLoading(false);
+
+    if (error) {
+      toast.error("Could not submit your repair request: " + error.message);
+      return;
+    }
+    toast.success("Repair request sent to the technician.");
+    setIsSubmitted(true);
+    window.scrollTo(0, 0);
   };
 
   if (isSubmitted) {
@@ -105,7 +161,7 @@ const BookRepair = () => {
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="space-y-2">
                     <Label className="text-base font-semibold text-slate-900">Device Type</Label>
-                    <Select required>
+                    <Select required value={deviceType} onValueChange={setDeviceType}>
                       <SelectTrigger className="h-12 border-slate-200 text-base">
                         <SelectValue placeholder="Select device type" />
                       </SelectTrigger>
@@ -121,7 +177,7 @@ const BookRepair = () => {
 
                   <div className="space-y-2">
                     <Label className="text-base font-semibold text-slate-900">Brand & Model</Label>
-                    <Input required placeholder="e.g. iPhone 13 Pro Max, MacBook Air M1" className="h-12 border-slate-200 text-base" />
+                    <Input required value={brandModel} onChange={(e) => setBrandModel(e.target.value)} placeholder="e.g. iPhone 13 Pro Max, MacBook Air M1" className="h-12 border-slate-200 text-base" />
                   </div>
                 </div>
               )}
@@ -131,7 +187,7 @@ const BookRepair = () => {
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="space-y-2">
                     <Label className="text-base font-semibold text-slate-900">What needs to be repaired?</Label>
-                    <Select required>
+                    <Select required value={issue} onValueChange={setIssue}>
                       <SelectTrigger className="h-12 border-slate-200 text-base">
                         <SelectValue placeholder="Select primary issue" />
                       </SelectTrigger>
@@ -152,6 +208,8 @@ const BookRepair = () => {
                     <textarea 
                       required
                       className="flex min-h-[120px] w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:border-transparent transition-all"
+                      value={problemDetail}
+                      onChange={(e) => setProblemDetail(e.target.value)}
                       placeholder="Tell us exactly what happened and what's not working..."
                     ></textarea>
                   </div>
@@ -171,17 +229,39 @@ const BookRepair = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label className="text-base font-semibold text-slate-900">Full Name</Label>
-                      <Input required placeholder="John Doe" className="h-12 border-slate-200 text-base" />
+                      <Input required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" className="h-12 border-slate-200 text-base" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-base font-semibold text-slate-900">Phone Number</Label>
-                      <Input required type="tel" placeholder="0712 345 678" className="h-12 border-slate-200 text-base" />
+                      <Input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="0712 345 678" className="h-12 border-slate-200 text-base" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
+                    <Label className="text-base font-semibold text-slate-900">Choose a technician</Label>
+                    <Select required value={vendorId} onValueChange={setVendorId}>
+                      <SelectTrigger className="h-12 border-slate-200 text-base">
+                        <SelectValue placeholder={techs.length ? "Select a verified technician" : "No repair technicians available yet"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {techs.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.business_name}{t.city ? ` - ${t.city}` : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {techs.length === 0 && (
+                      <p className="text-xs text-amber-600 mt-1">
+                        No vendors have enabled repair services yet. A vendor enables this by ticking
+                        "Offer repair services" during onboarding.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
                     <Label className="text-base font-semibold text-slate-900">Your Location / County</Label>
-                    <Input required placeholder="e.g. Nairobi, Mombasa" className="h-12 border-slate-200 text-base" />
+                    <Input required value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Nairobi, Mombasa" className="h-12 border-slate-200 text-base" />
                     <p className="text-xs text-slate-500 mt-1">We'll use this to match you with a verified technician nearby.</p>
                   </div>
                 </div>

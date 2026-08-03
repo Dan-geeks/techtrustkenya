@@ -1,9 +1,10 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, CreditCard, MapPin, Navigation, Building2, Store, Clock, CheckCircle2 } from "lucide-react";
@@ -22,6 +23,10 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
     google_maps_link: vendor?.google_maps_link ?? "https://maps.google.com/?q=-1.286389,36.817223",
     latitude: vendor?.latitude ?? "-1.286389",
     longitude: vendor?.longitude ?? "36.817223",
+    // Was only settable during onboarding, so a vendor who skipped it could
+    // never turn repairs on — and the Repairs tab keys off this flag.
+    offers_products: vendor?.offers_products ?? true,
+    offers_repairs: vendor?.offers_repairs ?? false,
   });
 
   const [saving, setSaving] = useState(false);
@@ -76,6 +81,8 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
             till_number: form.till_number,
             operating_hours: form.operating_hours,
             google_maps_link: form.google_maps_link,
+            offers_products: form.offers_products,
+            offers_repairs: form.offers_repairs,
             updated_at: new Date().toISOString(),
           } as any)
           .eq("id", vendor.id)
@@ -87,7 +94,8 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
       }
       toast.success("Shop location and profile settings updated successfully!");
     } catch (err: any) {
-      toast.success("Shop location settings updated!");
+      // This used to toast SUCCESS on failure, so a rejected save looked saved.
+      toast.error(err?.message || "Could not save your settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -95,6 +103,40 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
 
   return (
     <div className="space-y-6 max-w-4xl">
+      {/* What this shop offers — drives the Repairs tab and the technician
+          picker customers see on /book-repair. */}
+      <Card className="p-6 md:p-8 space-y-4 bg-white border border-slate-200 shadow-sm rounded-2xl">
+        <div className="flex items-center gap-2">
+          <Store className="h-5 w-5 text-primary" />
+          <h3 className="font-bold text-lg text-slate-900">Services you offer</h3>
+        </div>
+
+        <div className="flex items-start justify-between gap-4 py-2 border-t border-slate-100 pt-4">
+          <div>
+            <Label className="text-base font-semibold text-slate-900">Sell products</Label>
+            <p className="text-xs text-slate-500 mt-1">List devices for sale on the marketplace.</p>
+          </div>
+          <Switch
+            checked={form.offers_products}
+            onCheckedChange={(c) => setForm({ ...form, offers_products: !!c })}
+          />
+        </div>
+
+        <div className="flex items-start justify-between gap-4 py-2 border-t border-slate-100 pt-4">
+          <div>
+            <Label className="text-base font-semibold text-slate-900">Offer repair services</Label>
+            <p className="text-xs text-slate-500 mt-1">
+              Adds a <strong>Repairs</strong> tab here for incoming requests, and lists you as a
+              technician customers can pick when booking a repair.
+            </p>
+          </div>
+          <Switch
+            checked={form.offers_repairs}
+            onCheckedChange={(c) => setForm({ ...form, offers_repairs: !!c })}
+          />
+        </div>
+      </Card>
+
       {/* Location Settings Card */}
       <Card className="p-6 md:p-8 space-y-6 bg-white border border-slate-200 shadow-sm rounded-2xl">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
