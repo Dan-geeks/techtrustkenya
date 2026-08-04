@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ export const RepairsTab = ({ vendor }: { vendor: any }) => {
   const [active, setActive] = useState<any>(null);
   const [quote, setQuote] = useState("");
   const [notes, setNotes] = useState("");
+  const navigate = useNavigate();
 
   const load = async () => {
     setLoading(true);
@@ -90,11 +92,18 @@ export const RepairsTab = ({ vendor }: { vendor: any }) => {
       ) : (
         <div className="space-y-3">
           {reqs.map((r) => (
-            <Card key={r.id} className="p-4">
+            /* Opens the same detail page an order card does, so a technician
+               can see the whole job rather than just act on a one-line card.
+               Buttons inside stopPropagation so acting doesn't navigate away. */
+            <Card
+              key={r.id}
+              onClick={() => navigate(`/repairs/${r.id}`)}
+              className="p-4 cursor-pointer transition-colors hover:bg-muted/40"
+            >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div>
                   <div className="font-medium flex items-center gap-2">
-                    <span>{r.device_description}</span>
+                    <span className="hover:underline">{r.device_description}</span>
                     <span className="text-data-id text-xs text-muted-foreground">#{r.id.slice(0, 8).toUpperCase()}</span>
                   </div>
                   <div className="text-xs text-muted-foreground">
@@ -110,7 +119,7 @@ export const RepairsTab = ({ vendor }: { vendor: any }) => {
                   {r.customer_approved_quote ? <Badge className="bg-success/10 text-success">Approved</Badge> : <Badge variant="outline">Pending approval</Badge>}
                 </div>
               )}
-              <div className="flex flex-wrap gap-2 mt-3">
+              <div className="flex flex-wrap gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
                 {r.status === "submitted" && (
                   <Button size="sm" onClick={() => { setActive(r); setQuote(""); setNotes(""); setQuoteOpen(true); }}>Send quote</Button>
                 )}

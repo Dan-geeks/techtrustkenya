@@ -267,7 +267,7 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Specifications Table — driven by whatever the vendor actually filled
+      {/* Specifications Table - driven by whatever the vendor actually filled
           in, so blank fields disappear instead of rendering "N/A". */}
       {Object.keys(product.specs ?? {}).length > 0 && (
         <div className="mt-16 max-w-4xl">

@@ -169,7 +169,7 @@ const Browse = () => {
 
     // Only real catalogue rows. SAMPLE_PRODUCTS have ids like "prod-1" (not
     // UUIDs) and carry no vendor, so checking one out failed with
-    // "Failed to create order" — never list something that cannot be bought.
+    // "Failed to create order" - never list something that cannot be bought.
     let result = [...mappedDb];
 
     if (searchQuery.trim()) {

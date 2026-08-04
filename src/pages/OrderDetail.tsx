@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RateVendor } from "@/components/reviews/RateVendor";
 
 /** The five milestones shown in the tracker, in order. */
 const STEPS = [
@@ -83,7 +84,7 @@ const BANNERS: Record<number, { title: string; note: string }> = {
 };
 
 export const OrderDetail = () => {
-  // The route is declared as `/orders/:orderId` in App.tsx — reading `id` here
+  // The route is declared as `/orders/:orderId` in App.tsx - reading `id` here
   // silently yielded undefined and left the page stuck on "Loading order...".
   // Accept either name so the page survives a future route rename.
   const params = useParams<{ orderId?: string; id?: string }>();
@@ -97,6 +98,9 @@ export const OrderDetail = () => {
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
   const [raising, setRaising] = useState(false);
+  const [payoutOpen, setPayoutOpen] = useState(false);
+  const [payoutMessage, setPayoutMessage] = useState("");
+  const [reportingPayout, setReportingPayout] = useState(false);
   const { user } = useAuth();
 
   const fetchOrder = async () => {
@@ -182,7 +186,7 @@ export const OrderDetail = () => {
 
   /**
    * Raise a dispute. open_dispute freezes the Float payment, tells the other
-   * side, and puts the order in front of every admin — none of which the old
+   * side, and puts the order in front of every admin - none of which the old
    * "link to the policy page" button did.
    */
   const raiseDispute = async () => {
@@ -204,6 +208,26 @@ export const OrderDetail = () => {
     setDisputeOpen(false);
     setDisputeReason("");
     await fetchOrder();
+  };
+
+  const reportPayoutIssue = async () => {
+    if (!payoutMessage.trim()) {
+      toast.error("Tell us what happened so we can chase it.");
+      return;
+    }
+    setReportingPayout(true);
+    const { error } = await supabase.rpc("report_payout_issue", {
+      _order_id: order.id,
+      _message: payoutMessage.trim(),
+    });
+    setReportingPayout(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Reported. We'll respond within 24 hours.");
+    setPayoutOpen(false);
+    setPayoutMessage("");
   };
 
   /**
@@ -471,7 +495,7 @@ export const OrderDetail = () => {
 
           {/* ---------- Right column ---------- */}
           <div className="lg:col-span-4 space-y-6">
-            {/* Vendor pickup location — real coordinates from vendor_profiles */}
+            {/* Vendor pickup location - real coordinates from vendor_profiles */}
             <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden flex flex-col">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 gap-2">
                 <div className="flex items-center gap-2 min-w-0">
@@ -539,7 +563,7 @@ export const OrderDetail = () => {
               <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-[#E2E8F0] space-y-4">
                 <h3 className="font-bold text-base text-[#0F172A]">Fulfil This Order</h3>
                 <p className="text-xs text-[#64748B] leading-relaxed">
-                  The customer's payment is held in Float. Move the order along as you go — they see each step on
+                  The customer's payment is held in Float. Move the order along as you go - they see each step on
                   this same page, and their confirmation is what releases your payout.
                 </p>
 
@@ -586,15 +610,48 @@ export const OrderDetail = () => {
                     </p>
                   )}
                   {isCompleted && (
-                    <p className="text-xs text-emerald-700 font-semibold">
-                      Confirmed by the customer — your payout has been released from Float.
-                    </p>
+                    <div className="w-full space-y-3">
+                      <p className="text-xs text-emerald-700 font-semibold">
+                        Confirmed by the customer. Your payout has been released from Float.
+                      </p>
+                      {/* A released payout is not the same as money in hand, and
+                          a vendor who is short had no obvious next step. This is
+                          NOT open_dispute: that would flip a confirmed order back
+                          to disputed and reverse the buyer's confirmation. A
+                          missing payout is between the vendor and TechTrust. */}
+                      <div className="rounded-xl border border-[#CBD5E1] bg-slate-50 p-3">
+                        <p className="text-xs text-[#475569] leading-relaxed">
+                          <strong className="text-[#0F172A]">Didn't receive the money?</strong> Open a request
+                          below and we'll respond in less than 24 hours.
+                        </p>
+                        <button
+                          onClick={() => { setPayoutMessage(""); setPayoutOpen(true); }}
+                          className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700"
+                        >
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          Report a payout problem
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Finalize transaction — customer only. A vendor must never be
+            {/* Rate the vendor. Only once the order is actually complete, and
+                only for the buyer - this is what feeds the vendor's public
+                rating, which until now had no source at all. */}
+            {!isVendorSide && isCompleted && user && (
+              <RateVendor
+                orderId={order.id}
+                vendorId={order.vendor_id}
+                productId={order.product_id}
+                customerId={user.id}
+                vendorName={order.vendor?.business_name}
+              />
+            )}
+
+            {/* Finalize transaction - customer only. A vendor must never be
                 able to confirm delivery on the buyer's behalf. */}
             {!isVendorSide && (
             <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-[#E2E8F0] space-y-4">
@@ -619,7 +676,7 @@ export const OrderDetail = () => {
                 </span>
               </button>
 
-              {/* This used to link to /disputes, a static policy page — there
+              {/* This used to link to /disputes, a static policy page - there
                   was no way to actually raise one. */}
               {order.status === "disputed" ? (
                 <div className="w-full rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
@@ -658,7 +715,7 @@ export const OrderDetail = () => {
           </DialogHeader>
           <div className="space-y-3">
             <p className="text-xs text-[#64748B] leading-relaxed">
-              Your payment is held in Float and stays frozen while we review this — the seller is not paid.
+              Your payment is held in Float and stays frozen while we review this - the seller is not paid.
               Tell us what happened, with as much detail as you can.
             </p>
             <div className="space-y-1.5">
@@ -678,6 +735,38 @@ export const OrderDetail = () => {
             </Button>
             <Button variant="destructive" onClick={raiseDispute} disabled={raising}>
               {raising ? "Opening…" : "Open dispute"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={payoutOpen} onOpenChange={setPayoutOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Report a payout problem</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-[#64748B] leading-relaxed">
+              This order is marked as released, but tell us if the money hasn't reached you. We'll
+              trace it and respond within 24 hours. The customer's order is not affected.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="payout-message">What happened?</Label>
+              <Textarea
+                id="payout-message"
+                rows={4}
+                placeholder="e.g. The order shows released but nothing has come to my M-Pesa till since yesterday."
+                value={payoutMessage}
+                onChange={(e) => setPayoutMessage(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPayoutOpen(false)} disabled={reportingPayout}>
+              Cancel
+            </Button>
+            <Button onClick={reportPayoutIssue} disabled={reportingPayout}>
+              {reportingPayout ? "Sending…" : "Send report"}
             </Button>
           </DialogFooter>
         </DialogContent>

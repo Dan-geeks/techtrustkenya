@@ -1,4 +1,4 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, CheckCircle2, Building2, UserCheck, AlertCircle, FileText } from "lucide-react";
 
@@ -28,7 +28,7 @@ const VendorVerification = () => {
         </div>
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">Vendor Verification Policy</h1>
         <p className="text-sm text-muted-foreground mb-8">
-          Official Documentation — How TechTrust eliminates fraud by physically inspecting and identity-checking sellers before listing.
+          Official Documentation - How TechTrust eliminates fraud by physically inspecting and identity-checking sellers before listing.
         </p>
 
         {/* 2 Tracks Banner */}

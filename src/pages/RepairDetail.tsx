@@ -13,7 +13,7 @@ import { invokeFunction, fetchRepairPaymentStatus } from "@/lib/functions";
 import { toast } from "sonner";
 import {
   Loader2, Wrench, ArrowLeft, CheckCircle2, Phone, MapPin, User, AlertTriangle,
-  ShieldCheck, Smartphone, ThumbsUp, ThumbsDown,
+  ShieldCheck, Smartphone, ThumbsUp, ThumbsDown, Star,
 } from "lucide-react";
 
 /**
@@ -21,7 +21,7 @@ import {
  *
  * This route did not exist. `routeForNotification` has always sent
  * repair_update notifications to `/repairs/:id`, so every "New repair request"
- * or "Repair quotation received" notification landed on the 404 page — and a
+ * or "Repair quotation received" notification landed on the 404 page - and a
  * customer who booked a repair had no way to ever look at it again.
  *
  * RLS already scopes the row to the customer who booked it and the vendor it
@@ -60,13 +60,15 @@ const RepairDetail = () => {
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   const [inspectionNotes, setInspectionNotes] = useState("");
+  const [rating, setRating] = useState(0);
+  const [ratingReview, setRatingReview] = useState("");
 
   const load = async () => {
     if (!id) {
       setLoading(false);
       return;
     }
-    // Never return early without clearing `loading` — that is exactly how the
+    // Never return early without clearing `loading` - that is exactly how the
     // order page used to hang on "Loading order...".
     try {
       const { data, error } = await supabase
@@ -146,7 +148,7 @@ const RepairDetail = () => {
   // the notification from the row change itself. Sending one from here too
   // would double up, and would only work from this screen.
   const approveQuote = async () => {
-    await patch({ customer_approved_quote: true }, "Quote approved — the technician has been notified.");
+    await patch({ customer_approved_quote: true }, "Quote approved - the technician has been notified.");
   };
 
   const declineRepair = async () => {
@@ -155,7 +157,7 @@ const RepairDetail = () => {
 
   /**
    * Pay the quote into Float. Two responses: the push returns once the PIN
-   * prompt is delivered — which is NOT payment — then we poll
+   * prompt is delivered - which is NOT payment - then we poll
    * /repair-payment-status until it stops being pending.
    */
   const payQuote = async () => {
@@ -178,7 +180,7 @@ const RepairDetail = () => {
 
     toast.success("Check your phone and enter your M-Pesa PIN.");
 
-    // Response 2. Give up after 2.5 minutes rather than spinning forever — the
+    // Response 2. Give up after 2.5 minutes rather than spinning forever - the
     // gateway reports an expired prompt identically to a live one.
     const GIVE_UP_AFTER = 150_000;
     const startedAt = Date.now();
@@ -193,7 +195,7 @@ const RepairDetail = () => {
       if (Date.now() - startedAt > GIVE_UP_AFTER) {
         setPaying(false);
         setPayError(
-          "We didn't get a confirmation. If you were charged it will show here shortly — otherwise try again.",
+          "We didn't get a confirmation. If you were charged it will show here shortly - otherwise try again.",
         );
         load();
         return;
@@ -229,6 +231,23 @@ const RepairDetail = () => {
   // this only patches; a second manual notification would double up.
   const advance = (status: string) => async () => {
     await patch({ status }, "Status updated.");
+  };
+
+  const submitRating = async () => {
+    if (rating < 1) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("rate_repair", {
+      _repair_id: req.id,
+      _rating: rating,
+      _review: ratingReview.trim() || null,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Thanks! Your rating is now on the technician's profile.");
+    load();
   };
 
   if (loading) {
@@ -391,7 +410,7 @@ const RepairDetail = () => {
           {req.payment_status === "held" && (
             <p className="mt-4 text-xs text-emerald-700 flex items-center gap-1.5 border-t pt-4">
               <ShieldCheck className="h-4 w-4" />
-              Held in Float{req.mpesa_receipt_number ? ` · M-Pesa ${req.mpesa_receipt_number}` : ""} — released when
+              Held in Float{req.mpesa_receipt_number ? ` · M-Pesa ${req.mpesa_receipt_number}` : ""} - released when
               the customer confirms the repair.
             </p>
           )}
@@ -432,7 +451,7 @@ const RepairDetail = () => {
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ThumbsUp className="h-4 w-4 mr-1" /> Device received &amp; repair confirmed</>}
             </Button>
             <Button variant="outline" className="text-red-600" disabled={busy} onClick={() => confirmCollection(false)}>
-              <ThumbsDown className="h-4 w-4 mr-1" /> Not fixed — send it back
+              <ThumbsDown className="h-4 w-4 mr-1" /> Not fixed - send it back
             </Button>
           </div>
         </Card>
@@ -451,6 +470,59 @@ const RepairDetail = () => {
             <CheckCircle2 className="h-4 w-4" />
             Confirmed by the customer on {formatDate(req.customer_confirmed_at)}.
           </p>
+        </Card>
+      )}
+
+      {/* Rate the technician. Feeds the same vendor rating as a product order,
+          so a repair-only shop can build a reputation too. */}
+      {isCustomer && req.status === "completed" && (
+        <Card className={`p-5 ${req.customer_rating ? "" : "border-2 border-amber-200"}`}>
+          {req.customer_rating ? (
+            <>
+              <h2 className="font-semibold text-sm mb-2">You rated this repair</h2>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Star
+                    key={n}
+                    className={`h-5 w-5 ${n <= req.customer_rating ? "text-amber-400 fill-amber-400" : "text-slate-300"}`}
+                  />
+                ))}
+              </div>
+              {req.customer_review && (
+                <p className="text-xs text-muted-foreground mt-2 italic">"{req.customer_review}"</p>
+              )}
+            </>
+          ) : (
+            <>
+              <h2 className="font-semibold text-sm">How was {vendor?.business_name ?? "the technician"}?</h2>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-3">
+                Your rating is what builds this shop's reputation, so other customers know who to trust.
+              </p>
+              <div className="flex gap-1 mb-3">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setRating(n)}
+                    aria-label={`${n} star${n === 1 ? "" : "s"}`}
+                    className="p-0.5 transition-transform hover:scale-110"
+                  >
+                    <Star className={`h-7 w-7 ${n <= rating ? "text-amber-400 fill-amber-400" : "text-slate-300"}`} />
+                  </button>
+                ))}
+              </div>
+              <Textarea
+                rows={3}
+                className="mb-3"
+                placeholder="Anything to add? (optional)"
+                value={ratingReview}
+                onChange={(e) => setRatingReview(e.target.value)}
+              />
+              <Button size="sm" disabled={busy || rating < 1} onClick={submitRating}>
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit rating"}
+              </Button>
+            </>
+          )}
         </Card>
       )}
 
@@ -511,7 +583,7 @@ const RepairDetail = () => {
               </Button>
             )}
             {/* The vendor cannot mark a repair completed. Only the customer
-                closes it out, by inspecting and confirming — that is what
+                closes it out, by inspecting and confirming - that is what
                 releases the money from Float. */}
             {req.status === "ready_for_collection" && (
               <p className="text-xs text-muted-foreground self-center">
@@ -521,7 +593,7 @@ const RepairDetail = () => {
             {req.status === "quotation_sent" && (
               <p className="text-xs text-muted-foreground self-center">
                 {req.customer_approved_quote
-                  ? "Quote approved — waiting for the customer to pay into Float."
+                  ? "Quote approved - waiting for the customer to pay into Float."
                   : "Waiting for the customer to approve your quote."}
               </p>
             )}

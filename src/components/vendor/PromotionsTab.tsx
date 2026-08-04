@@ -61,8 +61,8 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
     setStkPhase("sending");
 
     // Charge what the vendor is actually shown and what gets recorded on the
-    // promotion row. This was hardcoded to 1, so every promotion — however
-    // long or expensive — collected exactly KES 1.
+    // promotion row. This was hardcoded to 1, so every promotion - however
+    // long or expensive - collected exactly KES 1.
     const totalAmount = (PRICES[type] * Number(days)) / 7;
 
     const digits = String(phone ?? "").replace(/^\+/, "").replace(/\D/g, "");
@@ -157,9 +157,9 @@ export const PromotionsTab = ({ vendor }: { vendor: any }) => {
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="featured_homepage">Featured on homepage — KES 2,000/wk</SelectItem>
-                  <SelectItem value="top_search">Top of search — KES 1,500/wk</SelectItem>
-                  <SelectItem value="trending_carousel">Trending carousel — KES 1,000/wk</SelectItem>
+                  <SelectItem value="featured_homepage">Featured on homepage - KES 2,000/wk</SelectItem>
+                  <SelectItem value="top_search">Top of search - KES 1,500/wk</SelectItem>
+                  <SelectItem value="trending_carousel">Trending carousel - KES 1,000/wk</SelectItem>
                 </SelectContent>
               </Select>
             </div>

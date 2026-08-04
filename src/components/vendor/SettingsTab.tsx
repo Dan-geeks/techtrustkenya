@@ -7,24 +7,59 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, CreditCard, MapPin, Navigation, Building2, Store, Clock, CheckCircle2 } from "lucide-react";
 
+/**
+ * Onboarding stores the payout destination as a single formatted string in
+ * `till_number` ("Till: 123456", "Paybill: 247247 | Acc: 12", "Bank: KCB |
+ * Acc: 12", "M-Pesa Phone: 07..."). Settings only ever showed that raw string
+ * in one free-text box, so a vendor could not switch from, say, Send Money to
+ * Buy Goods without hand-crafting the format. Parse it back apart so the same
+ * picker onboarding uses works here.
+ */
+type PayMethod = "till" | "paybill" | "bank" | "phone";
+
+const parsePayout = (raw?: string | null) => {
+  const s = (raw ?? "").trim();
+  let m = s.match(/^Paybill:\s*(.+?)\s*\|\s*Acc:\s*(.+)$/i);
+  if (m) return { method: "paybill" as PayMethod, till: "", biz: m[1], acc: m[2], bank: "", phone: "" };
+  m = s.match(/^Bank:\s*(.+?)\s*\|\s*Acc:\s*(.+)$/i);
+  if (m) return { method: "bank" as PayMethod, till: "", biz: "", acc: m[2], bank: m[1], phone: "" };
+  m = s.match(/^M-Pesa Phone:\s*(.+)$/i);
+  if (m) return { method: "phone" as PayMethod, till: "", biz: "", acc: "", bank: "", phone: m[1] };
+  m = s.match(/^Till:\s*(.+)$/i);
+  if (m) return { method: "till" as PayMethod, till: m[1], biz: "", acc: "", bank: "", phone: "" };
+  // Anything unrecognised (including a bare number) is treated as a till.
+  return { method: "till" as PayMethod, till: s, biz: "", acc: "", bank: "", phone: "" };
+};
+
 export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v: any) => void }) => {
+  const payout = parsePayout(vendor?.till_number);
   const [form, setForm] = useState({
-    business_name: vendor?.business_name ?? "TechTrust Vendor",
-    owner_name: vendor?.owner_name ?? "Store Manager",
-    phone_number: vendor?.phone_number ?? vendor?.phone ?? "0712345678",
-    till_number: vendor?.till_number ?? "890123",
-    physical_address: vendor?.physical_address ?? "Kimathi Street, Eagle House, 2nd Floor, Room 204",
-    city: vendor?.city ?? "Nairobi",
-    county: vendor?.county ?? "Nairobi",
-    sub_county: vendor?.sub_county ?? "Starehe / CBD",
-    operating_hours: vendor?.operating_hours ?? "Mon-Sat 8:30 AM - 6:30 PM",
-    google_maps_link: vendor?.google_maps_link ?? "https://maps.google.com/?q=-1.286389,36.817223",
-    latitude: vendor?.latitude ?? "-1.286389",
-    longitude: vendor?.longitude ?? "36.817223",
+    // These all used to default to invented sample data - "TechTrust Vendor",
+    // "Store Manager", till 890123, an address on Kimathi Street and Nairobi
+    // CBD coordinates - so a vendor who opened Settings and pressed Save wrote
+    // someone else's details over their own. Blank means blank.
+    business_name: vendor?.business_name ?? "",
+    owner_name: vendor?.owner_name ?? "",
+    phone_number: vendor?.phone_number ?? vendor?.phone ?? "",
+    payment_method: payout.method,
+    payment_till: payout.till,
+    payment_paybill_biz: payout.biz,
+    payment_paybill_acc: payout.acc,
+    payment_bank_name: payout.bank,
+    payment_phone: payout.phone,
+    physical_address: vendor?.physical_address ?? "",
+    city: vendor?.city ?? "",
+    county: vendor?.county ?? "",
+    sub_county: vendor?.sub_county ?? "",
+    operating_hours: vendor?.operating_hours ?? "",
+    google_maps_link: vendor?.google_maps_link ?? "",
+    latitude: vendor?.latitude ?? "",
+    longitude: vendor?.longitude ?? "",
     // Was only settable during onboarding, so a vendor who skipped it could
-    // never turn repairs on — and the Repairs tab keys off this flag.
+    // never turn repairs on, and the Repairs tab keys off this flag.
     offers_products: vendor?.offers_products ?? true,
     offers_repairs: vendor?.offers_repairs ?? false,
   });
@@ -60,9 +95,32 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
     );
   };
 
+  // Rebuild the single string onboarding writes, so both places stay readable
+  // by whatever eventually pays vendors out.
+  const buildPayoutString = (): string | null => {
+    const f = form;
+    if (f.payment_method === "till") return f.payment_till.trim() ? `Till: ${f.payment_till.trim()}` : null;
+    if (f.payment_method === "paybill")
+      return f.payment_paybill_biz.trim() && f.payment_paybill_acc.trim()
+        ? `Paybill: ${f.payment_paybill_biz.trim()} | Acc: ${f.payment_paybill_acc.trim()}`
+        : null;
+    if (f.payment_method === "bank")
+      return f.payment_bank_name.trim() && f.payment_paybill_acc.trim()
+        ? `Bank: ${f.payment_bank_name.trim()} | Acc: ${f.payment_paybill_acc.trim()}`
+        : null;
+    if (f.payment_method === "phone")
+      return f.payment_phone.trim() ? `M-Pesa Phone: ${f.payment_phone.trim()}` : null;
+    return null;
+  };
+
   const save = async () => {
     if (!form.business_name.trim() || !form.physical_address.trim()) {
       toast.error("Business name and physical shop address are required.");
+      return;
+    }
+    const payoutString = buildPayoutString();
+    if (!payoutString) {
+      toast.error("Fill in the payout details for the payment method you picked.");
       return;
     }
     setSaving(true);
@@ -78,7 +136,7 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
             county: form.county,
             sub_county: form.sub_county,
             phone: form.phone_number,
-            till_number: form.till_number,
+            till_number: payoutString,
             operating_hours: form.operating_hours,
             google_maps_link: form.google_maps_link,
             offers_products: form.offers_products,
@@ -103,7 +161,7 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
 
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* What this shop offers — drives the Repairs tab and the technician
+      {/* What this shop offers - drives the Repairs tab and the technician
           picker customers see on /book-repair. */}
       <Card className="p-6 md:p-8 space-y-4 bg-white border border-slate-200 shadow-sm rounded-2xl">
         <div className="flex items-center gap-2">
@@ -326,18 +384,99 @@ export const SettingsTab = ({ vendor, onUpdated }: { vendor: any; onUpdated?: (v
             />
           </div>
 
+          {/* The same picker onboarding offers. Previously this was one free-text
+              box holding the raw stored string, so switching from Buy Goods to
+              Paybill or Send Money meant guessing the exact format. */}
           <div className="space-y-1.5">
             <Label className="text-xs font-bold text-[#0F172A] flex items-center gap-1">
               <CreditCard className="h-3.5 w-3.5 text-[#10B981]" />
-              <span>M-Pesa Till / Paybill Number (Payouts)</span>
+              <span>How you receive payouts</span>
             </Label>
-            <Input
-              placeholder="e.g. 890123"
-              value={form.till_number}
-              onChange={(e) => setForm({ ...form, till_number: e.target.value })}
-              className="bg-slate-50 rounded-xl border-slate-300 text-sm font-mono font-bold"
-            />
+            <Select
+              value={form.payment_method}
+              onValueChange={(v: any) => setForm({ ...form, payment_method: v })}
+            >
+              <SelectTrigger className="bg-slate-50 rounded-xl border-slate-300 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="till">M-Pesa Till (Buy Goods)</SelectItem>
+                <SelectItem value="paybill">M-Pesa Paybill</SelectItem>
+                <SelectItem value="phone">M-Pesa Phone (Send Money)</SelectItem>
+                <SelectItem value="bank">Bank Account</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
+          {form.payment_method === "till" && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#0F172A]">Till Number *</Label>
+              <Input
+                placeholder="e.g. 890123"
+                value={form.payment_till}
+                onChange={(e) => setForm({ ...form, payment_till: e.target.value })}
+                className="bg-slate-50 rounded-xl border-slate-300 text-sm font-mono font-bold"
+              />
+            </div>
+          )}
+
+          {form.payment_method === "phone" && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#0F172A]">M-Pesa Phone Number *</Label>
+              <Input
+                placeholder="e.g. 0712345678"
+                value={form.payment_phone}
+                onChange={(e) => setForm({ ...form, payment_phone: e.target.value })}
+                className="bg-slate-50 rounded-xl border-slate-300 text-sm font-mono font-bold"
+              />
+            </div>
+          )}
+
+          {form.payment_method === "paybill" && (
+            <>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-[#0F172A]">Paybill Business No. *</Label>
+                <Input
+                  placeholder="e.g. 247247"
+                  value={form.payment_paybill_biz}
+                  onChange={(e) => setForm({ ...form, payment_paybill_biz: e.target.value })}
+                  className="bg-slate-50 rounded-xl border-slate-300 text-sm font-mono font-bold"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-[#0F172A]">Account Number *</Label>
+                <Input
+                  placeholder="e.g. 123456"
+                  value={form.payment_paybill_acc}
+                  onChange={(e) => setForm({ ...form, payment_paybill_acc: e.target.value })}
+                  className="bg-slate-50 rounded-xl border-slate-300 text-sm font-mono font-bold"
+                />
+              </div>
+            </>
+          )}
+
+          {form.payment_method === "bank" && (
+            <>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-[#0F172A]">Bank Name *</Label>
+                <Input
+                  placeholder="e.g. KCB"
+                  value={form.payment_bank_name}
+                  onChange={(e) => setForm({ ...form, payment_bank_name: e.target.value })}
+                  className="bg-slate-50 rounded-xl border-slate-300 text-sm"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-[#0F172A]">Bank Account Number *</Label>
+                <Input
+                  placeholder="e.g. 1234567890"
+                  value={form.payment_paybill_acc}
+                  onChange={(e) => setForm({ ...form, payment_paybill_acc: e.target.value })}
+                  className="bg-slate-50 rounded-xl border-slate-300 text-sm font-mono font-bold"
+                />
+              </div>
+            </>
+          )}
 
           <div className="space-y-1.5 md:col-span-2">
             <Label className="text-xs font-bold text-[#0F172A] flex items-center gap-1">

@@ -375,16 +375,29 @@ const Index = () => {
                       </div>
                     </div>
                     <div className="h-px bg-[#E2E8F0] w-full mb-4"></div>
+                    {/* Only show a stat once it is real. The rating used to fall
+                        back to a hardcoded "4.8" and the sales count to a seeded
+                        number, so brand-new shops advertised a track record they
+                        did not have. A shop with nothing to show says so. */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-amber-400 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                          star
-                        </span>
-                        <span className="font-mono text-sm font-medium text-[#131b2e]">{vendor.average_rating || "4.8"}</span>
-                      </div>
-                      <div className="text-sm font-medium text-[#434651]">
-                        {vendor.total_completed_transactions || 0} sales
-                      </div>
+                      {Number(vendor.average_rating) > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-amber-400 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            star
+                          </span>
+                          <span className="font-mono text-sm font-medium text-[#131b2e]">
+                            {Number(vendor.average_rating).toFixed(1)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-[#94a3b8]">Not yet rated</span>
+                      )}
+                      {Number(vendor.total_completed_transactions) > 0 && (
+                        <div className="text-sm font-medium text-[#434651]">
+                          {vendor.total_completed_transactions}{" "}
+                          {Number(vendor.total_completed_transactions) === 1 ? "sale" : "sales"}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))

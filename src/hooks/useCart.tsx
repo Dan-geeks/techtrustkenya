@@ -72,7 +72,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await supabase
       .from("cart_items")
       .select(
-        "id, product_id, quantity, product:products(id, brand, model_name, price_ksh, image_urls, quantity_in_stock, is_active, vendor_id, vendor:vendor_profiles(id, business_name))",
+        "id, product_id, quantity, product:products(id, brand, model_name, price_ksh, image_urls, quantity_in_stock, is_active, vendor_id, vendor:vendor_profiles(id, business_name, verification_status))",
       )
       .eq("cart_id", id)
       .order("created_at", { ascending: true });

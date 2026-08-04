@@ -22,7 +22,7 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("express");
   // Empty so the placeholder actually shows. It used to be pre-filled with a
   // real-looking number, which the buyer had to clear before typing their own
-  // — and risked pushing the STK prompt to a stranger's phone if they didn't.
+  // - and risked pushing the STK prompt to a stranger's phone if they didn't.
   const [phoneNumber, setPhoneNumber] = useState("");
   const [paybillNumber, setPaybillNumber] = useState("400200");
   const [accountNumber, setAccountNumber] = useState("TT-8492-MK2");
@@ -109,7 +109,7 @@ const Checkout = () => {
     let stopped = false;
     let elapsed = 0;
     const STEP = 1500;
-    const GIVE_UP_AFTER = 150_000; // 2.5 min — Safaricom abandons a prompt well before this
+    const GIVE_UP_AFTER = 150_000; // 2.5 min - Safaricom abandons a prompt well before this
 
     const finish = (kind: "failed" | "timeout", message: string) => {
       stopped = true;
@@ -175,7 +175,7 @@ const Checkout = () => {
       if (elapsed >= GIVE_UP_AFTER) {
         finish(
           "timeout",
-          "We didn't receive a confirmation for this payment. If money left your account it will still be picked up — check My Orders.",
+          "We didn't receive a confirmation for this payment. If money left your account it will still be picked up - check My Orders.",
         );
       }
     }, STEP);
@@ -205,7 +205,7 @@ const Checkout = () => {
       await fetch(`${ESCROW_API_BASE}/mpesa-stkpush`, {
         method: "POST",
         headers,
-        // Send the REAL order total — this is what the customer is charged.
+        // Send the REAL order total - this is what the customer is charged.
         // The server's resolveChargeAmount() only overrides it while
         // PAYMENT_SANDBOX_MODE is on, and that is now off in production.
         body: JSON.stringify({
@@ -302,7 +302,7 @@ const Checkout = () => {
   };
 
   const handleConfirmPaymentReceived = () => {
-    // Never fall back to a hardcoded order id — that sent buyers to someone
+    // Never fall back to a hardcoded order id - that sent buyers to someone
     // else's order. With no active order there is nothing to track.
     if (!activeOrderId) {
       toast.error("We couldn't find this order. Please check My Orders.");

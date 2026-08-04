@@ -6,8 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface VendorProfile {
   id: string;
-  /** Owner's profiles(id). messages.receiver_id references profiles, so this —
-   *  not `id` — is who a buyer actually chats with. */
+  /** Owner's profiles(id). messages.receiver_id references profiles, so this -
+   *  not `id` - is who a buyer actually chats with. */
   user_id: string | null;
   business_name: string;
   city: string;

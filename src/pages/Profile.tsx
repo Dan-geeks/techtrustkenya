@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Copy, Check, Gift, Wallet, User, Phone, Mail, MapPin, Key, Shield, ArrowLeft, MessageCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -14,7 +14,7 @@ const Profile = () => {
   const [conversations, setConversations] = useState<any[]>([]);
   const referralCode = "TECH500";
   // Built from the current origin rather than a hardcoded host, so the link a
-  // user shares matches the domain they are actually on — otherwise everyone
+  // user shares matches the domain they are actually on - otherwise everyone
   // referred from techtrustkenya.com would be sent to the .web.app address.
   const shareLink = `${window.location.origin}/auth?mode=signup&ref=${referralCode}`;
 

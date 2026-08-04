@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { isVendorVerified } from "@/lib/format";
 
 const Repairs = () => {
   // This page was entirely static, so a customer could never see who actually
   // repairs things. List the vendors who enabled repairs at onboarding AND
-  // have been through the admin's three vetting checks — ticking the box alone
+  // have been through the admin's three vetting checks - ticking the box alone
   // is only an application, not a licence to appear here.
   const [techs, setTechs] = useState<any[]>([]);
   const [loadingTechs, setLoadingTechs] = useState(true);
+  const [myRepairs, setMyRepairs] = useState<any[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     (async () => {
@@ -23,6 +26,23 @@ const Repairs = () => {
       setLoadingTechs(false);
     })();
   }, []);
+
+  // A customer's own repairs, so this page answers "how is my repair going?"
+  // without them having to hunt for the notification that mentioned it.
+  useEffect(() => {
+    if (!user) {
+      setMyRepairs([]);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("repair_requests")
+        .select("id, device_description, status, quoted_price_ksh, payment_status, customer_rating, created_at, vendor:vendor_profiles(business_name)")
+        .eq("customer_id", user.id)
+        .order("created_at", { ascending: false });
+      setMyRepairs(data ?? []);
+    })();
+  }, [user]);
 
   useEffect(() => {
     document.title = "Certified Tech Repairs | TechTrust Kenya";
@@ -234,6 +254,55 @@ const Repairs = () => {
             </div>
           </div>
         </section>
+        {/* Your own repairs, first thing on the page. Previously the only way
+            back to a repair in progress was the notification that announced it,
+            so once that was read the repair was effectively lost. */}
+        {myRepairs.length > 0 && (
+          <section className="py-14 md:py-16 bg-[#F8FAFC] border-t border-[#E2E8F0]">
+            <div className="max-w-container-max mx-auto px-6 md:px-12">
+              <h2 className="font-display-h2 text-2xl md:text-3xl text-[#0F172A] font-bold mb-1">
+                Your repairs
+              </h2>
+              <p className="text-sm text-[#64748B] mb-6">
+                Tap any repair to see its progress, approve a quote, pay, or confirm the work.
+              </p>
+              <div className="grid gap-3">
+                {myRepairs.map((r) => (
+                  <Link
+                    key={r.id}
+                    to={`/repairs/${r.id}`}
+                    className="bg-white rounded-xl border border-[#E2E8F0] p-4 flex flex-wrap items-center justify-between gap-3 hover:shadow-md hover:border-[#0F3D8C]/30 transition-all"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-[#0F172A] truncate">
+                        {r.device_description}
+                      </p>
+                      <p className="text-xs text-[#64748B] mt-0.5">
+                        {r.vendor?.business_name ?? "Technician"} · #{r.id.slice(0, 8).toUpperCase()}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      {r.quoted_price_ksh != null && (
+                        <span className="font-mono text-sm font-bold text-[#0F172A]">
+                          KES {Number(r.quoted_price_ksh).toLocaleString()}
+                        </span>
+                      )}
+                      {r.payment_status === "held" && (
+                        <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                          In Float
+                        </span>
+                      )}
+                      <span className="text-[11px] font-bold capitalize text-[#0F3D8C] bg-[#EEF2FF] border border-[#0F3D8C]/20 px-2.5 py-1 rounded-full">
+                        {String(r.status).replace(/_/g, " ")}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Verified technicians, straight from vendor_profiles. */}
         <section className="py-20 md:py-28 bg-white border-t border-[#E2E8F0]">
           <div className="max-w-container-max mx-auto px-6 md:px-12">
@@ -249,10 +318,16 @@ const Repairs = () => {
             {loadingTechs ? (
               <p className="text-sm text-[#64748B]">Loading technicians...</p>
             ) : techs.length === 0 ? (
+              /* The old copy said a vendor appears here as soon as they tick
+                 "Offer repair services", which is not true and is why a shop
+                 that had signed up looked like it had vanished. Listing also
+                 requires TechTrust to clear three vetting checks. */
               <div className="border-2 border-dashed border-[#E2E8F0] rounded-2xl p-12 text-center">
                 <p className="font-semibold text-[#0F172A]">No repair technicians listed yet</p>
-                <p className="text-sm text-[#64748B] mt-1">
-                  Vendors appear here once they enable <strong>Offer repair services</strong> in their dashboard.
+                <p className="text-sm text-[#64748B] mt-1 max-w-md mx-auto">
+                  A shop appears here after it ticks <strong>Offer repair services</strong> and TechTrust
+                  clears its three vetting checks - identity, repair skills, and safety. Applications
+                  waiting on us are in the admin Repairs tab.
                 </p>
               </div>
             ) : (

@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -260,7 +260,7 @@ export const ProductsTab = ({ vendor }: Props) => {
     // before the dialog even appeared, which felt like the button had hung.
     if (!confirm(
       `Delete ${label}? This cannot be undone.\n\n` +
-      `Any past orders for it are kept — only the listing is removed.`
+      `Any past orders for it are kept - only the listing is removed.`
     )) return;
 
     const { error } = await supabase.from("products").delete().eq("id", p.id);
@@ -544,7 +544,7 @@ export const ProductsTab = ({ vendor }: Props) => {
               </div>
             </div>
 
-            {/* Technical Specifications — every field optional. Whatever is left
+            {/* Technical Specifications - every field optional. Whatever is left
                 blank is simply not shown on the product page. */}
             <div className="space-y-4">
               <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider border-b border-border pb-2">

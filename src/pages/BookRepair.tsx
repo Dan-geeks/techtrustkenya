@@ -30,7 +30,7 @@ const BookRepair = () => {
   const [techs, setTechs] = useState<any[]>([]);
 
   useEffect(() => {
-    // Only vendors the admin has vetted and listed as repair technicians —
+    // Only vendors the admin has vetted and listed as repair technicians -
     // ticking "offers repairs" at onboarding just files an application.
     (async () => {
       const { data } = await supabase

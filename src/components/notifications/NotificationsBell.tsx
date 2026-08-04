@@ -90,7 +90,7 @@ export const NotificationsBell = () => {
     // Realtime alone is not dependable enough to be the only path. The socket
     // drops on sleep, on a flaky mobile connection, and whenever a phone
     // backgrounds the tab, and postgres_changes does NOT replay what was missed
-    // while it was down — so a notification inserted during that window never
+    // while it was down - so a notification inserted during that window never
     // arrives, which is exactly the "sometimes it comes, sometimes it doesn't"
     // behaviour reported. Poll as a floor, and refetch whenever the user comes
     // back to the tab so returning to the app always shows the truth.

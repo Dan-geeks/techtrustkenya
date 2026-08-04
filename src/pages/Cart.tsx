@@ -1,63 +1,57 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShieldCheck, Lock, Trash2, ArrowLeft, Info, Shield, CheckCircle2, ChevronRight, ShoppingBag } from "lucide-react";
+import { ShieldCheck, Lock, Trash2, ArrowLeft, Info, Shield, CheckCircle2, ChevronRight, ShoppingBag, Loader2 } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
+import { isVendorVerified } from "@/lib/format";
 
-interface CartItem {
-  id: string;
-  title: string;
-  price: number;
-  quantity: number;
-  image: string;
-  vendor: string;
-  vendorVerified: boolean;
-}
-
-const INITIAL_CART_ITEMS: CartItem[] = [
-  {
-    id: "cart-item-1",
-    title: "Sony Alpha A7 IV Mirrorless Camera Body",
-    price: 245000,
-    quantity: 1,
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAwA-kJTEPK10Wg_bRHBIlfZubG3UUaAFPmoHmXVIm-9rtv2eRoKoArIYISqtZcpPp3r1STnxKVfmWD7Z80g_LSUJ1G4MNGQDCfLs0tkRQWICZlUHHM0PYY0MZve16ya9YeB-3W9XU6VmkyqtrZO1_W73BQAJbvejNJy_dy1lpZ7I83PW_Nfp_LV2Fl1NbgDZ8cRqwMNciflmEqsRlOo0iaW3O_ATqICPDAvBUyrbJBoBTjzctqbm37TA",
-    vendor: "Nairobi Digital Hub",
-    vendorVerified: true,
-  },
-  {
-    id: "cart-item-2",
-    title: 'MacBook Pro 16" M2 Max (2023) - 32GB RAM, 1TB SSD',
-    price: 410000,
-    quantity: 1,
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCqqlp3hfRl0uUXyyoq-8_Rl4w60pe0DIiQTG3QclH731XZZyaxK6UgdLWsQ_NqlDp7BsqkKhuHJlIErL1HImbaQ0dq9BIdkcPNm2iHt2VNz0Bgjxb3JzSQLqBO0FBPNh8ibNn1ZFXF90PN5rrbPtjiYhjnxx9L-ktpGq4iBlJv3brvaEI16_BlDq-u7NE0l47BFBLLVvyVcOEbWUQWqSMyZD1oUEvx8nEOkOjIF-50lBjPyLJT4Ody_Q",
-    vendor: "TechVillage KE",
-    vendorVerified: true,
-  },
-];
-
+/**
+ * The cart page was showing two hardcoded demo products (a Sony A7 IV and a
+ * MacBook Pro) held in local state, so removing them "worked" until the next
+ * render and they came straight back - and a real add-to-cart never showed up
+ * here at all. It now reads the same `cart_items` rows as the rest of the app
+ * through useCart, which already handles stock checks, quantities and realtime.
+ */
 const Cart = () => {
-  const [items, setItems] = useState<CartItem[]>(INITIAL_CART_ITEMS);
+  const { items: cartItems, loading, removeItem, setQuantity } = useCart();
 
   useEffect(() => {
     document.title = "Shopping Cart | TechTrust Kenya";
   }, []);
 
+  // Flatten the joined rows into what this page renders.
+  const items = cartItems.map((ci) => {
+    const p = ci.product ?? {};
+    return {
+      id: ci.id,
+      title: [p.brand, p.model_name].filter(Boolean).join(" ") || "Item",
+      price: Number(p.price_ksh ?? 0),
+      quantity: ci.quantity,
+      image: p.image_urls?.[0] || "/placeholder.svg",
+      vendor: p.vendor?.business_name ?? "TechTrust vendor",
+      vendorVerified: isVendorVerified(p.vendor?.verification_status),
+    };
+  });
+
   const handleUpdateQuantity = (id: string, delta: number) => {
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const newQty = Math.max(1, item.quantity + delta);
-          return { ...item, quantity: newQty };
-        }
-        return item;
-      })
-    );
+    const current = items.find((i) => i.id === id);
+    if (!current) return;
+    void setQuantity(id, Math.max(1, current.quantity + delta));
   };
 
   const handleRemoveItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+    void removeItem(id);
   };
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const total = subtotal;
+
+  if (loading && items.length === 0) {
+    return (
+      <div className="bg-slate-50 min-h-screen grid place-items-center">
+        <Loader2 className="h-6 w-6 animate-spin text-[#0F3D8C]" />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-50 text-[#0F172A] antialiased min-h-screen">

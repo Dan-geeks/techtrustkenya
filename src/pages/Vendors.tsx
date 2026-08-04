@@ -215,14 +215,25 @@ const Vendors = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-1.5 bg-[#fff8e6] px-2.5 py-1 rounded-md">
-                      <Star className="w-3.5 h-3.5 text-[#f59e0b] fill-[#f59e0b]" />
-                      <span className="font-bold text-[#b45309] text-sm">{vendor.average_rating || "4.8"}</span>
-                    </div>
-                    <div className="text-sm font-medium text-[#434651]">
-                      {vendor.total_completed_transactions || 0} sales
-                    </div>
+                  {/* Same rule as the home page: a stat only appears once it is
+                      earned. The "4.8" was a hardcoded fallback. */}
+                  <div className="flex items-center justify-between mb-4 min-h-[28px]">
+                    {Number(vendor.average_rating) > 0 ? (
+                      <div className="flex items-center gap-1.5 bg-[#fff8e6] px-2.5 py-1 rounded-md">
+                        <Star className="w-3.5 h-3.5 text-[#f59e0b] fill-[#f59e0b]" />
+                        <span className="font-bold text-[#b45309] text-sm">
+                          {Number(vendor.average_rating).toFixed(1)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-[#94a3b8]">Not yet rated</span>
+                    )}
+                    {Number(vendor.total_completed_transactions) > 0 && (
+                      <div className="text-sm font-medium text-[#434651]">
+                        {vendor.total_completed_transactions}{" "}
+                        {Number(vendor.total_completed_transactions) === 1 ? "sale" : "sales"}
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-auto pt-4 border-t border-[#E2E8F0] flex flex-col gap-2">

@@ -125,7 +125,7 @@ export const ChatWidget = () => {
     const tempMessage = newMessage;
     setNewMessage("");
 
-    // Render immediately rather than after the insert round-trip — waiting on
+    // Render immediately rather than after the insert round-trip - waiting on
     // the network before showing your own message is what made chat feel laggy.
     const tempId = `pending-${Date.now()}`;
     setMessages((prev) => [

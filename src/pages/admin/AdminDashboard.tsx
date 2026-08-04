@@ -24,7 +24,7 @@ import {
 
 const AdminDashboard = () => {
   useEffect(() => {
-    document.title = "Admin Dashboard — TechTrust";
+    document.title = "Admin Dashboard - TechTrust";
   }, []);
 
   return (
@@ -333,7 +333,7 @@ const AdminVendors = () => {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{v.business_name}</div>
                   <div className="text-xs text-muted-foreground truncate">
-                    {v.owner_name ?? "—"} · Applied {formatDate(v.created_at)}
+                    {v.owner_name ?? "-"} · Applied {formatDate(v.created_at)}
                   </div>
                 </div>
                 <VendorStatusBadge status={v.verification_status} />
@@ -353,7 +353,7 @@ const AdminVendors = () => {
                 <div className="flex items-start gap-1.5 text-muted-foreground">
                   <MapPin className="h-3 w-3 mt-0.5 shrink-0" />
                   <span className="truncate">
-                    {v.county ?? v.city ?? "—"}{v.sub_county ? `, ${v.sub_county}` : ""}{v.physical_address ? ` · ${v.physical_address}` : ""}
+                    {v.county ?? v.city ?? "-"}{v.sub_county ? `, ${v.sub_county}` : ""}{v.physical_address ? ` · ${v.physical_address}` : ""}
                   </span>
                 </div>
                 {v.google_maps_link && (
@@ -560,7 +560,7 @@ const AdminVendors = () => {
 const Row = ({ k, v }: { k: string; v: React.ReactNode }) => (
   <div className="flex justify-between gap-3 border-b pb-1">
     <span className="text-muted-foreground shrink-0">{k}</span>
-    <span className="text-right">{v ?? "—"}</span>
+    <span className="text-right">{v ?? "-"}</span>
   </div>
 );
 
@@ -607,7 +607,7 @@ const AdminDisputes = () => {
   // resolve_dispute does the status change AND notifies both sides in one
   // transaction. The old code updated the order and then inserted a
   // notification directly, which notifications' "auth.uid() = user_id" policy
-  // silently refuses for anyone but yourself — so resolving a dispute told
+  // silently refuses for anyone but yourself - so resolving a dispute told
   // nobody, and never told the vendor anything at all.
   const resolve = async (o: DisputeOrder, outcome: "refund_customer" | "release_to_vendor") => {
     const { error } = await supabase.rpc("resolve_dispute", {
@@ -622,7 +622,7 @@ const AdminDisputes = () => {
       toast.error(error.message);
       return;
     }
-    toast.success("Dispute resolved — both parties notified.");
+    toast.success("Dispute resolved - both parties notified.");
     load();
   };
 
@@ -655,7 +655,7 @@ const AdminDisputes = () => {
                 <div className="text-xs text-muted-foreground">{o.vendor?.business_name}</div>
               </td>
               <td className="px-4 py-3">
-                <div>{o.customer?.full_name ?? "—"}</div>
+                <div>{o.customer?.full_name ?? "-"}</div>
                 <div className="text-xs text-muted-foreground">{o.customer?.phone_number}</div>
               </td>
               <td className="px-4 py-3 font-medium">{formatKsh(o.total_amount_ksh)}</td>
@@ -663,7 +663,7 @@ const AdminDisputes = () => {
                 {o.dispute_reason ? (
                   <p className="text-sm bg-red-50 text-red-800 border border-red-200 rounded px-2 py-1 line-clamp-2">{o.dispute_reason}</p>
                 ) : (
-                  <span className="text-muted-foreground">—</span>
+                  <span className="text-muted-foreground">-</span>
                 )}
               </td>
               <td className="px-4 py-3">
@@ -767,8 +767,8 @@ const AdminUsers = () => {
               {filtered.map((u) => (
                 <tr key={u.id} className="hover:bg-muted/25 transition-colors">
                   <td className="px-4 py-3 font-medium">{u.full_name ?? "Unnamed"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{u.email ?? "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{u.phone_number ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{u.email ?? "-"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{u.phone_number ?? "-"}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1 flex-wrap">
                       {(u.user_roles ?? []).map((r) => (
@@ -832,7 +832,7 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
 };
 
 const ProviderBadge = ({ provider }: { provider: string | null }) => {
-  if (!provider) return <span className="text-muted-foreground text-xs">—</span>;
+  if (!provider) return <span className="text-muted-foreground text-xs">-</span>;
   const isKcb = provider.toLowerCase().includes("kcb");
   return (
     <Badge variant="outline" className={`text-xs ${isKcb ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200"}`}>
@@ -942,17 +942,17 @@ const AdminPayments = () => {
                 {pageItems.map((o) => (
                   <tr key={o.id} className="hover:bg-muted/25 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs">#{o.id.slice(0, 8).toUpperCase()}</td>
-                    <td className="px-4 py-3">{o.customer?.full_name ?? "—"}</td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">{o.customer?.phone_number ?? "—"}</td>
+                    <td className="px-4 py-3">{o.customer?.full_name ?? "-"}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{o.customer?.phone_number ?? "-"}</td>
                     <td className="px-4 py-3 text-right font-medium">{formatKsh(o.total_amount_ksh)}</td>
                     <td className="px-4 py-3"><ProviderBadge provider={o.payment_provider} /></td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{o.mpesa_receipt_number ?? "—"}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{o.mpesa_receipt_number ?? "-"}</td>
                     <td className="px-4 py-3"><PaymentStatusBadge status={o.payment_status} /></td>
                     <td className="px-4 py-3">
                       {o.payout_status ? (
                         <Badge variant="outline" className="text-xs capitalize">{o.payout_status}</Badge>
                       ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
+                        <span className="text-muted-foreground text-xs">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(o.created_at)}</td>
@@ -965,7 +965,7 @@ const AdminPayments = () => {
           {totalPages > 1 && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
+                Showing {page * PAGE_SIZE + 1}-{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
               </span>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
@@ -1093,7 +1093,7 @@ const RepairTechnicianApplications = () => {
       .eq("id", vendor.id);
     setBusy(null);
     if (error) { toast.error(error.message); return; }
-    toast.success("Removed from the Repairs page — back in the review queue.");
+    toast.success("Removed from the Repairs page - back in the review queue.");
     load();
   };
 
@@ -1183,7 +1183,7 @@ const RepairTechnicianApplications = () => {
                         onChange={() => toggleStep(v, s.col)}
                       />
                       <span className="min-w-0">
-                        <span className="text-sm font-medium block">Step {i + 1} — {s.label}</span>
+                        <span className="text-sm font-medium block">Step {i + 1} - {s.label}</span>
                         <span className="text-xs text-muted-foreground block">{s.hint}</span>
                       </span>
                     </label>
@@ -1316,7 +1316,7 @@ const AdminRepairRequests = () => {
               </td>
               <td className="px-4 py-3">
                 {/* These read device_type/device_model/issue_description, none
-                    of which exist on repair_requests — every cell rendered
+                    of which exist on repair_requests - every cell rendered
                     blank. The real columns are device_description and
                     problem_description. */}
                 <div className="font-medium">{r.device_description}</div>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2, ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ const ResetPassword = () => {
           }
         });
     } else {
-      // No tokens — maybe user navigated here directly. Check if they already have a session.
+      // No tokens - maybe user navigated here directly. Check if they already have a session.
       supabase.auth.getSession().then(({ data }) => {
         if (data.session) setReady(true);
         else setLinkError("This password reset link has expired or is invalid. Please request a new one.");

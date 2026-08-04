@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,7 +96,7 @@ export const OrdersTab = ({ vendor }: { vendor: any }) => {
                         <span className="text-data-id">#{o.id.slice(0, 8).toUpperCase()}</span> · Qty <span className="text-stat">{o.quantity}</span> · {formatDate(o.created_at)}
                       </div>
                       <div className="text-xs mt-1">
-                        Customer: {o.customer?.full_name ?? "—"} · {o.customer?.phone_number ?? "—"}
+                        Customer: {o.customer?.full_name ?? "-"} · {o.customer?.phone_number ?? "-"}
                       </div>
                     </div>
                     <div className="text-right shrink-0">

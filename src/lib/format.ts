@@ -14,7 +14,7 @@ export const formatDate = (iso: string): string => {
  * Where a notification should take you when tapped.
  *
  * `roles` matters for vendor_application: those go to a dashboard, and an admin
- * reviewing a technician application does not hold the `vendor` role — sending
+ * reviewing a technician application does not hold the `vendor` role - sending
  * them to /vendor/dashboard bounced them to the home page via ProtectedRoute.
  * Pass the viewer's roles so each side lands somewhere they can actually open.
  */

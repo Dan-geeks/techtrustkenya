@@ -1,4 +1,4 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const sections = [
@@ -10,7 +10,7 @@ const sections = [
   {
     id: "definitions",
     title: "2. Definitions",
-    content: `• Platform — the TechTrust website, application, and related services.\n• Buyer — a user who purchases products or repair services.\n• Vendor — a verified seller who lists products for sale.\n• Technician — a verified provider of repair services.\n• Float escrow — TechTrust's escrow payment system that holds a buyer's payment until the buyer confirms receipt.\n• Verified — a vendor or technician who has passed TechTrust's physical or identity verification process.\n• Dispute — a formal complaint raised by a buyer about a transaction.`
+    content: `• Platform - the TechTrust website, application, and related services.\n• Buyer - a user who purchases products or repair services.\n• Vendor - a verified seller who lists products for sale.\n• Technician - a verified provider of repair services.\n• Float escrow - TechTrust's escrow payment system that holds a buyer's payment until the buyer confirms receipt.\n• Verified - a vendor or technician who has passed TechTrust's physical or identity verification process.\n• Dispute - a formal complaint raised by a buyer about a transaction.`
   },
   {
     id: "eligibility",

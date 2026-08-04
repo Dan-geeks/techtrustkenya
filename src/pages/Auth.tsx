@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -200,7 +200,7 @@ export const Auth = () => {
           }
         }
 
-        // Fire-and-forget — never awaited into the navigation path below.
+        // Fire-and-forget - never awaited into the navigation path below.
         void sendWelcomeEmail({
           name: cleanFullName,
           role: accountType === "vendor" ? "vendor" : "customer",

@@ -12,7 +12,7 @@ type InvokeResult<T> = {
 const FUNCTION_BASE_URL = import.meta.env.VITE_RAILWAY_FUNCTION_URL?.replace(/\/+$/, "");
 
 /** Base URL of the escrow API. Pages must use this rather than hardcoding a Railway
- *  host — two pages pinned the old deleted deployment and silently broke. */
+ *  host - two pages pinned the old deleted deployment and silently broke. */
 export const ESCROW_API_BASE = FUNCTION_BASE_URL ?? "";
 
 /** True when a dedicated escrow API is configured (rather than Supabase edge functions). */
@@ -106,7 +106,7 @@ export type RepairPaymentStatus = {
 
 /**
  * Response 2 for a repair. As with orders, the STK push's first response only
- * means the PIN prompt was delivered — poll this until `status` stops being
+ * means the PIN prompt was delivered - poll this until `status` stops being
  * "pending" before treating the repair as paid.
  */
 export async function fetchRepairPaymentStatus(repairId: string): Promise<RepairPaymentStatus | null> {
@@ -143,7 +143,7 @@ export type PaymentStatus = {
 };
 
 /**
- * Response 2 of an STK Push. Response 1 only means the PIN prompt was delivered —
+ * Response 2 of an STK Push. Response 1 only means the PIN prompt was delivered -
  * this is the call that tells you whether money actually moved. Poll it until
  * `status` stops being "pending".
  *
@@ -169,7 +169,7 @@ export async function fetchPaymentStatus(
     if (!response.ok || !data?.success) return null;
     return data;
   } catch {
-    // Network hiccup mid-poll is not a payment failure — let the caller retry.
+    // Network hiccup mid-poll is not a payment failure - let the caller retry.
     return null;
   }
 }

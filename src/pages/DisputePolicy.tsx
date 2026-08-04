@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AlertTriangle, ShieldCheck, Scale, Clock, CheckCircle2, XCircle, RefreshCw, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +24,7 @@ const STATUS_STYLE: Record<string, string> = {
  * The viewer's own disputes, above the policy text.
  *
  * This page was pure policy copy, and the order tracker's "Open Dispute" button
- * simply linked here — so a buyer could read about disputes but never raise or
+ * simply linked here - so a buyer could read about disputes but never raise or
  * track one.
  */
 const MyDisputes = () => {
@@ -104,7 +104,7 @@ const DisputePolicy = () => {
         </div>
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">Disputes</h1>
         <p className="text-sm text-muted-foreground mb-8">
-          Raise a dispute from the order itself — open the order and choose <strong>Report a problem</strong>. Your
+          Raise a dispute from the order itself - open the order and choose <strong>Report a problem</strong>. Your
           payment stays frozen in Float until we've reviewed it.
         </p>
 

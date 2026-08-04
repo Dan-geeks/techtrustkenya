@@ -19,7 +19,7 @@ const phoneOk = (v: string) => /^(07\d{8}|2547\d{8})$/.test(v);
 /**
  * Vendor onboarding for users who are already authenticated (Google sign-in
  * via /welcome). Collects the same business details as /vendor/onboarding minus
- * email/password — there's already a session — plus the M-Pesa till number.
+ * email/password - there's already a session - plus the M-Pesa till number.
  */
 const VendorOnboarding = () => {
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ const VendorOnboarding = () => {
         }));
         setErrors((prev) => ({ ...prev, latitude: "", longitude: "" }));
         setLocating(false);
-        toast.success("Location captured — make sure you're at the shop before continuing.");
+        toast.success("Location captured - make sure you're at the shop before continuing.");
       },
       (err) => {
         setLocating(false);
@@ -199,7 +199,7 @@ const VendorOnboarding = () => {
           email: user.email,
           county: vsu.county,
           subCounty: vsu.sub_county,
-          physicalAddress: noPhysicalAddress ? "Online-only — no physical shop location" : vsu.physical_address,
+          physicalAddress: noPhysicalAddress ? "Online-only - no physical shop location" : vsu.physical_address,
           gpsLatitude: Number(vsu.latitude),
           gpsLongitude: Number(vsu.longitude),
           googleMapsLink: vsu.google_maps_link || null,
@@ -458,7 +458,7 @@ const VendorOnboarding = () => {
               <label className="mt-1.5 flex flex-col items-center justify-center gap-2 px-4 py-6 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-accent transition-smooth">
                 <Camera className="h-7 w-7 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">Upload shop photos, minimum 2</span>
-                <span className="text-[10px] text-muted-foreground">JPG, PNG, WEBP — max 5MB each</span>
+                <span className="text-[10px] text-muted-foreground">JPG, PNG, WEBP - max 5MB each</span>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"

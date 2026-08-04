@@ -359,6 +359,60 @@ export type Database = {
           },
         ]
       }
+      payout_issue_reports: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          order_id: string
+          reported_by: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          order_id: string
+          reported_by: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          order_id?: string
+          reported_by?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_issue_reports_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_issue_reports_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           average_rating: number
@@ -558,6 +612,8 @@ export type Database = {
           customer_approved_quote: boolean
           customer_confirmed_at: string | null
           customer_id: string
+          customer_rating: number | null
+          customer_review: string | null
           device_description: string
           id: string
           inspection_notes: string | null
@@ -571,6 +627,7 @@ export type Database = {
           payment_status: Database["public"]["Enums"]["repair_payment_status"]
           problem_description: string
           quoted_price_ksh: number | null
+          rated_at: string | null
           released_at: string | null
           repair_service_id: string | null
           status: Database["public"]["Enums"]["repair_status"]
@@ -583,6 +640,8 @@ export type Database = {
           customer_approved_quote?: boolean
           customer_confirmed_at?: string | null
           customer_id: string
+          customer_rating?: number | null
+          customer_review?: string | null
           device_description: string
           id?: string
           inspection_notes?: string | null
@@ -596,6 +655,7 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["repair_payment_status"]
           problem_description: string
           quoted_price_ksh?: number | null
+          rated_at?: string | null
           released_at?: string | null
           repair_service_id?: string | null
           status?: Database["public"]["Enums"]["repair_status"]
@@ -608,6 +668,8 @@ export type Database = {
           customer_approved_quote?: boolean
           customer_confirmed_at?: string | null
           customer_id?: string
+          customer_rating?: number | null
+          customer_review?: string | null
           device_description?: string
           id?: string
           inspection_notes?: string | null
@@ -621,6 +683,7 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["repair_payment_status"]
           problem_description?: string
           quoted_price_ksh?: number | null
+          rated_at?: string | null
           released_at?: string | null
           repair_service_id?: string | null
           status?: Database["public"]["Enums"]["repair_status"]
@@ -1066,8 +1129,24 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      rate_repair: {
+        Args: { _rating: number; _repair_id: string; _review?: string }
+        Returns: undefined
+      }
+      recompute_vendor_stats: {
+        Args: { _vendor_id: string }
+        Returns: undefined
+      }
+      report_payout_issue: {
+        Args: { _message: string; _order_id: string }
+        Returns: undefined
+      }
       resolve_dispute: {
         Args: { _note?: string; _order_id: string; _outcome: string }
+        Returns: undefined
+      }
+      resolve_payout_issue: {
+        Args: { _report_id: string; _resolution: string }
         Returns: undefined
       }
       settle_order_into_float: {
