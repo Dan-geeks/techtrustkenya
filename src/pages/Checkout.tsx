@@ -537,10 +537,16 @@ const Checkout = () => {
                 <span>Amount:</span>
                 <span className="font-bold text-price">KES {totalDue.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Escrow Ref:</span>
-                <span className="font-bold">TT-8492-MK2</span>
-              </div>
+              {/* The real order reference. This was hardcoded to
+                  "TT-8492-MK2", so every buyer on every payment saw the same
+                  invented reference - useless for quoting to support, and it
+                  would not have matched anything if they had. */}
+              {activeOrderId && (
+                <div className="flex justify-between">
+                  <span>Escrow Ref:</span>
+                  <span className="font-bold">#{activeOrderId.slice(0, 8).toUpperCase()}</span>
+                </div>
+              )}
             </div>
             <div className="flex flex-col items-center justify-center gap-3 pt-4">
               <Loader2 className="h-8 w-8 text-[#0F3D8C] animate-spin" />
