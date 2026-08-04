@@ -312,6 +312,33 @@ own disputes above the policy text.
 
 ---
 
+## 4a. Ratings and vendor stats
+
+Both were fiction until 2026-08-04.
+
+`reviews` and its RLS policy (own order, confirmed only) existed with **zero
+rows** and no UI, so `vendor_profiles.average_rating` had no source and the
+landing page fell back to a **hardcoded `4.8`** for every unrated shop. Four
+seed vendors also carried invented totals — ProFix 312 sales, TechZone 243,
+ByteHub 127, Gadget Palace 89 — none with a single real order, while the shops
+that *had* sold showed 0 because nothing maintained the column.
+
+Now: buyers rate item + service after confirming; customers rate a completed
+repair (`rate_repair`); `recompute_vendor_stats()` derives both numbers from
+confirmed orders, completed repairs and real ratings, by trigger on all three
+tables. It is a **full recompute, not an increment** — idempotent and
+self-healing after any manual data fix. A shop with nothing to show says "Not
+yet rated" rather than inventing one.
+
+### "Didn't receive the money?" is NOT a dispute
+
+`report_payout_issue()` / `resolve_payout_issue()`, with its own
+`payout_issue_reports` table. Deliberately **not** `open_dispute`, which
+requires `payment_status = 'paid_float'` and refuses a confirmed order: routing
+a payout complaint through disputes would reverse the buyer's confirmation, undo
+their side of the escrow, and corrupt the stats that now derive from confirmed
+orders. A missing payout is between the vendor and TechTrust. Sellers only.
+
 ## 4b. Three RLS traps that make things fail *silently*
 
 These caused most of the "it works sometimes" behaviour. Look here first.
