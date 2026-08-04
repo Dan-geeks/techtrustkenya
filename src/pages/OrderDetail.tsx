@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RateVendor } from "@/components/reviews/RateVendor";
+import { invokeFunction } from "@/lib/functions";
 
 /** The five milestones shown in the tracker, in order. */
 const STEPS = [
@@ -167,21 +168,60 @@ export const OrderDetail = () => {
     }
   }, [order]);
 
+  /**
+   * Confirming delivery is what releases the money.
+   *
+   * This used to be a bare `update({ status: "confirmed" })`. It never set
+   * payment_status, never set float_released_at, and never called
+   * /release-float-payment - so the vendor was never actually paid, no payout
+   * was ever recorded, and the referral reward never fired. The banner still
+   * read "Float: Released" because that text keys off the step being complete,
+   * so the screen claimed a payout that nothing had performed. Four confirmed
+   * orders were sitting in exactly that state.
+   *
+   * The escrow API owns this transition: it claims the payout before calling
+   * the gateway (so a double click cannot pay twice), writes
+   * payment_status/float_released_at/payout_reference, notifies the vendor and
+   * grants the referral reward.
+   */
   const handleConfirmDelivery = async () => {
     if (!order || confirming) return;
     setConfirming(true);
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: "confirmed", updated_at: new Date().toISOString() })
-      .eq("id", order.id);
 
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Delivery confirmed! Float funds have been released to the vendor.");
+    const { data, error } = await invokeFunction<{
+      success: boolean;
+      error?: string;
+      payoutPending?: boolean;
+    }>("release-float-payment", { body: { orderId: order.id } });
+
+    if (error || !data?.success) {
+      const message = error?.message ?? data?.error ?? "Could not release the payment.";
+      // Don't leave the buyer stuck: the goods really did arrive, so record the
+      // confirmation and let an admin chase the payout, rather than silently
+      // pretending the money moved.
+      const { error: markErr } = await supabase
+        .from("orders")
+        .update({ status: "confirmed", updated_at: new Date().toISOString() })
+        .eq("id", order.id);
+      setConfirming(false);
+      if (markErr) {
+        toast.error(markErr.message);
+        return;
+      }
+      toast.warning(
+        `Delivery confirmed, but the payout could not be sent yet: ${message} TechTrust has been notified.`,
+      );
       await fetchOrder();
+      return;
     }
+
     setConfirming(false);
+    toast.success(
+      data.payoutPending
+        ? "Delivery confirmed. The payout to the vendor is already on its way."
+        : "Delivery confirmed and the Float payment has been released to the vendor.",
+    );
+    await fetchOrder();
   };
 
   /**
