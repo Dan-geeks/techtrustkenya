@@ -24,9 +24,12 @@ const Checkout = () => {
   // real-looking number, which the buyer had to clear before typing their own
   // - and risked pushing the STK prompt to a stranger's phone if they didn't.
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [paybillNumber, setPaybillNumber] = useState("400200");
-  const [accountNumber, setAccountNumber] = useState("TT-8492-MK2");
-  const [tillNumber, setTillNumber] = useState("890123");
+  // The paybill / till / account fields that used to live here are gone. They
+  // were prefilled with invented-but-real-looking values (paybill 400200,
+  // account TT-8492-MK2, till 890123), were never rendered as inputs and were
+  // never sent anywhere - the STK push carries the amount and the buyer's
+  // phone, and the destination is the gateway's. All they did was sit in the
+  // bundle looking like real merchant details.
   const [processing, setProcessing] = useState(false);
   const [stkModalOpen, setStkModalOpen] = useState(false);
   const [paymentError, setPaymentError] = useState<{ kind: "failed" | "timeout"; message: string } | null>(null);
@@ -225,14 +228,6 @@ const Checkout = () => {
     e.preventDefault();
     if (!phoneNumber) {
       toast.error("Please enter a valid mobile number for payment confirmation.");
-      return;
-    }
-    if (paymentMethod === "paybill" && (!paybillNumber || !accountNumber)) {
-      toast.error("Please fill in both Paybill Number and Account Number.");
-      return;
-    }
-    if (paymentMethod === "till" && !tillNumber) {
-      toast.error("Please fill in the Till Number.");
       return;
     }
     if (!user) {
