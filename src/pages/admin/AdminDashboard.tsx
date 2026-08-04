@@ -843,6 +843,185 @@ const ProviderBadge = ({ provider }: { provider: string | null }) => {
 
 const PAGE_SIZE = 20;
 
+/**
+ * Vendors waiting to be paid.
+ *
+ * PAYOUT_PROVIDER is `simulation` and no Safaricom B2C credentials exist, so
+ * /release-float-payment records the intent but no money can leave. B2C is an
+ * activation only the operator can apply for - meanwhile the business still has
+ * to pay its vendors, and it can: send the M-Pesa by hand and record it here.
+ *
+ * The alternative people reach for is editing payment_status directly, which
+ * leaves no reference, no timestamp and no notification to the vendor.
+ */
+const PendingPayouts = () => {
+  const [rows, setRows] = useState<any[] | null>(null);
+  const [active, setActive] = useState<any | null>(null);
+  const [reference, setReference] = useState("");
+  const [note, setNote] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    const { data, error } = await supabase
+      .from("pending_payouts")
+      .select("*")
+      .order("created_at", { ascending: true });
+    if (error) toast.error(error.message);
+    setRows(data ?? []);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const settle = async () => {
+    if (!active) return;
+    if (!reference.trim()) {
+      toast.error("Enter the M-Pesa reference so the payment can be traced.");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.rpc("mark_payout_settled", {
+      _order_id: active.order_id,
+      _reference: reference.trim(),
+      _note: note.trim() || null,
+    });
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Payout recorded and the vendor has been notified.");
+    setActive(null);
+    setReference("");
+    setNote("");
+    load();
+  };
+
+  if (rows === null) {
+    return <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-accent" /></div>;
+  }
+
+  return (
+    <div className="mb-8">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div>
+          <h2 className="text-lg font-semibold">Vendors awaiting payout</h2>
+          <p className="text-xs text-muted-foreground">
+            The buyer has confirmed and the Float is still held. Automatic payouts need Safaricom B2C;
+            until that is active, send the M-Pesa and record the reference here.
+          </p>
+        </div>
+        {rows.length > 0 && (
+          <Badge variant="outline" className="border-amber-500 text-amber-600 shrink-0">
+            {rows.length} pending
+          </Badge>
+        )}
+      </div>
+
+      {rows.length === 0 ? (
+        <Card className="p-8 text-center text-muted-foreground text-sm">
+          No vendors are waiting to be paid.
+        </Card>
+      ) : (
+        <div className="grid gap-3">
+          {rows.map((r) => (
+            <Card key={r.order_id} className="p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm">
+                    {r.business_name}{" "}
+                    <span className="font-mono text-xs text-muted-foreground">
+                      #{r.order_id.slice(0, 8).toUpperCase()}
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {[r.brand, r.model_name].filter(Boolean).join(" ") || "Order"} · confirmed {formatDate(r.created_at)}
+                  </p>
+                  {/* Where to actually send it. A vendor who never set a payout
+                      destination has to be chased, so say so rather than
+                      rendering an empty cell. */}
+                  <p className="text-xs mt-1">
+                    <span className="text-muted-foreground">Send to: </span>
+                    {r.payout_destination ? (
+                      <span className="font-mono font-semibold">{r.payout_destination}</span>
+                    ) : r.vendor_phone ? (
+                      <span className="font-mono font-semibold">{r.vendor_phone} (phone - no till set)</span>
+                    ) : (
+                      <span className="text-red-600 font-semibold">
+                        no payout destination on file - ask the vendor to set one in Settings
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="font-bold">{formatKsh(Number(r.payout_ksh))}</div>
+                  <div className="text-xs text-muted-foreground">
+                    of {formatKsh(Number(r.total_amount_ksh))}
+                  </div>
+                  <Button
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => { setActive(r); setReference(""); setNote(""); }}
+                  >
+                    Record payment
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={!!active} onOpenChange={(o) => !o && setActive(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Record payout to {active?.business_name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="rounded-lg border bg-muted/40 p-3 text-xs space-y-1">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Amount</span>
+                <span className="font-bold">{active ? formatKsh(Number(active.payout_ksh)) : ""}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Send to</span>
+                <span className="font-mono font-semibold">
+                  {active?.payout_destination || active?.vendor_phone || "not set"}
+                </span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Send the M-Pesa first, then record its reference here. This releases the Float on the
+              order and notifies the vendor.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="payout-ref">M-Pesa reference *</Label>
+              <Input
+                id="payout-ref"
+                placeholder="e.g. UH4XABC123"
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                className="font-mono"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="payout-note">Note to the vendor (optional)</Label>
+              <Input
+                id="payout-note"
+                placeholder="e.g. Sent from the main till."
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setActive(null)} disabled={saving}>Cancel</Button>
+            <Button onClick={settle} disabled={saving}>
+              {saving ? "Recording…" : "Record payout"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
 const AdminPayments = () => {
   const [allOrders, setAllOrders] = useState<PaymentOrder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -890,6 +1069,10 @@ const AdminPayments = () => {
 
   return (
     <div className="space-y-4">
+      {/* Money owed to vendors comes first: it is the only thing on this screen
+          that needs someone to act. */}
+      <PendingPayouts />
+
       <div className="grid grid-cols-2 gap-3">
         <Card className="p-4 border-l-4 border-l-amber-500">
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Total Held (in float)</div>

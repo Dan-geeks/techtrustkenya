@@ -234,6 +234,13 @@ export type Database = {
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "order_payment_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["order_id"]
+          },
         ]
       }
       orders: {
@@ -354,6 +361,13 @@ export type Database = {
             foreignKeyName: "orders_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendor_profiles"
             referencedColumns: ["id"]
           },
@@ -403,6 +417,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_issue_reports_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "payout_issue_reports_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["vendor_id"]
           },
           {
             foreignKeyName: "payout_issue_reports_vendor_id_fkey"
@@ -493,6 +521,13 @@ export type Database = {
           year_of_manufacture?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["vendor_id"]
+          },
           {
             foreignKeyName: "products_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -601,6 +636,13 @@ export type Database = {
             foreignKeyName: "promotions_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "promotions_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendor_profiles"
             referencedColumns: ["id"]
           },
@@ -703,6 +745,13 @@ export type Database = {
             foreignKeyName: "repair_requests_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "repair_requests_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendor_profiles"
             referencedColumns: ["id"]
           },
@@ -756,6 +805,13 @@ export type Database = {
             foreignKeyName: "repair_services_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "repair_services_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendor_profiles"
             referencedColumns: ["id"]
           },
@@ -804,11 +860,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["order_id"]
+          },
+          {
             foreignKeyName: "reviews_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["vendor_id"]
           },
           {
             foreignKeyName: "reviews_vendor_id_fkey"
@@ -1051,6 +1121,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "wallet_transactions_related_order_id_fkey"
+            columns: ["related_order_id"]
+            isOneToOne: false
+            referencedRelation: "pending_payouts"
+            referencedColumns: ["order_id"]
+          },
+          {
             foreignKeyName: "wallet_transactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1061,7 +1138,25 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      pending_payouts: {
+        Row: {
+          brand: string | null
+          business_name: string | null
+          created_at: string | null
+          model_name: string | null
+          mpesa_receipt_number: string | null
+          order_id: string | null
+          order_status: string | null
+          payment_status: string | null
+          payout_destination: string | null
+          payout_ksh: number | null
+          platform_fee_ksh: number | null
+          total_amount_ksh: number | null
+          vendor_id: string | null
+          vendor_phone: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       apply_referral_code: { Args: { p_code: string }; Returns: boolean }
@@ -1105,6 +1200,10 @@ export type Database = {
             }
             Returns: undefined
           }
+      mark_payout_settled: {
+        Args: { _note?: string; _order_id: string; _reference: string }
+        Returns: undefined
+      }
       mark_repair_paid: {
         Args: {
           _mpesa_tx: string
