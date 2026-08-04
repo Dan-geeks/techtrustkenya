@@ -1,13 +1,19 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { SettingsTab } from "../components/vendor/SettingsTab";
 
-// The tab only needs Supabase for saving; rendering must not hit the network.
+// Captures what Save actually writes, so the tests can assert the stored
+// payout string rather than just what is on screen.
+const updateSpy = vi.fn();
+
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     from: () => ({
-      update: () => ({ eq: () => ({ select: () => ({ single: async () => ({ data: null, error: null }) }) }) }),
+      update: (payload: any) => {
+        updateSpy(payload);
+        return { eq: () => ({ select: () => ({ single: async () => ({ data: payload, error: null }) }) }) };
+      },
     }),
   },
 }));
@@ -88,6 +94,88 @@ describe("Vendor settings - payout method (client feedback item 8)", () => {
     expect(
       screen.queryByDisplayValue("Kimathi Street, Eagle House, 2nd Floor, Room 204"),
     ).not.toBeInTheDocument();
+  });
+
+  /**
+   * The client's literal ask: "if one want to change from send money to Buy
+   * goods or paybill we can let them do." Rendering the picker is not enough -
+   * the switch has to persist in the format onboarding writes, or the payout
+   * destination silently stays whatever it was.
+   */
+  describe("switching method persists in onboarding's format", () => {
+    beforeEach(() => updateSpy.mockClear());
+
+    const saveAnd = async (assertion: (payload: any) => void) => {
+      fireEvent.click(screen.getByRole("button", { name: /Save Location & Settings/i }));
+      await waitFor(() => expect(updateSpy).toHaveBeenCalled());
+      assertion(updateSpy.mock.calls.at(-1)![0]);
+    };
+
+    it("Send Money -> Buy Goods (till) writes 'Till: ...'", async () => {
+      // Starts on Send Money, exactly the client's scenario.
+      renderTab({ ...baseVendor, till_number: "M-Pesa Phone: 0712345678" });
+      expect(screen.getByDisplayValue("0712345678")).toBeInTheDocument();
+
+      const trigger = screen.getByText("M-Pesa Phone (Send Money)").closest("button")!;
+      fireEvent.keyDown(trigger, { key: "Enter" });
+      fireEvent.click(screen.getAllByText("M-Pesa Till (Buy Goods)").at(-1)!);
+
+      fireEvent.change(screen.getByPlaceholderText("e.g. 890123"), { target: { value: "556677" } });
+      await saveAnd((p) => expect(p.till_number).toBe("Till: 556677"));
+    });
+
+    it("Send Money -> Paybill writes 'Paybill: <biz> | Acc: <acc>'", async () => {
+      renderTab({ ...baseVendor, till_number: "M-Pesa Phone: 0712345678" });
+
+      const trigger = screen.getByText("M-Pesa Phone (Send Money)").closest("button")!;
+      fireEvent.keyDown(trigger, { key: "Enter" });
+      fireEvent.click(screen.getAllByText("M-Pesa Paybill").at(-1)!);
+
+      fireEvent.change(screen.getByPlaceholderText("e.g. 247247"), { target: { value: "247247" } });
+      fireEvent.change(screen.getByPlaceholderText("e.g. 123456"), { target: { value: "ACC-9" } });
+      await saveAnd((p) => expect(p.till_number).toBe("Paybill: 247247 | Acc: ACC-9"));
+    });
+
+    it("Buy Goods -> Send Money writes 'M-Pesa Phone: ...'", async () => {
+      renderTab({ ...baseVendor, till_number: "Till: 123456" });
+
+      const trigger = screen.getByText("M-Pesa Till (Buy Goods)").closest("button")!;
+      fireEvent.keyDown(trigger, { key: "Enter" });
+      fireEvent.click(screen.getAllByText("M-Pesa Phone (Send Money)").at(-1)!);
+
+      fireEvent.change(screen.getByPlaceholderText("e.g. 0712345678"), { target: { value: "0799001122" } });
+      await saveAnd((p) => expect(p.till_number).toBe("M-Pesa Phone: 0799001122"));
+    });
+
+    it("refuses to save a method with its details left blank", async () => {
+      renderTab({ ...baseVendor, till_number: "Till: 123456" });
+
+      const trigger = screen.getByText("M-Pesa Till (Buy Goods)").closest("button")!;
+      fireEvent.keyDown(trigger, { key: "Enter" });
+      fireEvent.click(screen.getAllByText("M-Pesa Paybill").at(-1)!);
+
+      // Switched to Paybill but filled nothing in.
+      fireEvent.click(screen.getByRole("button", { name: /Save Location & Settings/i }));
+      await new Promise((r) => setTimeout(r, 50));
+      // Must not silently persist an empty or half-formed destination.
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("a saved switch survives a reload of the tab", async () => {
+      renderTab({ ...baseVendor, till_number: "M-Pesa Phone: 0712345678" });
+      const trigger = screen.getByText("M-Pesa Phone (Send Money)").closest("button")!;
+      fireEvent.keyDown(trigger, { key: "Enter" });
+      fireEvent.click(screen.getAllByText("M-Pesa Till (Buy Goods)").at(-1)!);
+      fireEvent.change(screen.getByPlaceholderText("e.g. 890123"), { target: { value: "556677" } });
+      await saveAnd((p) => expect(p.till_number).toBe("Till: 556677"));
+
+      // Re-mount with what was stored: it must come back as Buy Goods, not
+      // fall back to the old Send Money value.
+      const saved = updateSpy.mock.calls.at(-1)![0].till_number;
+      renderTab({ ...baseVendor, till_number: saved });
+      expect(screen.getAllByText("M-Pesa Till (Buy Goods)").length).toBeGreaterThan(0);
+      expect(screen.getAllByDisplayValue("556677").length).toBeGreaterThan(0);
+    });
   });
 
   it("offers every method the client asked for, in one control", () => {
