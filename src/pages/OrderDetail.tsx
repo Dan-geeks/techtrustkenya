@@ -78,6 +78,8 @@ const BANNERS: Record<number, { title: string; note: string }> = {
     title: "Delivered",
     note: "Your order has been delivered. Inspect the item, then confirm to release the funds.",
   },
+  // The payout half of this note is conditional at render time: an order can be
+  // complete for the buyer while the vendor is still owed. See `floatReleased`.
   4: {
     title: "Complete",
     note: "This order is complete and the funds have been released to the vendor.",
@@ -342,6 +344,11 @@ export const OrderDetail = () => {
   // order is neither, and must not get either side's action buttons.
   const isVendorSide = !!user && !!order.vendor?.user_id && user.id === order.vendor.user_id;
 
+  // Whether the money has ACTUALLY left Float, as opposed to the tracker merely
+  // reaching its last step. These are not the same thing and were conflated.
+  const floatReleased = order.payment_status === "released";
+  const awaitingPayout = isCompleted && !floatReleased && !isTerminated;
+
   // ---- Real vendor location (no fabricated courier GPS) ----
   const rawLat = order.vendor?.gps_latitude ?? order.vendor?.latitude;
   const rawLng = order.vendor?.gps_longitude ?? order.vendor?.longitude;
@@ -416,17 +423,29 @@ export const OrderDetail = () => {
                 <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
                   {isTerminated
                     ? "This order is no longer active. Contact support if you believe this is a mistake."
-                    : banner?.note}
+                    : awaitingPayout
+                      ? "This order is complete. The vendor's payout is still being settled."
+                      : banner?.note}
                 </p>
               </div>
+              {/* Reads payment_status, NOT the step index. This said
+                  "Float: Released" the moment the tracker reached Complete,
+                  whether or not a payout had actually happened - and because
+                  confirming delivery never called the release endpoint, that
+                  was routinely a lie. An order can be complete for the buyer
+                  and still owe the vendor money; the badge now says which. */}
               <div
                 className={`px-5 py-3 rounded-full flex items-center gap-2 shadow-sm whitespace-nowrap text-white flex-shrink-0 ${
-                  isTerminated ? "bg-[#94A3B8]" : isCompleted ? "bg-[#22C55E]" : "bg-[#3B82F6]"
+                  isTerminated ? "bg-[#94A3B8]" : floatReleased ? "bg-[#22C55E]" : "bg-[#3B82F6]"
                 }`}
               >
                 <ShieldCheck className="h-5 w-5 flex-shrink-0" />
                 <span className="font-mono text-sm sm:text-base font-medium">
-                  {isTerminated ? "Float: Closed" : isCompleted ? `Float: Released KES ${amount}` : `Float: Holding KES ${amount}`}
+                  {isTerminated
+                    ? "Float: Closed"
+                    : floatReleased
+                      ? `Float: Released KES ${amount}`
+                      : `Float: Holding KES ${amount}`}
                 </span>
               </div>
             </div>
@@ -651,9 +670,19 @@ export const OrderDetail = () => {
                   )}
                   {isCompleted && (
                     <div className="w-full space-y-3">
-                      <p className="text-xs text-emerald-700 font-semibold">
-                        Confirmed by the customer. Your payout has been released from Float.
-                      </p>
+                      {floatReleased ? (
+                        <p className="text-xs text-emerald-700 font-semibold">
+                          Confirmed by the customer. Your payout has been released from Float
+                          {order.payout_reference ? ` (ref ${order.payout_reference})` : ""}.
+                        </p>
+                      ) : (
+                        /* Told the vendor their payout was released regardless of
+                           whether it had been. Say what is actually true. */
+                        <p className="text-xs text-amber-700 font-semibold">
+                          Confirmed by the customer. Your payout is queued and has not left Float yet -
+                          TechTrust is completing it. Report it below if it doesn't arrive.
+                        </p>
+                      )}
                       {/* A released payout is not the same as money in hand, and
                           a vendor who is short had no obvious next step. This is
                           NOT open_dispute: that would flip a confirmed order back
