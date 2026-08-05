@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ShieldCheck, MessageCircle, Lock, Verified, Star, CheckCircle, MapPin, Loader2, Phone } from "lucide-react";
+import { ShieldCheck, MessageCircle, Lock, Verified, Star, CheckCircle, MapPin, Loader2, Phone, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,14 +13,19 @@ import { SAMPLE_PRODUCTS } from "@/data/products";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { isVendorVerified } from "@/lib/format";
+import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { user } = useAuth();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState("");
-  
+  const [adding, setAdding] = useState(false);
+
   useEffect(() => {
     const loadProduct = async () => {
       setLoading(true);
@@ -47,6 +52,10 @@ const ProductDetail = () => {
               : null,
           category: data.category,
           condition: data.condition,
+          stock: data.quantity_in_stock ?? 0,
+          // Only a real `products` row can go in `cart_items`, so the
+          // SAMPLE_PRODUCTS fallback below must not offer Add to Cart.
+          isSample: false,
           vendor: data.vendor_profiles?.business_name || "Unknown Vendor",
           vendor_id: data.vendor_id,
           // messages.receiver_id -> profiles(id), so chat must target the
@@ -82,7 +91,7 @@ const ProductDetail = () => {
       } else {
         // Fallback to SAMPLE_PRODUCTS
         const sp = SAMPLE_PRODUCTS.find(p => p.id === id) || SAMPLE_PRODUCTS[5];
-        setProduct(sp);
+        setProduct({ ...sp, isSample: true });
         const gallery = (sp as any).gallery || [sp.image];
         setActiveImage(gallery[0]);
       }
@@ -114,6 +123,24 @@ const ProductDetail = () => {
   }
   
   const gallery = product.gallery || [product.image];
+  const outOfStock = !product.isSample && (product.stock ?? 0) < 1;
+
+  // The product page only ever offered "Buy Now with Float", so a buyer who
+  // wanted more than one item had no way to reach the cart from here.
+  const handleAddToCart = async () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setAdding(true);
+    const ok = await addToCart(product.id, 1);
+    setAdding(false);
+    if (ok) {
+      toast.success("Added to cart", {
+        action: { label: "View cart", onClick: () => navigate("/cart") },
+      });
+    }
+  };
 
   return (
     <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-6xl">
@@ -195,10 +222,27 @@ const ProductDetail = () => {
               size="lg" 
               className="w-full text-base h-14 bg-primary hover:bg-primary-deep shadow-md font-bold gap-2"
               onClick={() => navigate(`/checkout?product=${product.id}`)}
+              disabled={outOfStock}
             >
               <Lock className="w-5 h-5" />
-              Buy Now with Float
+              {outOfStock ? "Out of Stock" : "Buy Now with Float"}
             </Button>
+            {!product.isSample && (
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full text-base h-14 border-2 font-bold gap-2 text-primary hover:text-primary-deep border-primary/40 hover:border-primary hover:bg-primary/5"
+                onClick={handleAddToCart}
+                disabled={adding || outOfStock}
+              >
+                {adding ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <ShoppingCart className="w-5 h-5" />
+                )}
+                Add to Cart
+              </Button>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="lg" variant="outline" className="w-full text-base h-14 border-2 font-bold gap-2 text-slate-700 hover:text-slate-900 cursor-pointer">
