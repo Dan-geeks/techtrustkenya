@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
+import { NewVersionWatcher } from "@/components/NewVersionWatcher";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CookieConsent } from "@/components/layout/CookieConsent";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -60,6 +61,7 @@ const App = () => (
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <AuthProvider>
             <CartProvider>
+              <NewVersionWatcher />
               <CookieConsent />
               <Routes>
                 <Route path="/auth" element={<Auth />} />
