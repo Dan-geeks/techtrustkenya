@@ -58,7 +58,6 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    document.title = "TechTrust - Verified Tech Marketplace";
 
     const ensureStylesheet = (href: string) => {
       const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(

@@ -46,7 +46,6 @@ const BookRepair = () => {
   }, []);
 
   useEffect(() => {
-    document.title = "Book a Repair | TechTrust";
     window.scrollTo(0, 0);
   }, []);
 

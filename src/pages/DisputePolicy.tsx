@@ -92,7 +92,6 @@ const MyDisputes = () => {
 
 const DisputePolicy = () => {
   useEffect(() => {
-    document.title = "Disputes | TechTrust Kenya";
   }, []);
 
   return (

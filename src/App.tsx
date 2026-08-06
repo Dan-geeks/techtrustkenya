@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { NewVersionWatcher } from "@/components/NewVersionWatcher";
+import { RouteSeo } from "@/components/RouteSeo";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CookieConsent } from "@/components/layout/CookieConsent";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -183,6 +184,8 @@ const App = () => (
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              {/* After <Routes> on purpose - see RouteSeo for why. */}
+              <RouteSeo />
             </CartProvider>
           </AuthProvider>
         </BrowserRouter>

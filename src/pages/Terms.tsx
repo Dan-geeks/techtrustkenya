@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const sections = [
@@ -95,10 +94,6 @@ const sections = [
 ];
 
 const Terms = () => {
-  useEffect(() => {
-    document.title = "Terms of Service | TechTrust Kenya";
-  }, []);
-
   return (
     <div className="bg-background text-foreground font-body antialiased min-h-screen py-12">
       <div className="container max-w-4xl mx-auto px-4">

@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { isVendorVerified } from "@/lib/format";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
+import { Seo } from "@/components/Seo";
+import { SITE_URL, DEFAULT_OG_IMAGE } from "@/lib/seo";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -104,10 +106,7 @@ const ProductDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    if (product) {
-      document.title = `${product.title} | TechTrust`;
-      window.scrollTo(0, 0);
-    }
+    if (product) window.scrollTo(0, 0);
   }, [product]);
 
   if (loading) {
@@ -124,6 +123,62 @@ const ProductDetail = () => {
   
   const gallery = product.gallery || [product.image];
   const outOfStock = !product.isSample && (product.stock ?? 0) < 1;
+
+  const absolute = (u?: string) =>
+    !u ? DEFAULT_OG_IMAGE : u.startsWith("http") ? u : `${SITE_URL}${u.startsWith("/") ? "" : "/"}${u}`;
+  const productUrl = `${SITE_URL}/product/${product.id}`;
+  // The vendor join comes back empty for suspended shops, and the page falls
+  // back to the literal string "Unknown Vendor". Never assert that as a seller
+  // in indexed copy or in Product schema - say nothing instead.
+  const vendorName: string | null =
+    product.vendor && product.vendor !== "Unknown Vendor" ? product.vendor : null;
+  const seoDescription = [
+    `${product.condition ? `${product.condition} ` : ""}${product.title} for KES ${Number(product.price).toLocaleString()} in Kenya.`,
+    vendorName
+      ? `Sold by ${vendorName}${product.vendorVerified ? ", a physically verified TechTrust vendor" : ""}.`
+      : "",
+    "Paid through Float escrow - funds are only released after you inspect the device.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  // Product + breadcrumb structured data. The SAMPLE_PRODUCTS fallback is demo
+  // data, so it gets neither schema nor an index.
+  const jsonLd = product.isSample
+    ? undefined
+    : [
+        {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: product.title,
+          description: seoDescription,
+          image: gallery.map((g: string) => absolute(g)),
+          sku: product.id,
+          ...(product.specs?.Brand ? { brand: { "@type": "Brand", name: product.specs.Brand } } : {}),
+          ...(product.condition ? { itemCondition: "https://schema.org/UsedCondition" } : {}),
+          offers: {
+            "@type": "Offer",
+            url: productUrl,
+            priceCurrency: "KES",
+            price: Number(product.price),
+            availability: outOfStock
+              ? "https://schema.org/OutOfStock"
+              : "https://schema.org/InStock",
+            ...(vendorName
+              ? { seller: { "@type": "Organization", name: vendorName } }
+              : {}),
+          },
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "Browse", item: `${SITE_URL}/browse` },
+            { "@type": "ListItem", position: 3, name: product.title, item: productUrl },
+          ],
+        },
+      ];
 
   // The product page only ever offered "Buy Now with Float", so a buyer who
   // wanted more than one item had no way to reach the cart from here.
@@ -144,6 +199,15 @@ const ProductDetail = () => {
 
   return (
     <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-6xl">
+      <Seo
+        title={product.title}
+        description={seoDescription}
+        path={`/product/${product.id}`}
+        image={absolute(gallery[0])}
+        type="product"
+        noindex={product.isSample}
+        jsonLd={jsonLd}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         {/* Left: Image Gallery */}
         <div className="lg:col-span-7 flex flex-col gap-4">

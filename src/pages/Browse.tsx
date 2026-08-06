@@ -69,7 +69,6 @@ const Browse = () => {
   }, []);
 
   useEffect(() => {
-    document.title = "Browse Verified Marketplace | TechTrust Kenya";
 
     const ensureStylesheet = (href: string) => {
       const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(

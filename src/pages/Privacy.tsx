@@ -1,5 +1,4 @@
-﻿import { useEffect } from "react";
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { ShieldCheck, Mail } from "lucide-react";
 
 const privacySections = [
@@ -94,10 +93,6 @@ Alternative contact: johnmwangimegwe@gmail.com`
 ];
 
 const Privacy = () => {
-  useEffect(() => {
-    document.title = "Privacy Policy | TechTrust Kenya";
-  }, []);
-
   return (
     <div className="bg-background text-foreground font-body antialiased min-h-screen py-12">
       <div className="container max-w-4xl mx-auto px-4">

@@ -1,5 +1,4 @@
-﻿import { useEffect } from "react";
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { Store, AlertTriangle, ShieldCheck, CheckCircle2, FileText, XCircle } from "lucide-react";
 
 const prohibitedTable = [
@@ -11,10 +10,6 @@ const prohibitedTable = [
 ];
 
 const SellerGuidelines = () => {
-  useEffect(() => {
-    document.title = "Seller Guidelines | TechTrust Kenya";
-  }, []);
-
   return (
     <div className="bg-background text-foreground font-body antialiased min-h-screen py-12">
       <div className="container max-w-4xl mx-auto px-4">

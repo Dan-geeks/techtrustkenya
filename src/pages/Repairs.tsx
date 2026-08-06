@@ -45,7 +45,6 @@ const Repairs = () => {
   }, [user]);
 
   useEffect(() => {
-    document.title = "Certified Tech Repairs | TechTrust Kenya";
     window.scrollTo(0, 0);
 
     const ensureStylesheet = (href: string) => {

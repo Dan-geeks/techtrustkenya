@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, CheckCircle2, Building2, UserCheck, AlertCircle, FileText } from "lucide-react";
 
@@ -15,10 +14,6 @@ const documentTable = [
 ];
 
 const VendorVerification = () => {
-  useEffect(() => {
-    document.title = "Vendor Verification Policy | TechTrust Kenya";
-  }, []);
-
   return (
     <div className="bg-background text-foreground font-body antialiased min-h-screen py-12">
       <div className="container max-w-4xl mx-auto px-4">

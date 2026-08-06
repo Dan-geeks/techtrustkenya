@@ -1,14 +1,24 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+
+# Signed-in and transactional surfaces. Nothing here is useful in a search
+# result, and crawling them just burns crawl budget on the public pages.
+Disallow: /auth
+Disallow: /auth/callback
+Disallow: /reset-password
+Disallow: /welcome
+Disallow: /cart
+Disallow: /checkout
+Disallow: /orders
+Disallow: /order/
+Disallow: /profile
+Disallow: /notifications
+Disallow: /admin
+Disallow: /vendor/
+Disallow: /repair/
+
+# Filter permutations are the same listings in a different order - they dilute
+# the crawl without adding anything indexable.
+Disallow: /browse?
+
+Sitemap: https://techtrustkenya.com/sitemap.xml

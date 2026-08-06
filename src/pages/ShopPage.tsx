@@ -3,6 +3,8 @@ import { isVendorVerified } from "@/lib/format";
 import { useParams, Link } from "react-router-dom";
 import { ShieldCheck, MapPin, Star, Store, CheckCircle, ArrowRight, Phone, Mail, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Seo } from "@/components/Seo";
+import { SITE_URL } from "@/lib/seo";
 
 interface VendorProfile {
   id: string;
@@ -46,7 +48,6 @@ const ShopPage = () => {
 
       if (vendorData) {
         setVendor(vendorData);
-        document.title = `${vendorData.business_name} | TechTrust Storefront`;
       }
 
       const { data: productsData } = await supabase
@@ -94,8 +95,53 @@ const ShopPage = () => {
   const isVerified = isVendorVerified(vendor.verification_status);
   const joinedDate = new Date(vendor.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
+  const shopVerified = isVendorVerified(vendor.verification_status);
+  const shopUrl = `${SITE_URL}/shop/${vendor.id}`;
+  const shopDescription = [
+    `Shop ${products.length} verified device${products.length === 1 ? "" : "s"} from ${vendor.business_name}`,
+    vendor.city ? ` in ${vendor.city}, Kenya.` : " in Kenya.",
+    shopVerified ? " Physically verified TechTrust vendor." : "",
+    " Every order is protected by Float escrow.",
+  ].join("");
+
   return (
     <div className="bg-background text-foreground font-body antialiased min-h-screen pt-32 pb-8">
+      <Seo
+        title={`${vendor.business_name} Storefront`}
+        description={shopDescription}
+        path={`/shop/${vendor.id}`}
+        image={vendor.shop_photo_urls?.[0]}
+        // A suspended or pending shop should not be collecting search traffic.
+        noindex={!shopVerified}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Store",
+            name: vendor.business_name,
+            url: shopUrl,
+            ...(vendor.average_rating
+              ? {
+                  aggregateRating: {
+                    "@type": "AggregateRating",
+                    ratingValue: vendor.average_rating,
+                    bestRating: 5,
+                  },
+                }
+              : {}),
+            ...(vendor.city || vendor.physical_address
+              ? {
+                  address: {
+                    "@type": "PostalAddress",
+                    addressLocality: vendor.city,
+                    streetAddress: vendor.physical_address,
+                    addressCountry: "KE",
+                  },
+                }
+              : {}),
+            parentOrganization: { "@type": "Organization", name: "TechTrust" },
+          },
+        ]}
+      />
       <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Sidebar Vendor Info */}

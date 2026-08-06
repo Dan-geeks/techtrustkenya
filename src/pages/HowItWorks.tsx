@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Lock, CheckCircle2, Clock, RotateCcw, AlertTriangle, ArrowRight, Store, Wrench } from "lucide-react";
 
@@ -126,10 +126,6 @@ const faqs = [
 
 const HowItWorks = () => {
   const [activeTab, setActiveTab] = useState<"buyer" | "vendor">("buyer");
-
-  useEffect(() => {
-    document.title = "How TechTrust Works | Float Escrow & Verification";
-  }, []);
 
   const steps = activeTab === "buyer" ? buyerSteps : vendorSteps;
 

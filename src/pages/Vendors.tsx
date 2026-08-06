@@ -35,7 +35,6 @@ const Vendors = () => {
   }, []);
 
   useEffect(() => {
-    document.title = "Verified Vendors | TechTrust Kenya";
     
     const ensureStylesheet = (href: string) => {
       const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(

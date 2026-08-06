@@ -17,6 +17,7 @@
     />
     <meta name="author" content="TechTrust" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://techtrustkenya.com" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TechTrust" />
@@ -25,6 +26,11 @@
       property="og:description"
       content="Physically inspected vendors. M-Pesa payments held in escrow until you confirm delivery. Buy tech you can actually trust."
     />
+    <meta property="og:url" content="https://techtrustkenya.com" />
+    <meta property="og:image" content="https://techtrustkenya.com/og-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_KE" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="TechTrust | Verified Tech Marketplace in Kenya" />
@@ -32,6 +38,49 @@
       name="twitter:description"
       content="Physically inspected vendors. M-Pesa payments held in escrow until you confirm delivery."
     />
+    <meta name="twitter:image" content="https://techtrustkenya.com/og-card.png" />
+
+    <!-- Crawlers read this before any JS runs, so the organisation and the
+         sitelinks search box do not depend on the bundle booting. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://techtrustkenya.com/#organization",
+            "name": "TechTrust",
+            "url": "https://techtrustkenya.com",
+            "logo": "https://techtrustkenya.com/favicon-techtrust.png",
+            "description": "Kenya's verified tech marketplace. Physically inspected vendors and Float escrow protection on every order.",
+            "areaServed": { "@type": "Country", "name": "Kenya" },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "email": "support@techtrust.co.ke",
+              "contactType": "customer support",
+              "areaServed": "KE",
+              "availableLanguage": ["en", "sw"]
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://techtrustkenya.com/#website",
+            "url": "https://techtrustkenya.com",
+            "name": "TechTrust",
+            "publisher": { "@id": "https://techtrustkenya.com/#organization" },
+            "inLanguage": "en-KE",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://techtrustkenya.com/browse?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
+      }
+    </script>
   </head>
 
   <body>
